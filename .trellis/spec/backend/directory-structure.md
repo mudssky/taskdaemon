@@ -70,6 +70,10 @@ taskdaemon 采用根 Go module + 轻量前端 workspace 的结构。项目主轴
 
 * Go module 基线保持 `go 1.22.6`，除非专门任务决定升级 Go 版本。
 * 选择依赖时必须检查间接依赖是否把 `go.mod` 自动抬到 Go 1.23+。已知例子：Koanf `v2.2+` 及新版 provider 会要求 Go 1.23，当前配置层使用 `github.com/knadh/koanf/v2 v2.1.2`、`providers/confmap v0.1.0`，YAML/env 映射由项目代码转成 confmap。
+* 数据层当前使用 `entgo.io/ent v0.13.1`。不要直接升级到 Ent `v0.14.3+`，这些版本会要求 Go 1.23+ 或更高；升级 Ent 前必须先有 Go baseline 升级任务。
+* SQLite 当前使用 `modernc.org/sqlite v1.34.5`，对应 database/sql driver 名为 `sqlite`。新版 `modernc.org/sqlite v1.50.1` 已要求 Go 1.25，不能在 Go 1.22.6 baseline 下直接升级。
+* PostgreSQL 集成测试当前使用 `github.com/testcontainers/testcontainers-go v0.35.0` 和 `modules/postgres v0.35.0`。新版 testcontainers-go 已要求 Go 1.25，不能在当前 baseline 下直接升级。
+* PostgreSQL runtime driver 当前使用 `github.com/lib/pq v1.12.3`，配置方言字符串保持为 `postgres`。
 * Wails 使用 `github.com/wailsapp/wails/v3 v3.0.0-alpha.9`，这是当前本机 Go 1.22.6 可编译的最新 v3 alpha；`alpha.10` 起要求 Go 1.24，`alpha.60` 起要求 Go 1.25。
 * Wails v3 Windows 构建需要保持 `github.com/wailsapp/go-webview2 v1.0.19`，避免被旧依赖残留或手动升级抬到不兼容回调签名。
 * Desktop 入口通过 `application.New`、`application.AssetFileServerFS(embedded.Assets)`、`NewWebviewWindowWithOptions` 与 `application.NewService` 加载前端资源和绑定服务。

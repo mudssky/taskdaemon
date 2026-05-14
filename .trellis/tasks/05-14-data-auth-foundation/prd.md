@@ -18,14 +18,22 @@
 
 ## Acceptance Criteria
 
-* [ ] 默认 SQLite 可启动。
-* [ ] PostgreSQL 可通过配置连接。
-* [ ] Ent schema 生成流程可运行。
-* [ ] 当前数据库 schema migration 可运行。
-* [ ] 单管理员初始化/登录可用。
-* [ ] 受保护 API 未登录时拒绝访问。
-* [ ] 配置加载覆盖顺序明确且可测试。
-* [ ] PostgreSQL 相关测试具备 testcontainers-go 集成测试入口。
+* [x] 默认 SQLite 可启动。
+* [x] PostgreSQL 可通过配置连接。
+* [x] Ent schema 生成流程可运行。
+* [x] 当前数据库 schema migration 可运行。
+* [x] 单管理员初始化/登录可用。
+* [x] 受保护 API 未登录时拒绝访问。
+* [x] 配置加载覆盖顺序明确且可测试。
+* [x] PostgreSQL 相关测试具备 testcontainers-go 集成测试入口。
+
+## Implementation Notes
+
+* Ent 生成入口为 `internal/data/ent/generate.go`，复现命令为 `go generate ./internal/data/ent`。
+* SQLite 使用 `modernc.org/sqlite` 的 `sqlite` driver，数据层在 `internal/data` 内映射为 Ent `sqlite3` 方言。
+* PostgreSQL 使用 `github.com/lib/pq` 的 `postgres` driver。
+* 兼容 Go `1.22.6` 的依赖版本为：`entgo.io/ent v0.13.1`、`modernc.org/sqlite v1.34.5`、`github.com/testcontainers/testcontainers-go v0.35.0`。
+* PostgreSQL 集成测试入口为 `go test -tags=integration ./internal/data`。
 
 ## Testing Constraints
 

@@ -63,6 +63,31 @@ taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，
 * `details` 只放可安全展示的结构化信息，例如字段名、警告类型、允许范围。
 * 软警告使用不同响应或字段表达 `warnings`，不能和硬错误混在同一个阻断结果里。
 
+### Auth API Error Contracts
+
+认证 API 必须把认证服务 sentinel error 映射为稳定错误码：
+
+| Condition | Service error | HTTP | API code |
+|---|---|---:|---|
+| 未提供 session cookie、session 过期或 token 无效 | `auth.ErrInvalidSession` | 401 | `unauthorized` |
+| 用户名或密码错误 | `auth.ErrInvalidCredentials` | 401 | `invalid_credentials` |
+| 已存在管理员时再次初始化 | `auth.ErrAdminAlreadyInitialized` | 409 | `admin_already_initialized` |
+| 认证服务未注入 | n/a | 503 | `auth_unavailable` |
+
+未认证响应固定为：
+
+```json
+{
+  "error": {
+    "code": "unauthorized",
+    "message": "Authentication required",
+    "details": null
+  }
+}
+```
+
+错误响应和日志不得包含密码、密码哈希、session token、CSRF token 或完整 Cookie。
+
 ---
 
 ## CLI Error Handling

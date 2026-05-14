@@ -8,7 +8,7 @@
 
 taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默认运行时使用 SQLite，用户可通过配置切换到 PostgreSQL。数据建模与访问层使用 Ent，Ent 生成代码和数据库方言细节必须封装在 `internal/data` 边界内，业务层、HTTP handler、CLI 和 Wails 绑定不直接散落 SQL 方言判断。
 
-当前仓库还没有正式 Ent schema，相关约定来自父任务 PRD：`.trellis/tasks/05-14-cross-platform-scheduler-daemon/prd.md` 与数据层子任务 `.trellis/tasks/05-14-data-auth-foundation/prd.md`。
+当前仓库的正式 Ent schema 位于 `internal/data/ent/schema/`，生成入口为 `internal/data/ent/generate.go`。修改 schema 后使用 `go generate ./internal/data/ent` 重新生成代码。
 
 ---
 
@@ -18,7 +18,7 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * `internal/app` 只负责组装数据层依赖，不承载具体查询逻辑。
 * `internal/httpapi`、`internal/auth`、`internal/scheduler`、`internal/runner` 通过 service/repository 接口访问持久化能力。
 * 不在 handler 或 runner 中直接拼接 SQL；需要数据库特定能力时，把差异集中在 `internal/data`。
-* 未来生成的 Ent 代码应保留在稳定目录中，并在 PR/任务说明中说明生成命令。
+* 生成的 Ent 代码保留在 `internal/data/ent/`，schema 变更随任务提交，并在 PR/任务说明中说明 `go generate ./internal/data/ent`。
 
 ---
 
@@ -31,6 +31,72 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * 管理员账号：单管理员初始化、密码哈希、账号状态。
 * 登录态/session：Cookie/session、过期时间、CSRF 关联信息。
 * 配置或运行状态：仅保存确实需要持久化的业务配置，避免把静态配置文件内容复制进数据库。
+
+---
+
+## Scenario: Data/Auth Foundation
+
+### 1. Scope / Trigger
+
+* Trigger: 数据层 schema、migration、认证 API 和配置数据库方言形成跨层合约。
+* Scope: `internal/data` 封装 Ent client 与方言映射；`internal/auth` 负责单管理员与 session；`internal/httpapi` 只依赖认证服务接口。
+
+### 2. Signatures
+
+* `data.Open(ctx context.Context, cfg config.DatabaseConfig) (*data.Store, error)`
+* `(*data.Store).Migrate(ctx context.Context) error`
+* `(*data.Store).Client() *ent.Client`
+* `(*data.Store).Close() error`
+* `auth.New(store *data.Store, opts auth.Options) *auth.Service`
+* `(*auth.Service).InitializeAdmin(ctx context.Context, username string, password string) (auth.AdminAccount, error)`
+* `(*auth.Service).Login(ctx context.Context, username string, password string, metadata auth.LoginMetadata) (auth.LoginResult, error)`
+* `(*auth.Service).AuthenticateSession(ctx context.Context, token string) (auth.Principal, error)`
+* `POST /api/auth/init`
+* `POST /api/auth/login`
+* `GET /api/auth/me`
+
+### 3. Contracts
+
+* 配置方言只接受 `sqlite` 与 `postgres`。`sqlite` 映射到 database/sql driver `sqlite` 和 Ent 方言 `sqlite3`；`postgres` 映射到 driver/Ent 方言 `postgres`。
+* 默认 SQLite DSN 使用 `file:<path>?_fk=1`；数据层打开文件型 SQLite 前应确保父目录存在，并启用 foreign keys。
+* 单管理员通过 `Admin.singleton_key` 唯一约束保证数据库层只有一个管理员；服务层创建时固定写入 `primary`。
+* 密码只保存 bcrypt hash；session token 和 CSRF token 只保存 SHA-256 十六进制哈希，原始 token 只返回给客户端。
+* HTTP session cookie 名称为 `taskdaemon_session`，必须设置 `HttpOnly` 和 `SameSite=Lax`。
+
+### 4. Validation & Error Matrix
+
+* 不支持的数据库方言 -> `data.ErrUnsupportedDriver`。
+* 重复初始化管理员 -> `auth.ErrAdminAlreadyInitialized`，API 映射为 `409 admin_already_initialized`。
+* 用户名或密码错误 -> `auth.ErrInvalidCredentials`，API 映射为 `401 invalid_credentials`。
+* 缺失、过期或无效 session -> `auth.ErrInvalidSession`，API 映射为 `401 unauthorized`。
+* API 错误响应必须保持 `{"error":{"code": "...", "message": "...", "details": null|object}}`。
+
+### 5. Good/Base/Bad Cases
+
+* Good: `taskdaemon db migrate` 对当前配置数据库执行 Ent migration，不初始化 Desktop。
+* Base: SQLite 临时库完成 migration 后，`Admin.Query().Count(ctx)` 可返回 `0`。
+* Bad: handler 直接调用 Ent client 或判断 SQL 方言；应通过 `auth.AuthService` 或后续 service/repository 边界。
+
+### 6. Tests Required
+
+* 数据层测试断言 SQLite open + migration 成功，并断言不支持方言返回 `ErrUnsupportedDriver`。
+* 认证测试断言初始化、重复初始化、登录、session 认证和错误凭证。
+* HTTP 测试断言 `/api/auth/me` 未登录返回稳定 401 JSON，`/api/auth/login` 写入 HttpOnly cookie，`/api/auth/init` 可初始化并拒绝重复初始化。
+* PostgreSQL 集成测试使用 `go test -tags=integration ./internal/data`，本机 Docker 不可用时允许跳过。
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```go
+client, _ := ent.Open("sqlite3", cfg.Database.DSN)
+```
+
+#### Correct
+
+```go
+store, err := data.Open(ctx, cfg.Database)
+```
 
 ---
 
