@@ -7,7 +7,9 @@ import (
 	"log/slog"
 	"net/http"
 
+	"taskdaemon/internal/auth"
 	"taskdaemon/internal/config"
+	"taskdaemon/internal/data"
 	"taskdaemon/internal/httpapi"
 )
 
@@ -43,10 +45,21 @@ func New(cfg config.Config, logger *slog.Logger) *App {
 // 返回值:
 //   - error: server 启动或关闭失败时返回错误。
 func (app *App) Serve(ctx context.Context) error {
+	store, err := data.Open(ctx, app.cfg.Database)
+	if err != nil {
+		return fmt.Errorf("open data store: %w", err)
+	}
+	defer func() {
+		if err := store.Close(); err != nil {
+			app.logger.Warn("close data store failed", "component", "data", "error", err)
+		}
+	}()
+
 	server := &http.Server{
 		Addr: app.cfg.Server.Address(),
 		Handler: httpapi.NewRouter(httpapi.Options{
 			EnableSwagger: app.cfg.Server.Swagger.Enabled,
+			Auth:          auth.New(store, auth.Options{}),
 		}),
 	}
 
@@ -70,17 +83,28 @@ func (app *App) Serve(ctx context.Context) error {
 	}
 }
 
-// MigrateSchema 预留当前数据库 schema migration 入口。
+// MigrateSchema 对当前配置数据库执行 schema migration。
 //
 // 参数:
 //   - ctx: 控制 migration 生命周期的 context。
 //
 // 返回值:
-//   - error: 当前骨架阶段无迁移实现，始终返回 nil。
+//   - error: 数据库打开、migration 或关闭连接失败时返回错误。
 func (app *App) MigrateSchema(ctx context.Context) error {
-	if err := ctx.Err(); err != nil {
+	store, err := data.Open(ctx, app.cfg.Database)
+	if err != nil {
+		return fmt.Errorf("open data store: %w", err)
+	}
+	defer func() {
+		if err := store.Close(); err != nil {
+			app.logger.Warn("close data store failed", "component", "data", "error", err)
+		}
+	}()
+
+	app.logger.Info("schema migration started", "driver", app.cfg.Database.Driver)
+	if err := store.Migrate(ctx); err != nil {
 		return err
 	}
-	app.logger.Info("schema migration command reached", "driver", app.cfg.Database.Driver)
+	app.logger.Info("schema migration completed", "driver", app.cfg.Database.Driver)
 	return nil
 }
