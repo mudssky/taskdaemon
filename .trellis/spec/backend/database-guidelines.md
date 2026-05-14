@@ -6,19 +6,19 @@
 
 ## Overview
 
-taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默认运行时使用 SQLite，用户可通过配置切换到 PostgreSQL。数据建模与访问层使用 Ent，Ent 生成代码和数据库方言细节必须封装在 `internal/data` 边界内，业务层、HTTP handler、CLI 和 Wails 绑定不直接散落 SQL 方言判断。
+taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默认运行时使用 SQLite，用户可通过配置切换到 PostgreSQL。数据建模与访问层使用 Ent，Ent 生成代码和数据库方言细节必须封装在 Go service 的 `internal/data` 边界内，业务层、HTTP handler、CLI 和 Wails 绑定不直接散落 SQL 方言判断。
 
-当前仓库的正式 Ent schema 位于 `internal/data/ent/schema/`，生成入口为 `internal/data/ent/generate.go`。修改 schema 后使用 `go generate ./internal/data/ent` 重新生成代码。
+当前仓库的正式 Ent schema 位于 `services/taskdaemon-go/internal/data/ent/schema/`，生成入口为 `services/taskdaemon-go/internal/data/ent/generate.go`。修改 schema 后在 `services/taskdaemon-go` 内使用 `go generate ./internal/data/ent` 重新生成代码，或从仓库根运行 `pnpm generate:go`。
 
 ---
 
 ## Data Boundary
 
-* `internal/data` 负责 Ent client、schema、repository、migration 和方言隔离。
-* `internal/app` 只负责组装数据层依赖，不承载具体查询逻辑。
-* `internal/httpapi`、`internal/auth`、`internal/scheduler`、`internal/runner` 通过 service/repository 接口访问持久化能力。
-* 不在 handler 或 runner 中直接拼接 SQL；需要数据库特定能力时，把差异集中在 `internal/data`。
-* 生成的 Ent 代码保留在 `internal/data/ent/`，schema 变更随任务提交，并在 PR/任务说明中说明 `go generate ./internal/data/ent`。
+* `services/taskdaemon-go/internal/data` 负责 Ent client、schema、repository、migration 和方言隔离。
+* `services/taskdaemon-go/internal/app` 只负责组装数据层依赖，不承载具体查询逻辑。
+* `services/taskdaemon-go/internal/httpapi`、`services/taskdaemon-go/internal/auth`、`services/taskdaemon-go/internal/scheduler`、`services/taskdaemon-go/internal/runner` 通过 service/repository 接口访问持久化能力。
+* 不在 handler 或 runner 中直接拼接 SQL；需要数据库特定能力时，把差异集中在 Go service 的 `internal/data`。
+* 生成的 Ent 代码保留在 `services/taskdaemon-go/internal/data/ent/`，schema 变更随任务提交，并在 PR/任务说明中说明 `pnpm generate:go` 或 `cd services/taskdaemon-go && go generate ./internal/data/ent`。
 
 ---
 
@@ -39,7 +39,7 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 ### 1. Scope / Trigger
 
 * Trigger: 数据层 schema、migration、认证 API 和配置数据库方言形成跨层合约。
-* Scope: `internal/data` 封装 Ent client 与方言映射；`internal/auth` 负责单管理员与 session；`internal/httpapi` 只依赖认证服务接口。
+* Scope: `services/taskdaemon-go/internal/data` 封装 Ent client 与方言映射；`services/taskdaemon-go/internal/auth` 负责单管理员与 session；`services/taskdaemon-go/internal/httpapi` 只依赖认证服务接口。
 
 ### 2. Signatures
 
@@ -82,7 +82,7 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * 数据层测试断言 SQLite open + migration 成功，并断言不支持方言返回 `ErrUnsupportedDriver`。
 * 认证测试断言初始化、重复初始化、登录、session 认证和错误凭证。
 * HTTP 测试断言 `/api/auth/me` 未登录返回稳定 401 JSON，`/api/auth/login` 写入 HttpOnly cookie，`/api/auth/init` 可初始化并拒绝重复初始化。
-* PostgreSQL 集成测试使用 `go test -tags=integration ./internal/data`，本机 Docker 不可用时允许跳过。
+* PostgreSQL 集成测试在 `services/taskdaemon-go` 内使用 `go test -tags=integration ./internal/data`，或从仓库根运行 `pnpm test:go:integration`；本机 Docker 不可用时允许跳过。
 
 ### 7. Wrong vs Correct
 
@@ -131,7 +131,7 @@ store, err := data.Open(ctx, cfg.Database)
 
 ## Naming Conventions
 
-* Go package 使用 `internal/data` 作为数据层根目录。
+* Go package 使用 `services/taskdaemon-go/internal/data` 作为数据层根目录；Go import path 仍是 module 内的 `taskdaemon/internal/data`。
 * Ent schema 名称使用业务名词单数形式，字段名保持 Go 风格；数据库列名由 Ent 约定生成，确需自定义时集中在 schema 中说明。
 * 表、索引和唯一约束命名要表达业务含义，例如任务唯一约束、session token 索引、执行记录按任务和开始时间查询索引。
 * 配置中数据库方言名称使用稳定字符串，例如 `sqlite`、`postgres`，不要混用 `postgresql`、`pg` 等多个别名，除非配置层明确做兼容映射。

@@ -8,7 +8,7 @@
 
 taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，调用方用 `errors.Is` / `errors.As` 判断可预期错误，并在 API/CLI 边界转换为用户可理解的响应。错误处理需要区分业务状态、用户输入错误和系统故障，尤其是 cron 校验、runner 执行、timeout/cancel、认证失败和数据库连接失败。
 
-当前真实代码示例位于 `internal/scheduler/gocron_spike_test.go`：spike 使用 sentinel error `errTaskAlreadyRunning` 表达同任务已经运行，并通过 gocron 的 skip hook 让业务层记录 `skipped`。
+当前真实代码示例位于 `services/taskdaemon-go/internal/scheduler/gocron_spike_test.go`：spike 使用 sentinel error `errTaskAlreadyRunning` 表达同任务已经运行，并通过 gocron 的 skip hook 让业务层记录 `skipped`。
 
 ---
 

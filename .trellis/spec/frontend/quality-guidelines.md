@@ -8,7 +8,7 @@
 
 前端质量链路使用 Biome lint/format、`tsc --noEmit` typecheck、Vitest + Testing Library。测试重点是业务逻辑、组件交互、表单校验、API client 和通用函数；不测试纯页面结构、CSS 样式或静态配置文件。
 
-当前仓库还未创建前端工程，相关约定来自父任务和基础 UI 子任务 PRD。
+当前前端工程位于 `apps/web`，相关约定来自父任务、基础 UI 子任务 PRD 和 frontend directory structure spec。
 
 ---
 

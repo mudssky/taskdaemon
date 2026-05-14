@@ -8,7 +8,7 @@
 
 taskdaemon 后端第一版使用 Go 标准库 `log/slog` 作为日志基础。日志服务于 daemon 排障、任务执行追踪和部署问题定位；用户可见的执行历史仍写入数据库，不能只存在日志里。
 
-当前仓库还没有正式 logging package。实现时应把 logger 作为应用依赖注入到 `internal/app`、`internal/httpapi`、`internal/scheduler`、`internal/runner` 等边界，避免在业务代码中散落全局 logger。
+当前仓库还没有正式 logging package。实现时应把 logger 作为应用依赖注入到 `services/taskdaemon-go/internal/app`、`services/taskdaemon-go/internal/httpapi`、`services/taskdaemon-go/internal/scheduler`、`services/taskdaemon-go/internal/runner` 等边界，避免在业务代码中散落全局 logger。
 
 ---
 

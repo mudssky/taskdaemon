@@ -8,7 +8,9 @@
 
 ### 产品形态
 
-* 使用 Go 作为核心后端，目标是跨平台、低占用、单二进制发布。
+* 使用 Go 作为首个后端服务，目标是跨平台、低占用、单二进制发布。
+* 仓库采用 pnpm monorepo：`apps/*` 放前端应用，`services/*` 放后端服务，`packages/*` 放共享前端包和 API client。
+* 当前 Go 后端服务位于 `services/taskdaemon-go`，前端管理台位于 `apps/web`。
 * 使用 Wails 承载 Desktop 壳和前端资源打包；Desktop 与 Web 端复用同一套 UI。
 * Desktop 第一阶段主要补充系统原生通知能力，不维护独立页面。
 * 前端与后端在开发期必须能单独启动。
@@ -121,13 +123,15 @@
 
 ### Architecture
 
-采用“Go 核心 + 多入口单二进制”：
+采用“pnpm monorepo + Go service 多入口发布”：
 
-* Go 核心承载配置、数据库、认证、调度、runner、执行历史和通知事件。
+* Go service 承载配置、数据库、认证、调度、runner、执行历史和通知事件。
+* 根 `package.json` 负责 workspace 聚合脚本；`services/taskdaemon-go/package.json` 负责 Go service 的启动、测试、生成和构建脚本门面。
+* Go module 位于 `services/taskdaemon-go`，Go 依赖仍由 `go.mod` 管理，pnpm 只做脚本编排。
 * `taskdaemon serve` 只启动后端 API、调度器和静态资源服务。
 * `taskdaemon desktop` 或默认桌面入口启动 Wails，并复用同一套前端 UI 和后端核心能力。
 * `taskdaemon trigger/cancel/db ...` 等 CLI 子命令不启动桌面窗口。
-* 前端开发期使用 Vite 单独启动；发布期构建产物由 Wails/Go embed 打入二进制。
+* 前端开发期使用 `apps/web` 中的 Vite 单独启动；发布期构建产物同步到 `services/taskdaemon-go/web/embedded/dist`，由 Wails/Go embed 打入二进制。
 
 ### Backend Stack
 
@@ -148,7 +152,7 @@
 
 ### Frontend Stack
 
-* Package manager/workspace: pnpm monorepo。
+* Package manager/workspace: pnpm monorepo，workspace 覆盖 `apps/*`、`packages/*`、`services/*`。
 * App framework: Vite + React + TypeScript。
 * Routing: TanStack Router。
 * Server state: TanStack Query。

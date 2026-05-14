@@ -14,7 +14,7 @@ Backend code should keep business behavior testable at package boundaries and av
 
 * Do not rely on gocron singleton mode as the only source for taskdaemon `skipped` execution history. Library-level suppression is not a persisted business event by itself.
 * Do not format scheduler `NextRun()` values for users without applying the task's intended timezone. `CRON_TZ=...` affects the trigger instant, but gocron can return that instant in the scheduler location.
-* Do not put business logic in `cmd/taskdaemon`; keep it in `internal/*` packages.
+* Do not put business logic in `services/taskdaemon-go/cmd/taskdaemon`; keep it in `services/taskdaemon-go/internal/*` packages.
 
 ---
 

@@ -56,7 +56,7 @@
 
 **Context**: 第一版需要进程内 cron、5/6 字段 cron、timezone、动态任务新增/更新/删除、手动触发、同任务 skip-overlap、shutdown/cancel 与后续全局并发扩展能力。
 
-**Decision**: 第一版使用 `github.com/go-co-op/gocron/v2`。当前 spike 验证版本为 `v2.21.2`，验证代码位于 `internal/scheduler/gocron_spike_test.go`。
+**Decision**: 第一版使用 `github.com/go-co-op/gocron/v2`。当前 spike 验证版本为 `v2.21.2`，验证代码位于 `services/taskdaemon-go/internal/scheduler/gocron_spike_test.go`。
 
 **Consequences**: gocron 满足第一版调度基础能力，并为 interval、singleton、scheduler-wide concurrency 保留扩展空间。`CRON_TZ` 可用于任务级 timezone，但 `NextRun()` 返回值仍按 scheduler location 表示同一触发瞬间，展示层需要按任务 timezone 格式化。`skipped` 历史不完全依赖 gocron singleton，而由 taskdaemon 业务层在执行前检查 running state 并写入。
 

@@ -22,7 +22,8 @@
     "05-14-scaffold-entrypoints",
     "05-14-data-auth-foundation",
     "05-14-basic-management-ui",
-    "05-14-scheduler-runner-core"
+    "05-14-scheduler-runner-core",
+    "05-15-frontend-backend-directory-architecture"
   ],
   "parent": null,
   "relatedFiles": [],
