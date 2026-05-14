@@ -39,3 +39,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 2: 增加项目 gitignore
+
+**Date**: 2026-05-14
+**Task**: 增加项目 gitignore
+**Branch**: `master`
+
+### Summary
+
+新增根 .gitignore，覆盖 Python 缓存、Go 构建测试产物、Node/Vite/Wails 构建缓存、本地环境文件和临时日志；验证当前 pyc 缓存已被忽略。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `553f0ee` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
