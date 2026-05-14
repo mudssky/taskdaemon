@@ -1,0 +1,25 @@
+{
+  "name": "taskdaemon-workspace",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "dev:web": "pnpm --filter @taskdaemon/web dev",
+    "build:web": "pnpm --filter @taskdaemon/web build",
+    "sync:web-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-web-assets.ps1",
+    "typecheck": "pnpm --filter @taskdaemon/web typecheck",
+    "lint": "pnpm --filter @taskdaemon/web lint",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  },
+  "lint-staged": {
+    "web/app/**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "pnpm --filter @taskdaemon/web lint"
+    ],
+    "**/*.go": [
+      "gofmt -w"
+    ]
+  }
+}

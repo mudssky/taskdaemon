@@ -1,0 +1,13 @@
+{
+  "name": "taskdaemon",
+  "frontend": {
+    "dir": "./web/app",
+    "install": "pnpm install",
+    "build": "pnpm build",
+    "dev": "pnpm dev",
+    "devServerUrl": "http://127.0.0.1:5173"
+  },
+  "author": {
+    "name": "mudssky"
+  }
+}

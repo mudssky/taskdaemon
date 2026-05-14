@@ -52,6 +52,8 @@ node_modules/
 web/app/dist/
 web/app/.vite/
 web/app/node_modules/
+!web/embedded/dist/
+!web/embedded/dist/**
 
 # Wails
 frontend/dist/

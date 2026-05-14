@@ -1,0 +1,143 @@
+package cli
+
+import (
+	"bytes"
+	"context"
+	"testing"
+
+	"taskdaemon/internal/config"
+)
+
+// TestServeCommandLoadsConfigAndRunsServe 验证 serve 子命令会加载 --config 并进入后端 API 模式。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestServeCommandLoadsConfigAndRunsServe(t *testing.T) {
+	var loadedPath string
+	var served bool
+	hooks := Hooks{
+		Serve: func(_ context.Context, cfg config.Config) error {
+			served = true
+			if cfg.Server.Port != 9090 {
+				t.Fatalf("serve config port = %d, want 9090", cfg.Server.Port)
+			}
+			return nil
+		},
+	}
+
+	err := Execute(context.Background(), Options{
+		Args:   []string{"serve", "--config", "custom.yaml"},
+		Stdout: &bytes.Buffer{},
+		Stderr: &bytes.Buffer{},
+		LoadConfig: func(opts config.LoadOptions) (config.Config, error) {
+			loadedPath = opts.ConfigPath
+			cfg := config.Default()
+			cfg.Server.Port = 9090
+			return cfg, nil
+		},
+		Hooks: hooks,
+	})
+	if err != nil {
+		t.Fatalf("execute serve: %v", err)
+	}
+	if loadedPath != "custom.yaml" {
+		t.Fatalf("loaded path = %s, want custom.yaml", loadedPath)
+	}
+	if !served {
+		t.Fatal("serve hook was not called")
+	}
+}
+
+// TestCLIOnlyCommandDoesNotStartDesktop 验证 CLI-only 子命令不会初始化 Desktop。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestCLIOnlyCommandDoesNotStartDesktop(t *testing.T) {
+	var migrated bool
+	var desktopStarted bool
+	hooks := Hooks{
+		DBMigrate: func(context.Context, config.Config) error {
+			migrated = true
+			return nil
+		},
+		Desktop: func(context.Context, config.Config) error {
+			desktopStarted = true
+			return nil
+		},
+	}
+
+	err := Execute(context.Background(), Options{
+		Args:       []string{"db", "migrate"},
+		Stdout:     &bytes.Buffer{},
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+		Hooks:      hooks,
+	})
+	if err != nil {
+		t.Fatalf("execute db migrate: %v", err)
+	}
+	if !migrated {
+		t.Fatal("db migrate hook was not called")
+	}
+	if desktopStarted {
+		t.Fatal("desktop hook should not be called for db migrate")
+	}
+}
+
+// TestDesktopCommandUsesDesktopHook 验证 desktop 子命令只进入桌面入口。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestDesktopCommandUsesDesktopHook(t *testing.T) {
+	var desktopStarted bool
+	var served bool
+	hooks := Hooks{
+		Desktop: func(context.Context, config.Config) error {
+			desktopStarted = true
+			return nil
+		},
+		Serve: func(context.Context, config.Config) error {
+			served = true
+			return nil
+		},
+	}
+
+	err := Execute(context.Background(), Options{
+		Args:       []string{"desktop"},
+		Stdout:     &bytes.Buffer{},
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+		Hooks:      hooks,
+	})
+	if err != nil {
+		t.Fatalf("execute desktop: %v", err)
+	}
+	if !desktopStarted {
+		t.Fatal("desktop hook was not called")
+	}
+	if served {
+		t.Fatal("serve hook should not be called for desktop")
+	}
+}
+
+// staticConfigLoader 返回测试使用的静态配置加载函数。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - func(config.LoadOptions) (config.Config, error): 忽略输入并返回默认配置的加载函数。
+func staticConfigLoader() func(config.LoadOptions) (config.Config, error) {
+	return func(config.LoadOptions) (config.Config, error) {
+		return config.Default(), nil
+	}
+}
