@@ -105,3 +105,38 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 4: 完成项目骨架与多入口
+
+**Date**: 2026-05-15
+**Task**: 完成项目骨架与多入口
+**Branch**: `master`
+
+### Summary
+
+搭建 Go/Cobra/Gin 多入口骨架、Wails v3 Desktop、Vite React 前端 workspace、Husky lint-staged 与 release 体积基线，并同步 Trellis 规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `d26d61c` | (see git log) |
+| `4743a33` | (see git log) |
+| `80d35c2` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
