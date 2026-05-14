@@ -72,3 +72,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 3: 补齐 Trellis 项目规范
+
+**Date**: 2026-05-14
+**Task**: 补齐 Trellis 项目规范
+**Branch**: `master`
+
+### Summary
+
+补齐 backend/frontend Trellis 规范，覆盖数据层、错误处理、日志、前端目录、组件、hooks、状态管理、类型安全和质量要求，并完成 bootstrap guidelines 任务归档。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9df5e44` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
