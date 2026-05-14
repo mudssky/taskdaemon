@@ -1,0 +1,65 @@
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Local environment
+.env
+.env.*
+!.env.example
+*.local
+
+# Logs / temp
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Go build / test output
+bin/
+dist/
+build/
+coverage/
+*.coverprofile
+*.test
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+*.prof
+
+# Node / pnpm / Vite
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.turbo/
+.vite/
+web/app/dist/
+web/app/.vite/
+web/app/node_modules/
+
+# Wails
+frontend/dist/
+build/bin/
+build/darwin/
+build/linux/
+build/windows/
+
+# Generated frontend caches
+*.tsbuildinfo
+coverage-final.json
