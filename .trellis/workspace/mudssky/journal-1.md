@@ -174,3 +174,38 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 6: 前后端分离 monorepo 迁移
+
+**Date**: 2026-05-15
+**Task**: 前后端分离 monorepo 迁移
+**Branch**: `master`
+
+### Summary
+
+将仓库迁移为 apps/web、services/taskdaemon-go、packages 的 pnpm monorepo；更新 Wails/embed、workspace 脚本、README 与 Trellis 目录规范，并完成 pnpm 与 Go 验证。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `7fb7a30` | (see git log) |
+| `67e3804` | (see git log) |
+| `556f12c` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
