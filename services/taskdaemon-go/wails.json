@@ -1,7 +1,7 @@
 {
   "name": "taskdaemon",
   "frontend": {
-    "dir": "./web/app",
+    "dir": "../../apps/web",
     "install": "pnpm install",
     "build": "pnpm build",
     "dev": "pnpm dev",

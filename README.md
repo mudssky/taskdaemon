@@ -1,35 +1,39 @@
 # taskdaemon
 
-跨平台、低占用的定时任务守护进程。当前仓库处于第一轮骨架阶段：Go 后端、CLI、多入口、Wails Desktop 壳与 Vite/React 前端 workspace 会在同一仓库中协作。
+跨平台、低占用的定时任务守护进程。当前仓库采用 pnpm monorepo 形态：`apps/*` 放前端应用，`services/*` 放后端服务，`packages/*` 预留共享前端包和 API client。Go 后端位于 `services/taskdaemon-go`，同时承载 HTTP API、CLI、daemon 和 Wails Desktop 发布模式。
 
 ## 开发命令
 
 ```bash
+pnpm install
+pnpm build:web
+pnpm sync:web-assets
+pnpm dev:web
+pnpm dev:backend
+pnpm desktop
+pnpm migrate
+pnpm typecheck
+pnpm lint
+pnpm test:go
+pnpm vet:go
+pnpm exec lint-staged
+
+cd services/taskdaemon-go
 go test ./...
 go run ./cmd/taskdaemon serve
 go run ./cmd/taskdaemon serve --config ./config.yaml
 go run ./cmd/taskdaemon db migrate
-pnpm install
-pnpm --filter @taskdaemon/web dev
-pnpm --filter @taskdaemon/web typecheck
-pnpm --filter @taskdaemon/web lint
-pnpm exec lint-staged
-pnpm build:web
-pnpm sync:web-assets
 ```
 
 ## 项目结构
 
 ```text
-cmd/taskdaemon/       # 单二进制入口：serve / desktop / CLI 子命令分发
-internal/app/         # 应用装配与生命周期
-internal/cli/         # Cobra CLI 命令树
-internal/config/      # 配置默认值、文件、环境变量、flag 覆盖
-internal/httpapi/     # Gin HTTP router
-internal/desktop/     # Desktop 壳边界
-internal/scheduler/   # 调度核心
-web/app/              # Vite + React 管理台
-web/embedded/         # 发布期前端嵌入边界
+apps/web/                         # Vite + React 管理台
+packages/                         # 共享前端包、API client、UI primitives 等
+services/taskdaemon-go/cmd/       # Go service 入口：serve / desktop / CLI 子命令分发
+services/taskdaemon-go/internal/  # Go service 内部业务包
+services/taskdaemon-go/web/       # 发布期前端嵌入边界
+scripts/                          # 本地开发与构建脚本
 ```
 
 ## 配置
@@ -45,7 +49,7 @@ Swagger route 默认关闭，打开 `server.swagger.enabled` 后注册 `/swagger
 
 ## 前端嵌入
 
-前端开发期在 `web/app` 独立运行。Desktop 壳使用 Wails v3，`wails.json` 采用 v3 的嵌套 `frontend` 配置并指向 `web/app`，发布前先执行 `pnpm build:web` 生成 `web/app/dist`，再执行 `pnpm sync:web-assets` 同步到 `web/embedded/dist`，由 Go `embed` 边界打入二进制。`web/embedded/dist` 会提交到仓库，保证干净 checkout 也能通过 Go 编译。
+前端开发期在 `apps/web` 独立运行。Desktop 壳使用 Wails v3，`services/taskdaemon-go/wails.json` 采用 v3 的嵌套 `frontend` 配置并指向 `../../apps/web`，发布前先执行 `pnpm build:web` 生成 `apps/web/dist`，再执行 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`，由 Go `embed` 边界打入二进制。`services/taskdaemon-go/web/embedded/dist` 会提交到仓库，保证干净 checkout 也能通过 Go 编译。
 
 ## 提交前检查
 

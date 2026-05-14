@@ -1,0 +1,14 @@
+{
+  "name": "@taskdaemon/service-go",
+  "private": true,
+  "scripts": {
+    "dev": "go run ./cmd/taskdaemon serve",
+    "desktop": "go run ./cmd/taskdaemon desktop",
+    "migrate": "go run ./cmd/taskdaemon db migrate",
+    "build": "go build -trimpath -o ../../build/bin/taskdaemon ./cmd/taskdaemon",
+    "test": "go test ./...",
+    "test:integration": "go test -tags=integration ./internal/data",
+    "generate": "go generate ./internal/data/ent",
+    "vet": "go vet ./..."
+  }
+}

@@ -1,6 +1,6 @@
 param(
-    [string]$Source = "web/app/dist",
-    [string]$Destination = "web/embedded/dist"
+    [string]$Source = "apps/web/dist",
+    [string]$Destination = "services/taskdaemon-go/web/embedded/dist"
 )
 
 $ErrorActionPreference = "Stop"

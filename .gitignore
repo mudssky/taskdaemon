@@ -49,11 +49,11 @@ node_modules/
 .yarn/
 .turbo/
 .vite/
-web/app/dist/
-web/app/.vite/
-web/app/node_modules/
-!web/embedded/dist/
-!web/embedded/dist/**
+apps/web/dist/
+apps/web/.vite/
+apps/web/node_modules/
+!services/taskdaemon-go/web/embedded/dist/
+!services/taskdaemon-go/web/embedded/dist/**
 
 # Wails
 frontend/dist/

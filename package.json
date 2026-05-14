@@ -5,9 +5,18 @@
   "scripts": {
     "dev:web": "pnpm --filter @taskdaemon/web dev",
     "build:web": "pnpm --filter @taskdaemon/web build",
+    "build:backend": "pnpm --filter @taskdaemon/service-go build",
+    "dev:backend": "pnpm --filter @taskdaemon/service-go dev",
+    "desktop": "pnpm --filter @taskdaemon/service-go desktop",
+    "migrate": "pnpm --filter @taskdaemon/service-go migrate",
     "sync:web-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-web-assets.ps1",
     "typecheck": "pnpm --filter @taskdaemon/web typecheck",
     "lint": "pnpm --filter @taskdaemon/web lint",
+    "test": "pnpm typecheck && pnpm lint && pnpm test:go",
+    "test:go": "pnpm --filter @taskdaemon/service-go test",
+    "test:go:integration": "pnpm --filter @taskdaemon/service-go test:integration",
+    "generate:go": "pnpm --filter @taskdaemon/service-go generate",
+    "vet:go": "pnpm --filter @taskdaemon/service-go vet",
     "prepare": "husky"
   },
   "devDependencies": {
@@ -15,7 +24,7 @@
     "lint-staged": "^16.2.7"
   },
   "lint-staged": {
-    "web/app/**/*.{ts,tsx,js,jsx,json,css,md}": [
+    "apps/web/**/*.{ts,tsx,js,jsx,json,css,md}": [
       "pnpm --filter @taskdaemon/web lint"
     ],
     "**/*.go": [

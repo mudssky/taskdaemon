@@ -15,7 +15,7 @@ importers:
         specifier: ^16.2.7
         version: 16.4.0
 
-  web/app:
+  apps/web:
     dependencies:
       '@vitejs/plugin-react':
         specifier: ^5.1.1
@@ -48,6 +48,8 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.14)
+
+  services/taskdaemon-go: {}
 
 packages:
 

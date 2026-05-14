@@ -1,3 +1,4 @@
 packages:
-  - web/app
-  - web/packages/*
+  - apps/*
+  - packages/*
+  - services/*
