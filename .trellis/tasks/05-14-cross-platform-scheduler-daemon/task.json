@@ -1,0 +1,31 @@
+{
+  "id": "cross-platform-scheduler-daemon",
+  "name": "cross-platform-scheduler-daemon",
+  "title": "brainstorm: 跨平台低占用定时任务守护进程",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "mudssky",
+  "assignee": "mudssky",
+  "createdAt": "2026-05-14",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "05-14-scaffold-entrypoints",
+    "05-14-data-auth-foundation",
+    "05-14-basic-management-ui",
+    "05-14-scheduler-runner-core"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}
