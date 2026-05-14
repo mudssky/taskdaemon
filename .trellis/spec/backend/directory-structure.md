@@ -43,12 +43,36 @@ taskdaemon 采用根 Go module + 轻量前端 workspace 的结构。项目主轴
 
 * `cmd/taskdaemon` 只负责入口分发、命令行绑定和调用应用装配，不承载业务逻辑。
 * `internal/app` 负责组合配置、数据层、调度器、runner、HTTP API 和 Desktop 生命周期。
+* `internal/cli` 放 Cobra 命令树；`serve`、`desktop`、`db migrate` 等入口通过 hooks 调用 `internal/app` 或 `internal/desktop`。
+* `internal/config` 放默认配置、用户配置目录解析、文件/env/flag 覆盖和配置测试。覆盖顺序固定为 defaults < file < `TASKDAEMON_` env < overrides。
 * `internal/httpapi` 放 HTTP router、middleware、request/response DTO 和 handler；handler 调用 service 边界，不直接散落数据库方言。
 * `internal/scheduler` 放 cron 调度、任务注册、手动触发和 overlap 处理边界。
 * `internal/runner` 放内置结构化 runner、进程执行、timeout/cancel、输出截断。
 * `internal/data` 放 Ent client、repository、migration 和数据库方言隔离。
 * `internal/auth` 放单管理员账号、登录态、CSRF/Host 校验等认证安全能力。
-* `internal/desktop` 只放 Wails 绑定与桌面专属能力，不能复制 HTTP/API/调度业务逻辑。
+* `internal/desktop` 只放 Wails 绑定与桌面专属能力，不能复制 HTTP/API/调度业务逻辑；Desktop 资产来自 `web/embedded.Assets`。
+* `web/embedded` 是发布期 Go embed 边界，构建脚本把 `web/app/dist` 同步到 `web/embedded/dist` 后再构建二进制；`web/embedded/dist` 需要提交，避免干净 checkout 缺少 `go:embed all:dist` 目标。
+
+---
+
+## Entry Contracts
+
+* `taskdaemon serve` 启动 HTTP API，不初始化 Wails Desktop。
+* `taskdaemon desktop` 启动 Wails v3 runtime，并加载 `web/embedded` 中的同一套前端构建产物。
+* `taskdaemon db migrate` 是 CLI-only 入口，不初始化 Desktop；当前骨架只打通命令边界，实际 Ent migration 在数据层任务实现。
+* `--config <path>` 是根级 persistent flag，所有子命令都应加载同一份配置。
+* 默认配置路径为 `os.UserConfigDir()/taskdaemon/config.yaml`。
+* `/api/health` 是后端探活 endpoint；Swagger route 默认关闭，只在 `server.swagger.enabled=true` 时注册。
+
+---
+
+## Dependency Compatibility
+
+* Go module 基线保持 `go 1.22.6`，除非专门任务决定升级 Go 版本。
+* 选择依赖时必须检查间接依赖是否把 `go.mod` 自动抬到 Go 1.23+。已知例子：Koanf `v2.2+` 及新版 provider 会要求 Go 1.23，当前配置层使用 `github.com/knadh/koanf/v2 v2.1.2`、`providers/confmap v0.1.0`，YAML/env 映射由项目代码转成 confmap。
+* Wails 使用 `github.com/wailsapp/wails/v3 v3.0.0-alpha.9`，这是当前本机 Go 1.22.6 可编译的最新 v3 alpha；`alpha.10` 起要求 Go 1.24，`alpha.60` 起要求 Go 1.25。
+* Wails v3 Windows 构建需要保持 `github.com/wailsapp/go-webview2 v1.0.19`，避免被旧依赖残留或手动升级抬到不兼容回调签名。
+* Desktop 入口通过 `application.New`、`application.AssetFileServerFS(embedded.Assets)`、`NewWebviewWindowWithOptions` 与 `application.NewService` 加载前端资源和绑定服务。
 
 ---
 
@@ -65,4 +89,4 @@ taskdaemon 采用根 Go module + 轻量前端 workspace 的结构。项目主轴
 ## Examples
 
 * gocron 调度库 spike：`internal/scheduler` 附近的测试或实验代码，结论同步到调度核心任务。
-* Web/Desktop 共用 UI：`web/app`，Wails 通过 `wails.json` 指向其构建产物。
+* Web/Desktop 共用 UI：`web/app`，Wails v3 通过 `wails.json` 的嵌套 `frontend` 配置指向开发期前端目录；发布期通过 `pnpm build:web` + `pnpm sync:web-assets` 将构建产物同步到 `web/embedded/dist`。

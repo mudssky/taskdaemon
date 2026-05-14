@@ -7,9 +7,9 @@
 ## Requirements
 
 * 建立 Go + Gin 后端入口。
-* 建立 Wails Desktop 入口，Desktop 复用 Web UI。
+* 建立 Wails v3 Desktop 入口，Desktop 复用 Web UI。
 * 建立 pnpm monorepo 与 Vite/React 前端工程。
-* 前端质量链路参考 `vote-system`：Biome、typecheck、lint-staged。
+* 前端质量链路参考 `vote-system`：Biome、typecheck、lint-staged、Husky pre-commit。
 * 后端质量链路包含 `golangci-lint`。
 * 同一二进制支持 `serve`、`desktop` 和 CLI 子命令模式。
 * CLI 模式不启动桌面窗口。
@@ -24,17 +24,17 @@
 
 ## Acceptance Criteria
 
-* [ ] 后端 API 可单独启动。
-* [ ] 前端开发服务器可单独启动并访问后端 API。
-* [ ] Desktop 模式可加载同一套前端 UI。
-* [ ] CLI 子命令入口存在且不启动 Desktop。
-* [ ] 默认配置路径与 `--config` 覆盖逻辑可用。
-* [ ] README 或开发文档说明开发/构建命令。
-* [ ] 前端 `biome`、`typecheck`、`lint-staged` 基础配置存在。
-* [ ] 后端 `golangci-lint` 基础配置存在。
-* [ ] release 构建产物体积有记录，作为后续依赖增长基线。
-* [ ] CLI-only 模式不会初始化 Desktop 窗口逻辑。
-* [ ] Swagger 文档路由可通过配置开启或关闭。
+* [x] 后端 API 可单独启动。
+* [x] 前端开发服务器可单独启动并访问后端 API。
+* [x] Desktop 模式可加载同一套前端 UI。
+* [x] CLI 子命令入口存在且不启动 Desktop。
+* [x] 默认配置路径与 `--config` 覆盖逻辑可用。
+* [x] README 或开发文档说明开发/构建命令。
+* [x] 前端 `biome`、`typecheck`、`lint-staged` 与 Husky pre-commit 基础配置存在。
+* [x] 后端 `golangci-lint` 基础配置存在。
+* [x] release 构建产物体积有记录，作为后续依赖增长基线。
+* [x] CLI-only 模式不会初始化 Desktop 窗口逻辑。
+* [x] Swagger 文档路由可通过配置开启或关闭。
 * [x] 整体目录结构方案记录在 PRD 或 spec 中，并被 gocron spike 复用。
 
 ## Testing Constraints
@@ -80,15 +80,16 @@
 决策理由：
 
 * `cmd/taskdaemon` 是唯一发布入口，CLI-only、serve、desktop 都由同一二进制模式分发。
-* `internal/desktop` 只放 Wails 绑定和桌面专属能力，业务能力仍通过 `internal/app`、`internal/scheduler`、`internal/runner` 等共享。
-* `web/app` 明确是可独立运行的前端应用；Wails 通过配置引用它的 build 输出。
+* `internal/desktop` 只放 Wails v3 绑定和桌面专属能力，业务能力仍通过 `internal/app`、`internal/scheduler`、`internal/runner` 等共享。
+* `web/app` 明确是可独立运行的前端应用；Wails v3 通过配置引用它的 build 输出。
 * `web/embedded` 是否需要独立 Go package 可在实现时根据 Wails embed 与 serve 静态资源复用方式微调。
 * gocron spike 若进入正式 module，优先放在 `internal/scheduler` 附近，避免创建临时结构后再搬迁。
 * 不采用完整 `apps/*`、`packages/*` 重 monorepo 作为第一版结构；后续若前端共享组件或生成 client 变多，可在 `web/packages/*` 中自然扩展。
 
 ## Research References
 
-* Context7 `/wailsapp/wails` 文档显示 Wails 默认使用 `frontend` 目录、`frontend/dist` embed 资产，并通过 `wails.json` 的 `frontend:dir`、`frontend:build` 等配置连接前端构建；本项目可将该目录调整为 `web/app`，但要在 `wails.json` 中显式配置。
+* Context7 `/websites/v3_wails_io` 文档显示 Wails v3 使用 `application.New`、`application.AssetFileServerFS` 和 `NewWebviewWindowWithOptions` 装配 Desktop；`wails.json` 的前端配置从 v2 `frontend:*` 扁平键迁移为 v3 嵌套 `frontend` 对象。
+* 本机 Go 1.22.6 下可编译的 Wails v3 版本 pin 为 `github.com/wailsapp/wails/v3 v3.0.0-alpha.9`；`alpha.10` 起要求 Go 1.24，`alpha.60` 起要求 Go 1.25，后续升级 Wails 前需先升级 Go 基线并重新验证 Windows `go-webview2` 组合。
 
 ## Parent
 

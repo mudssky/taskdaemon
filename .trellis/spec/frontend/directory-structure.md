@@ -8,7 +8,7 @@
 
 taskdaemon 前端是 Web/Desktop 共用的管理台，放在 `web/app`。它是 Vite + React + TypeScript 应用，开发期可独立启动，发布期构建产物由 Wails/Go embed 打进单二进制。第一版不使用营销首页，首屏进入任务列表和运行状态。
 
-当前仓库还未创建 `web/app`，目录规范来自父任务 PRD 与基础 UI 子任务：`.trellis/tasks/05-14-cross-platform-scheduler-daemon/prd.md`、`.trellis/tasks/05-14-basic-management-ui/prd.md`。
+当前仓库已经创建 `web/app` 基础骨架，目录规范来自父任务 PRD 与基础 UI 子任务：`.trellis/tasks/05-14-cross-platform-scheduler-daemon/prd.md`、`.trellis/tasks/05-14-basic-management-ui/prd.md`。
 
 ---
 
@@ -36,7 +36,7 @@ web/
 │   ├── vite.config.ts
 │   ├── tsconfig.json
 │   └── biome.json
-└── embedded/                # Go embed 包或构建产物挂载点，按实现调整
+└── embedded/                # Go embed 包，dist/ 由构建脚本同步
 ```
 
 ---
@@ -50,6 +50,8 @@ web/
 * `src/components/layout` 放 app shell、sidebar、topbar 等跨页面布局。
 * `src/lib/api` 放 API client 和后端 DTO 映射；后续接 OpenAPI 生成时仍保持前端调用点稳定。
 * `src/lib` 中的通用工具必须有明确复用场景；只被单个 feature 使用的逻辑留在 feature 内。
+* `web/app/dist` 是 Vite 构建输出，受 `.gitignore` 管理；发布前用 `pnpm sync:web-assets` 同步到 `web/embedded/dist`，该目录由 Go embed 编译进二进制并需要提交，保证干净 checkout 也能通过 `go test ./...`。
+* `wails.json` 使用 Wails v3 嵌套配置：`frontend.dir = ./web/app`、`frontend.devServerUrl = http://127.0.0.1:5173`；不要恢复成 Wails 默认 `frontend/` 目录，也不要退回 v2 的 `frontend:*` 扁平键。
 
 ---
 
@@ -65,7 +67,7 @@ web/
 
 ## Examples
 
-当前还没有正式前端代码。第一批实现时可按以下垂直切片落地：
+当前前端只有 app shell 骨架。第一批业务实现时可按以下垂直切片落地：
 
 * `features/tasks`：任务 CRUD 表单、任务列表、启停、手动触发。
 * `features/runs`：执行历史表格、状态 badge、stdout/stderr 截断显示。
