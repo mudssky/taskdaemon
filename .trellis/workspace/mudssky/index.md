@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 4
+- **Total Sessions**: 5
 - **Last Active**: 2026-05-15
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~142 | Active |
+| `journal-1.md` | ~176 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 5 | 2026-05-15 | 数据层与认证基础 | `9065952`, `222e3d6` | `master` |
 | 4 | 2026-05-15 | 完成项目骨架与多入口 | `d26d61c`, `4743a33`, `80d35c2` | `master` |
 | 3 | 2026-05-14 | 补齐 Trellis 项目规范 | `9df5e44` | `master` |
 | 2 | 2026-05-14 | 增加项目 gitignore | `553f0ee` | `master` |

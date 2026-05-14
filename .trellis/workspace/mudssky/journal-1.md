@@ -140,3 +140,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 5: 数据层与认证基础
+
+**Date**: 2026-05-15
+**Task**: 数据层与认证基础
+**Branch**: `master`
+
+### Summary
+
+实现 Ent 数据层、SQLite/PostgreSQL 方言封装、migration、单管理员认证与 session API，并沉淀数据认证基础规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9065952` | (see git log) |
+| `222e3d6` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
