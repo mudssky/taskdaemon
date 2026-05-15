@@ -30,7 +30,8 @@ type Options struct {
 
 // AuthService 定义 HTTP handler 依赖的认证服务能力。
 type AuthService interface {
-	InitializeAdmin(context.Context, string, string) (auth.AdminAccount, error)
+	InitializeAdminWithSession(context.Context, string, string, auth.LoginMetadata) (auth.LoginResult, error)
+	IsAdminInitialized(context.Context) (bool, error)
 	Login(context.Context, string, string, auth.LoginMetadata) (auth.LoginResult, error)
 	AuthenticateSession(context.Context, string) (auth.Principal, error)
 }
@@ -384,7 +385,10 @@ func registerAuthRoutes(router *gin.Engine, service AuthService) {
 			writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Invalid request body", gin.H{"field": "body"})
 			return
 		}
-		admin, err := service.InitializeAdmin(ctx.Request.Context(), req.Username, req.Password)
+		result, err := service.InitializeAdminWithSession(ctx.Request.Context(), req.Username, req.Password, auth.LoginMetadata{
+			UserAgent: ctx.GetHeader("User-Agent"),
+			IP:        ctx.ClientIP(),
+		})
 		if err != nil {
 			if errors.Is(err, auth.ErrAdminAlreadyInitialized) {
 				writeAPIError(ctx, http.StatusConflict, "admin_already_initialized", "Admin is already initialized", nil)
@@ -394,10 +398,47 @@ func registerAuthRoutes(router *gin.Engine, service AuthService) {
 			return
 		}
 
+		writeSessionCookie(ctx, result.SessionToken)
 		ctx.JSON(http.StatusCreated, initializeAdminResponse{
-			AdminID:  admin.ID,
-			Username: admin.Username,
+			AdminID:   result.Principal.AdminID,
+			Username:  result.Principal.Username,
+			CSRFToken: result.CSRFToken,
 		})
+	})
+
+	router.GET("/api/auth/status", func(ctx *gin.Context) {
+		if service == nil {
+			writeAPIError(ctx, http.StatusServiceUnavailable, "auth_unavailable", "Authentication service is unavailable", nil)
+			return
+		}
+		initialized, err := service.IsAdminInitialized(ctx.Request.Context())
+		if err != nil {
+			writeAPIError(ctx, http.StatusInternalServerError, "internal_error", "Authentication status query failed", nil)
+			return
+		}
+		response := authStatusResponse{Initialized: initialized}
+		if !initialized {
+			ctx.JSON(http.StatusOK, response)
+			return
+		}
+
+		cookie, err := ctx.Request.Cookie(SessionCookieName)
+		if err != nil || cookie.Value == "" {
+			ctx.JSON(http.StatusOK, response)
+			return
+		}
+		principal, err := service.AuthenticateSession(ctx.Request.Context(), cookie.Value)
+		if err != nil {
+			if errors.Is(err, auth.ErrInvalidSession) {
+				ctx.JSON(http.StatusOK, response)
+				return
+			}
+			writeAPIError(ctx, http.StatusInternalServerError, "internal_error", "Authentication failed", nil)
+			return
+		}
+		response.Authenticated = true
+		response.Admin = &authAdminResponse{AdminID: principal.AdminID, Username: principal.Username}
+		ctx.JSON(http.StatusOK, response)
 	})
 
 	router.POST("/api/auth/login", func(ctx *gin.Context) {
@@ -424,14 +465,7 @@ func registerAuthRoutes(router *gin.Engine, service AuthService) {
 			return
 		}
 
-		http.SetCookie(ctx.Writer, &http.Cookie{
-			Name:     SessionCookieName,
-			Value:    result.SessionToken,
-			Path:     "/",
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-			Expires:  time.Now().Add(24 * time.Hour),
-		})
+		writeSessionCookie(ctx, result.SessionToken)
 		ctx.JSON(http.StatusOK, loginResponse{
 			AdminID:   result.Principal.AdminID,
 			Username:  result.Principal.Username,
@@ -471,8 +505,39 @@ type initializeAdminRequest struct {
 }
 
 type initializeAdminResponse struct {
+	AdminID   int    `json:"adminId"`
+	Username  string `json:"username"`
+	CSRFToken string `json:"csrfToken"`
+}
+
+type authStatusResponse struct {
+	Initialized   bool               `json:"initialized"`
+	Authenticated bool               `json:"authenticated"`
+	Admin         *authAdminResponse `json:"admin,omitempty"`
+}
+
+type authAdminResponse struct {
 	AdminID  int    `json:"adminId"`
 	Username string `json:"username"`
+}
+
+// writeSessionCookie 写入管理员 session cookie。
+//
+// 参数:
+//   - ctx: Gin 请求上下文。
+//   - token: 原始 session token。
+//
+// 返回值:
+//   - 无。
+func writeSessionCookie(ctx *gin.Context, token string) {
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     SessionCookieName,
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(24 * time.Hour),
+	})
 }
 
 // writeUnauthorized 写入稳定的未认证错误响应。

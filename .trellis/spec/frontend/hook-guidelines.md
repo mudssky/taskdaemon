@@ -26,7 +26,7 @@
 * query key 放在 feature 附近集中管理，例如 `tasksKeys.list(filters)`。
 * mutation 成功后显式 invalidate 或更新相关 query cache。
 * API client 负责 HTTP 细节，query hook 负责缓存和错误状态，组件负责展示。
-* 登录态/session 查询应作为 app shell 或受保护 route 的基础 query，不在每个页面重复请求。
+* 登录态/session 查询应作为 app shell 或受保护 route 的基础 query，不在每个页面重复请求；首次初始化分流优先使用 `GET /api/auth/status`，避免把“未初始化”和“已初始化但未登录”都折叠成 `/api/auth/me` 的 401。
 
 ---
 

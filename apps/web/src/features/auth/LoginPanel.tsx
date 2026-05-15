@@ -24,6 +24,7 @@ export function LoginPanel() {
         <label>
           用户名
           <input
+            autoComplete="username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           />
@@ -31,6 +32,7 @@ export function LoginPanel() {
         <label>
           密码
           <input
+            autoComplete="current-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}

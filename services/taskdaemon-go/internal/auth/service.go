@@ -140,6 +140,81 @@ func (service *Service) InitializeAdmin(ctx context.Context, username string, pa
 	return AdminAccount{ID: admin.ID, Username: admin.Username}, nil
 }
 
+// InitializeAdminWithSession 创建系统唯一管理员账号并立即建立登录态。
+//
+// 参数:
+//   - ctx: 控制数据库查询和写入生命周期的 context。
+//   - username: 管理员用户名。
+//   - password: 管理员明文密码，只用于生成 bcrypt 哈希，不会持久化。
+//   - metadata: 首次初始化请求的 user agent 与 IP 摘要。
+//
+// 返回值:
+//   - LoginResult: 初始化成功后的主体、原始 session token 和 CSRF token。
+//   - error: 已存在管理员、密码哈希失败、随机 token 生成失败或数据库写入失败时返回错误。
+func (service *Service) InitializeAdminWithSession(ctx context.Context, username string, password string, metadata LoginMetadata) (LoginResult, error) {
+	tx, err := service.store.Client().Tx(ctx)
+	if err != nil {
+		return LoginResult{}, fmt.Errorf("begin admin initialization: %w", err)
+	}
+	committed := false
+	defer func() {
+		if !committed {
+			_ = tx.Rollback()
+		}
+	}()
+
+	exists, err := tx.Admin.Query().Exist(ctx)
+	if err != nil {
+		return LoginResult{}, fmt.Errorf("check admin initialization: %w", err)
+	}
+	if exists {
+		return LoginResult{}, ErrAdminAlreadyInitialized
+	}
+
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte(password), service.bcryptCost)
+	if err != nil {
+		return LoginResult{}, fmt.Errorf("hash admin password: %w", err)
+	}
+	admin, err := tx.Admin.Create().
+		SetSingletonKey(adminSingletonKey).
+		SetUsername(username).
+		SetPasswordHash(string(passwordHash)).
+		Save(ctx)
+	if err != nil {
+		if ent.IsConstraintError(err) {
+			return LoginResult{}, ErrAdminAlreadyInitialized
+		}
+		return LoginResult{}, fmt.Errorf("create admin: %w", err)
+	}
+
+	result, err := service.createSessionWithClient(ctx, tx.Client(), *admin, metadata)
+	if err != nil {
+		return LoginResult{}, err
+	}
+	if err := tx.Commit(); err != nil {
+		return LoginResult{}, fmt.Errorf("commit admin initialization: %w", err)
+	}
+	committed = true
+
+	return result, nil
+}
+
+// IsAdminInitialized 判断系统是否已经创建管理员。
+//
+// 参数:
+//   - ctx: 控制数据库查询生命周期的 context。
+//
+// 返回值:
+//   - bool: true 表示已经存在管理员账号。
+//   - error: 数据库查询失败时返回错误。
+func (service *Service) IsAdminInitialized(ctx context.Context) (bool, error) {
+	exists, err := service.store.Client().Admin.Query().Exist(ctx)
+	if err != nil {
+		return false, fmt.Errorf("check admin initialization: %w", err)
+	}
+	return exists, nil
+}
+
 // Login 校验管理员密码并创建新的 session。
 //
 // 参数:
@@ -165,6 +240,35 @@ func (service *Service) Login(ctx context.Context, username string, password str
 		return LoginResult{}, ErrInvalidCredentials
 	}
 
+	return service.createSession(ctx, *admin, metadata)
+}
+
+// createSession 为指定管理员创建 session 和 CSRF token。
+//
+// 参数:
+//   - ctx: 控制数据库写入生命周期的 context。
+//   - admin: 已通过身份验证的管理员实体。
+//   - metadata: 登录请求的 user agent 与 IP 摘要。
+//
+// 返回值:
+//   - LoginResult: 主体、原始 session token 和 CSRF token。
+//   - error: 随机 token 生成失败或数据库写入失败时返回错误。
+func (service *Service) createSession(ctx context.Context, admin ent.Admin, metadata LoginMetadata) (LoginResult, error) {
+	return service.createSessionWithClient(ctx, service.store.Client(), admin, metadata)
+}
+
+// createSessionWithClient 使用指定 Ent client 创建 session 和 CSRF token。
+//
+// 参数:
+//   - ctx: 控制数据库写入生命周期的 context。
+//   - client: 用于写入 session 的 Ent client，可绑定普通连接或事务。
+//   - admin: 已通过身份验证的管理员实体。
+//   - metadata: 登录请求的 user agent 与 IP 摘要。
+//
+// 返回值:
+//   - LoginResult: 主体、原始 session token 和 CSRF token。
+//   - error: 随机 token 生成失败或数据库写入失败时返回错误。
+func (service *Service) createSessionWithClient(ctx context.Context, client *ent.Client, admin ent.Admin, metadata LoginMetadata) (LoginResult, error) {
 	sessionToken, err := generateToken()
 	if err != nil {
 		return LoginResult{}, fmt.Errorf("generate session token: %w", err)
@@ -174,7 +278,7 @@ func (service *Service) Login(ctx context.Context, username string, password str
 		return LoginResult{}, fmt.Errorf("generate csrf token: %w", err)
 	}
 
-	_, err = service.store.Client().Session.Create().
+	_, err = client.Session.Create().
 		SetTokenHash(hashToken(sessionToken)).
 		SetCsrfTokenHash(hashToken(csrfToken)).
 		SetExpiresAt(service.now().Add(service.sessionTTL)).

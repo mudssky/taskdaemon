@@ -50,6 +50,64 @@ func TestInitializeAdminAndLogin(t *testing.T) {
 	require.Equal(t, "admin", principal.Username)
 }
 
+// TestAdminInitializationStatus 验证认证服务能区分首次启动和已初始化状态。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestAdminInitializationStatus(t *testing.T) {
+	ctx := context.Background()
+	store := newTestStore(t)
+	service := New(store, Options{BcryptCost: bcryptMinCostForTest})
+
+	initialized, err := service.IsAdminInitialized(ctx)
+	require.NoError(t, err)
+	require.False(t, initialized)
+
+	_, err = service.InitializeAdmin(ctx, "admin", "secret")
+	require.NoError(t, err)
+
+	initialized, err = service.IsAdminInitialized(ctx)
+	require.NoError(t, err)
+	require.True(t, initialized)
+}
+
+// TestInitializeAdminWithSession 验证首次创建管理员后会立即建立可用 session。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestInitializeAdminWithSession(t *testing.T) {
+	ctx := context.Background()
+	store := newTestStore(t)
+	service := New(store, Options{
+		BcryptCost: bcryptMinCostForTest,
+		SessionTTL: time.Hour,
+		Now:        func() time.Time { return time.Date(2026, 5, 15, 10, 0, 0, 0, time.UTC) },
+	})
+
+	result, err := service.InitializeAdminWithSession(ctx, "admin", "secret", LoginMetadata{
+		UserAgent: "test-agent",
+		IP:        "127.0.0.1",
+	})
+	require.NoError(t, err)
+	require.Equal(t, "admin", result.Principal.Username)
+	require.NotEmpty(t, result.SessionToken)
+	require.NotEmpty(t, result.CSRFToken)
+
+	principal, err := service.AuthenticateSession(ctx, result.SessionToken)
+	require.NoError(t, err)
+	require.Equal(t, result.Principal.AdminID, principal.AdminID)
+	require.Equal(t, "admin", principal.Username)
+
+	_, err = service.InitializeAdminWithSession(ctx, "other", "secret", LoginMetadata{})
+	require.ErrorIs(t, err, ErrAdminAlreadyInitialized)
+}
+
 // TestLoginRejectsInvalidPassword 验证登录失败不会创建 session，也不会泄漏具体原因。
 //
 // 参数:

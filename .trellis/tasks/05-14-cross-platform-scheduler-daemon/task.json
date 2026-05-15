@@ -3,7 +3,7 @@
   "name": "cross-platform-scheduler-daemon",
   "title": "brainstorm: 跨平台低占用定时任务守护进程",
   "description": "",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

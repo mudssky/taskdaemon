@@ -79,7 +79,7 @@ services/
 * `features/tasks`：任务 CRUD 表单、任务列表、启停、手动触发；`tasks.queries.ts` 集中维护 TanStack Query key、查询和 mutation 失效逻辑。
 * `features/runs`：执行历史表格、状态 badge、stdout/stderr 截断显示；历史查询复用任务 feature 的 `tasksKeys.runs(taskId)`。
 * `features/scheduler`：cron 5/6 字段校验、高频/秒级软警告、确认提交状态；`validateCronExpression` 只做前端快速反馈，后端仍是最终校验来源。
-* `features/auth`：单管理员登录、session 查询、受保护页面入口；登录态使用 `GET /api/auth/me` 作为 app shell 的基础 query。
+* `features/auth`：首次创建管理员、单管理员登录、auth status 查询、受保护页面入口；入口分流使用 `GET /api/auth/status` 作为 app shell 的基础 query，`GET /api/auth/me` 保留给需要当前管理员详情的调用点。
 * `lib/api`：手写轻量 API client 和 DTO 类型。API 错误必须映射为带 `status`、`code`、`details` 的 `ApiClientError`，组件不要解析后端 `message` 做稳定分支。
 
 ## Scenario: Basic Management UI

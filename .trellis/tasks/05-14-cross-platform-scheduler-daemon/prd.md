@@ -313,3 +313,70 @@
 * 已读取：`.trellis/spec/guides/index.md`
 * 已读取：`.trellis/spec/backend/index.md`
 * 已读取：`.trellis/spec/frontend/index.md`
+
+## Auth Setup UX Discussion
+
+### What I already know
+
+* 当前后端已有 `POST /api/auth/init`：用于创建首个单管理员账号；重复初始化返回 `409 admin_already_initialized`。
+* 当前后端已有 `POST /api/auth/login` 与 `GET /api/auth/me`：登录成功写入 `taskdaemon_session` HttpOnly Cookie，未登录 `/api/auth/me` 返回 `401 unauthorized`。
+* 当前前端 `ProtectedApp` 只根据 `/api/auth/me` 是否报错决定显示登录页；它没有区分“已经初始化但未登录”和“系统还没有管理员”。
+* 当前前端 `LoginPanel` 默认用户名填 `admin`，但密码为空，用户首次打开时不知道应该输入什么。
+* 当前认证契约坚持密码只保存 hash，不应把初始密码明文写入配置文件。
+
+### Requirements (evolving)
+
+* 首次打开系统时，用户不能被要求输入未知的用户名/密码。
+* UI 需要能表达“首次初始化管理员”和“已有管理员后登录”两个状态。
+* 首次初始化成功后，应自动进入已登录状态，或至少引导用户立即登录。
+* 不应提供长期有效的硬编码默认密码。
+* 首次使用采用“创建管理员”向导：用户自己设置首个管理员用户名和密码，之后再进入普通登录流程。
+* 创建首个管理员成功后，后端直接建立登录态并设置 `taskdaemon_session` Cookie，前端立即进入管理台。
+
+### Feasible Approaches
+
+**Approach A: 首次访问显示“创建管理员”向导（Recommended）**
+
+* How it works: 前端增加初始化模式；后端提供可查询初始化状态的轻量接口，未初始化时显示创建管理员表单，提交到 `/api/auth/init`。
+* Pros: 没有默认密码，用户心智清晰，适合未来公网访问边界。
+* Cons: 需要补一个初始化状态判断接口或等价响应语义。
+
+**Approach B: 启动日志生成一次性初始密码**
+
+* How it works: 首次启动时生成随机管理员密码并打印到日志或控制台，用户用该密码登录后修改。
+* Pros: 自动化部署友好，常见于自托管服务。
+* Cons: 本地 Desktop/Web 用户不一定看得到日志；还需要做一次性凭据生命周期与重置路径。
+
+**Approach C: 开发环境默认账号，发布环境禁用**
+
+* How it works: 开发工作区或显式 dev flag 下启用默认 `admin/admin` 或固定密码，发布版必须走初始化。
+* Pros: 开发最快。
+* Cons: 安全边界容易被误用，也会让产品体验和开发体验分叉。
+
+### Resolved Questions
+
+* 前端通过 `GET /api/auth/status` 判断系统是否尚未初始化，不复用 `/api/auth/me` 的 401 错误语义做首次设置分流。
+
+### Decision (ADR-lite): 首次访问创建管理员
+
+**Context**: 当前前端只在 `/api/auth/me` 失败后显示登录页，但新数据库里没有管理员账号，用户首次打开时不知道应该输入什么。
+
+**Decision**: 首次访问显示“创建管理员”向导。用户自己设置首个管理员用户名和密码；不提供长期有效的默认账号或默认密码。
+
+**Consequences**: 前端需要区分“未初始化”和“未登录”；后端需要提供初始化状态或等价错误语义。该方案比默认账号更安全，也比日志里的一次性密码更适合 Desktop/Web 共用 UI。
+
+### Decision (ADR-lite): 初始化成功即登录
+
+**Context**: 用户刚创建首个管理员账号后，如果还要重新输入同一组账号密码，会造成重复操作，并让首次体验显得不确定。
+
+**Decision**: `POST /api/auth/init` 在成功创建管理员后同时创建 session，设置 `taskdaemon_session` HttpOnly Cookie，并返回与登录接口兼容的 `adminId`、`username`、`csrfToken`。
+
+**Consequences**: 后端初始化路径需要复用登录态创建逻辑，前端初始化 mutation 成功后刷新 `/api/auth/me` 或直接进入管理台。重复初始化仍返回 `409 admin_already_initialized`。
+
+### Decision (ADR-lite): Auth status 作为入口分流
+
+**Context**: `/api/auth/me` 的 401 只能说明当前请求未认证，不能区分“数据库还没有管理员”和“已有管理员但当前浏览器未登录”。
+
+**Decision**: 新增 `GET /api/auth/status`，返回 `initialized`、`authenticated` 和可选 `admin`。未初始化与已初始化未登录都返回 200，前端据此显示“创建管理员”或“登录”。
+
+**Consequences**: 前端 app shell 以 auth status 作为基础 query；`/api/auth/me` 继续保留为需要当前管理员详情时的传统 session endpoint。

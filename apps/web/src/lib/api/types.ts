@@ -82,6 +82,21 @@ export type TaskRun = {
   stderr: string;
 };
 
+export type AuthPrincipal = {
+  adminId: number;
+  username: string;
+};
+
+export type AuthLoginResponse = AuthPrincipal & {
+  csrfToken: string;
+};
+
+export type AuthStatus = {
+  initialized: boolean;
+  authenticated: boolean;
+  admin?: AuthPrincipal;
+};
+
 export type ApiErrorBody = {
   error?: {
     code?: string;

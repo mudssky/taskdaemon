@@ -1,7 +1,7 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { Activity, Clock3, Database, Play, Settings } from "lucide-react";
 import type { PropsWithChildren } from "react";
-import { useSessionQuery } from "../../features/auth/auth.queries";
+import { useAuthStatusQuery } from "../../features/auth/auth.queries";
 
 type AppShellProps = PropsWithChildren<{
   pageTitle?: string;
@@ -13,9 +13,9 @@ export function AppShell({
   pageKicker = "本地守护进程",
   children,
 }: AppShellProps) {
-  const session = useSessionQuery();
-  const statusText = session.isSuccess
-    ? `管理员 ${session.data.username}`
+  const authStatus = useAuthStatusQuery();
+  const statusText = authStatus.data?.authenticated
+    ? `管理员 ${authStatus.data.admin?.username ?? ""}`.trim()
     : "未登录";
 
   return (

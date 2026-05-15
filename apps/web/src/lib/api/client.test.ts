@@ -56,4 +56,50 @@ describe("apiClient", () => {
       expect.objectContaining({ method: "POST", credentials: "include" }),
     );
   });
+
+  it("calls auth status and initialize endpoints", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/status")) {
+        return new Response(
+          JSON.stringify({ initialized: false, authenticated: false }),
+          { status: 200 },
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          adminId: 7,
+          username: "admin",
+          csrfToken: "csrf-token",
+        }),
+        { status: 201 },
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiClient.authStatus()).resolves.toEqual({
+      initialized: false,
+      authenticated: false,
+    });
+    await expect(apiClient.initializeAdmin("admin", "secret")).resolves.toEqual(
+      {
+        adminId: 7,
+        username: "admin",
+        csrfToken: "csrf-token",
+      },
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/api/auth/status",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/auth/init",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({ username: "admin", password: "secret" }),
+      }),
+    );
+  });
 });

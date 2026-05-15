@@ -49,9 +49,12 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * `(*data.Store).Close() error`
 * `auth.New(store *data.Store, opts auth.Options) *auth.Service`
 * `(*auth.Service).InitializeAdmin(ctx context.Context, username string, password string) (auth.AdminAccount, error)`
+* `(*auth.Service).InitializeAdminWithSession(ctx context.Context, username string, password string, metadata auth.LoginMetadata) (auth.LoginResult, error)`
+* `(*auth.Service).IsAdminInitialized(ctx context.Context) (bool, error)`
 * `(*auth.Service).Login(ctx context.Context, username string, password string, metadata auth.LoginMetadata) (auth.LoginResult, error)`
 * `(*auth.Service).AuthenticateSession(ctx context.Context, token string) (auth.Principal, error)`
 * `POST /api/auth/init`
+* `GET /api/auth/status`
 * `POST /api/auth/login`
 * `GET /api/auth/me`
 
@@ -62,6 +65,9 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * 单管理员通过 `Admin.singleton_key` 唯一约束保证数据库层只有一个管理员；服务层创建时固定写入 `primary`。
 * 密码只保存 bcrypt hash；session token 和 CSRF token 只保存 SHA-256 十六进制哈希，原始 token 只返回给客户端。
 * HTTP session cookie 名称为 `taskdaemon_session`，必须设置 `HttpOnly` 和 `SameSite=Lax`。
+* 首次使用由前端显示“创建管理员”向导，不提供长期有效的默认账号或默认密码。
+* `GET /api/auth/status` 是前端判断首次初始化和登录态的入口，返回 `{ initialized, authenticated, admin? }`；未初始化或未登录都返回 200，不用 401 表达普通页面分流。
+* `POST /api/auth/init` 成功后必须同时创建 session、写入 `taskdaemon_session` Cookie，并返回与登录兼容的 `{ adminId, username, csrfToken }`。
 
 ### 4. Validation & Error Matrix
 
@@ -70,18 +76,22 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * 用户名或密码错误 -> `auth.ErrInvalidCredentials`，API 映射为 `401 invalid_credentials`。
 * 缺失、过期或无效 session -> `auth.ErrInvalidSession`，API 映射为 `401 unauthorized`。
 * API 错误响应必须保持 `{"error":{"code": "...", "message": "...", "details": null|object}}`。
+* `/api/auth/status` 遇到缺失或无效 session 时返回 `200 {"initialized":true,"authenticated":false}`，只有认证服务不可用或数据库查询失败才返回错误响应。
 
 ### 5. Good/Base/Bad Cases
 
 * Good: `taskdaemon db migrate` 对当前配置数据库执行 Ent migration，不初始化 Desktop。
+* Good: 空数据库首次打开 Web UI 时，前端先请求 `/api/auth/status`，得到 `initialized=false` 后显示创建管理员表单。
+* Good: 用户提交创建管理员表单后，`POST /api/auth/init` 写入 session cookie，前端刷新 auth status 并进入管理台。
 * Base: SQLite 临时库完成 migration 后，`Admin.Query().Count(ctx)` 可返回 `0`。
+* Bad: 新数据库直接显示登录表单并要求用户输入未知密码。
 * Bad: handler 直接调用 Ent client 或判断 SQL 方言；应通过 `auth.AuthService` 或后续 service/repository 边界。
 
 ### 6. Tests Required
 
 * 数据层测试断言 SQLite open + migration 成功，并断言不支持方言返回 `ErrUnsupportedDriver`。
-* 认证测试断言初始化、重复初始化、登录、session 认证和错误凭证。
-* HTTP 测试断言 `/api/auth/me` 未登录返回稳定 401 JSON，`/api/auth/login` 写入 HttpOnly cookie，`/api/auth/init` 可初始化并拒绝重复初始化。
+* 认证测试断言初始化状态查询、初始化后创建 session、重复初始化、登录、session 认证和错误凭证。
+* HTTP 测试断言 `/api/auth/status` 的未初始化、已初始化未登录、已登录分支；`/api/auth/me` 未登录返回稳定 401 JSON；`/api/auth/login` 写入 HttpOnly cookie；`/api/auth/init` 可初始化、写入 HttpOnly cookie、返回 CSRF token，并拒绝重复初始化。
 * PostgreSQL 集成测试在 `services/taskdaemon-go` 内使用 `go test -tags=integration ./internal/data`，或从仓库根运行 `pnpm test:go:integration`；本机 Docker 不可用时允许跳过。
 
 ### 7. Wrong vs Correct

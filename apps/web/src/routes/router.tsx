@@ -5,14 +5,15 @@ import {
   Outlet,
 } from "@tanstack/react-router";
 import { AppShell } from "../components/layout/AppShell";
-import { useSessionQuery } from "../features/auth/auth.queries";
+import { AdminSetupPanel } from "../features/auth/AdminSetupPanel";
+import { useAuthStatusQuery } from "../features/auth/auth.queries";
 import { LoginPanel } from "../features/auth/LoginPanel";
 import { TaskDashboard } from "../features/tasks/TaskDashboard";
 
 function ProtectedApp() {
-  const session = useSessionQuery();
+  const authStatus = useAuthStatusQuery();
 
-  if (session.isLoading) {
+  if (authStatus.isLoading) {
     return (
       <AppShell pageTitle="运行状态">
         <div className="panel">
@@ -22,7 +23,27 @@ function ProtectedApp() {
     );
   }
 
-  if (session.isError) {
+  if (authStatus.isError) {
+    return (
+      <AppShell pageTitle="登录">
+        <div className="empty-state error">
+          认证状态查询失败，请确认后端服务可用。
+        </div>
+      </AppShell>
+    );
+  }
+
+  const status = authStatus.data;
+
+  if (!status?.initialized) {
+    return (
+      <AppShell pageTitle="首次设置">
+        <AdminSetupPanel />
+      </AppShell>
+    );
+  }
+
+  if (!status.authenticated) {
     return (
       <AppShell pageTitle="登录">
         <LoginPanel />

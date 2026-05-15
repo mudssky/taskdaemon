@@ -1,4 +1,12 @@
-import type { ApiErrorBody, Task, TaskPayload, TaskRun } from "./types";
+import type {
+  ApiErrorBody,
+  AuthLoginResponse,
+  AuthPrincipal,
+  AuthStatus,
+  Task,
+  TaskPayload,
+  TaskRun,
+} from "./types";
 
 export class ApiClientError extends Error {
   readonly status: number;
@@ -56,18 +64,25 @@ async function requestJSON<T>(
 
 export const apiClient = {
   async login(username: string, password: string) {
-    return requestJSON<{
-      adminId: number;
-      username: string;
-      csrfToken: string;
-    }>("/api/auth/login", {
+    return requestJSON<AuthLoginResponse>("/api/auth/login", {
       method: "POST",
       body: { username, password },
     });
   },
 
+  async initializeAdmin(username: string, password: string) {
+    return requestJSON<AuthLoginResponse>("/api/auth/init", {
+      method: "POST",
+      body: { username, password },
+    });
+  },
+
+  async authStatus() {
+    return requestJSON<AuthStatus>("/api/auth/status");
+  },
+
   async me() {
-    return requestJSON<{ adminId: number; username: string }>("/api/auth/me");
+    return requestJSON<AuthPrincipal>("/api/auth/me");
   },
 
   async listTasks() {
