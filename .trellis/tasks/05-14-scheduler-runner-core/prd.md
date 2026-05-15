@@ -25,18 +25,18 @@
 
 ## Acceptance Criteria
 
-* [ ] 可创建并注册 cron 任务。
+* [x] 可创建并注册 cron 任务。
 * [x] 完成 `gocron` spike，并记录最终选择。
 * [x] `05-14-gocron-scheduler-spike` 完成并将结论同步回来。
-* [ ] cron 5/6 字段校验可用。
-* [ ] 软警告确认机制可用。
-* [ ] API/CLI 可手动触发任务。
-* [ ] runner 配置保存前经过结构化校验。
-* [ ] `tsx` 作为 TypeScript runner 默认执行器。
-* [ ] 重叠触发记录 `skipped`。
-* [ ] timeout 记录 `timeout`。
-* [ ] cancel 记录 `cancelled`。
-* [ ] stdout/stderr 截断保存。
+* [x] cron 5/6 字段校验可用。
+* [x] 软警告确认机制可用。
+* [x] API/CLI 可手动触发任务。
+* [x] runner 配置保存前经过结构化校验。
+* [x] `tsx` 作为 TypeScript runner 默认执行器。
+* [x] 重叠触发记录 `skipped`。
+* [x] timeout 记录 `timeout`。
+* [x] cancel 记录 `cancelled`。
+* [x] stdout/stderr 截断保存。
 
 ## Testing Constraints
 
