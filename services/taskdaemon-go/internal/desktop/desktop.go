@@ -38,7 +38,7 @@ func Run(ctx context.Context, cfg config.Config) error {
 			application.NewService(bindings),
 		},
 	})
-	desktopApp.NewWebviewWindowWithOptions(application.WebviewWindowOptions{
+	desktopApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:           "taskdaemon",
 		Width:           1200,
 		Height:          760,
