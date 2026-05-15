@@ -13,6 +13,13 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var projectConfigFilenames = []string{
+	"taskdaemon.yaml",
+	"taskdaemon.yml",
+	"config.yaml",
+	"config.yml",
+}
+
 // Config 保存 taskdaemon 启动阶段需要的基础配置。
 type Config struct {
 	Server   ServerConfig
@@ -83,7 +90,34 @@ func DefaultPath() (string, error) {
 	return filepath.Join(configDir, "taskdaemon", "config.yaml"), nil
 }
 
+// ProjectPath 返回开发工作区当前工作目录下第一个存在的项目内配置文件路径。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - string: 项目内配置文件路径；未找到时为空。
+//   - bool: true 表示找到了项目内配置文件。
+//   - error: 读取当前工作目录或检查文件状态失败时返回错误。
+func ProjectPath() (string, bool, error) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return "", false, fmt.Errorf("resolve working directory: %w", err)
+	}
+	enabled, err := projectConfigSearchEnabled(workingDir)
+	if err != nil {
+		return "", false, err
+	}
+	if !enabled {
+		return "", false, nil
+	}
+	return projectPathInDir(workingDir)
+}
+
 // Load 按 defaults < file < env < overrides 的顺序加载配置。
+//
+// 未显式指定 ConfigPath 时，仅在开发工作区里自动查找当前目录的项目配置文件；
+// 发布版不会读取当前目录里的同名配置文件，避免误吃部署目录下的临时文件。
 //
 // 参数:
 //   - opts: 配置文件路径、是否允许缺失和最终覆盖值。
@@ -99,11 +133,19 @@ func Load(opts LoadOptions) (Config, error) {
 
 	configPath := opts.ConfigPath
 	if configPath == "" {
-		defaultPath, err := DefaultPath()
+		discoveredPath, found, err := ProjectPath()
 		if err != nil {
 			return Config{}, err
 		}
-		configPath = defaultPath
+		if found {
+			configPath = discoveredPath
+		} else {
+			defaultPath, err := DefaultPath()
+			if err != nil {
+				return Config{}, err
+			}
+			configPath = defaultPath
+		}
 		opts.Optional = true
 	}
 
@@ -145,6 +187,70 @@ func Load(opts LoadOptions) (Config, error) {
 //   - string: host:port 格式监听地址。
 func (cfg ServerConfig) Address() string {
 	return fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+}
+
+// projectPathInDir 返回指定目录中的第一个项目内配置文件路径。
+//
+// 参数:
+//   - dir: 待搜索的目录。
+//
+// 返回值:
+//   - string: 项目内配置文件路径；未找到时为空。
+//   - bool: true 表示找到了项目内配置文件。
+//   - error: 检查文件状态失败时返回错误。
+func projectPathInDir(dir string) (string, bool, error) {
+	for _, filename := range projectConfigFilenames {
+		candidate := filepath.Join(dir, filename)
+		info, err := os.Stat(candidate)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+			return "", false, fmt.Errorf("stat project config file %s: %w", candidate, err)
+		}
+		if !info.IsDir() {
+			return candidate, true, nil
+		}
+	}
+	return "", false, nil
+}
+
+// projectConfigSearchEnabled 判断当前工作目录是否属于开发工作区。
+//
+// 参数:
+//   - dir: 当前工作目录。
+//
+// 返回值:
+//   - bool: true 表示允许自动查找项目内配置文件。
+//   - error: 检查工作区标记失败时返回错误。
+func projectConfigSearchEnabled(dir string) (bool, error) {
+	current := dir
+	for {
+		if existsFileOrDir(filepath.Join(current, "pnpm-workspace.yaml")) {
+			return true, nil
+		}
+		if existsFileOrDir(filepath.Join(current, ".git")) {
+			return true, nil
+		}
+
+		parent := filepath.Dir(current)
+		if parent == current {
+			return false, nil
+		}
+		current = parent
+	}
+}
+
+// existsFileOrDir 判断路径是否存在。
+//
+// 参数:
+//   - path: 待检查的文件或目录路径。
+//
+// 返回值:
+//   - bool: true 表示路径存在。
+func existsFileOrDir(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
 }
 
 // defaultMap 返回 koanf 使用的默认配置 map。

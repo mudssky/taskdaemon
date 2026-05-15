@@ -76,6 +76,8 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * `taskdaemon desktop` 启动 Wails v3 runtime，并加载 `services/taskdaemon-go/web/embedded` 中的同一套前端构建产物。
 * `taskdaemon db migrate` 是 CLI-only 入口，不初始化 Desktop。
 * `--config <path>` 是根级 persistent flag，所有子命令都应加载同一份配置。
+* 未显式传入 `--config` 时，`internal/config` 只在开发工作区里自动查找项目内配置文件，按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 的顺序匹配；非工作区环境不会自动读取当前目录同名文件，找不到时回退到 `os.UserConfigDir()/taskdaemon/config.yaml`。
+* 显式 `--config <path>` 只读取指定文件，不再叠加项目内配置文件。
 * 默认配置路径为 `os.UserConfigDir()/taskdaemon/config.yaml`。
 * `/api/health` 是后端探活 endpoint；Swagger route 默认关闭，只在 `server.swagger.enabled=true` 时注册。
 

@@ -41,9 +41,12 @@ scripts/                          # 本地开发与构建脚本
 默认配置路径为系统用户配置目录下的 `taskdaemon/config.yaml`，可通过 `--config <path>` 覆盖。配置覆盖顺序为：
 
 1. 默认值
-2. 配置文件
-3. `TASKDAEMON_` 环境变量
-4. CLI flag 或调用方 overrides
+2. 开发工作区启动目录中的项目配置文件（按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 顺序查找）
+3. 系统用户配置目录下的 `taskdaemon/config.yaml`
+4. `TASKDAEMON_` 环境变量
+5. CLI flag 或调用方 overrides
+
+如果显式传入 `--config <path>`，则只读取该文件，不再自动叠加项目内配置文件。发布环境默认只依赖系统用户配置目录。
 
 Swagger route 默认关闭，打开 `server.swagger.enabled` 后注册 `/swagger/index.html`。
 

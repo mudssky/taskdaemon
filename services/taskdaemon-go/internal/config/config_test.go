@@ -108,3 +108,236 @@ func TestLoadDefaultsWhenConfigFileIsMissing(t *testing.T) {
 		t.Fatalf("database driver = %s, want sqlite", cfg.Database.Driver)
 	}
 }
+
+// TestLoadUsesProjectConfigWhenNoExplicitPath 验证工作区内未显式指定配置时会自动读取项目内配置文件。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestLoadUsesProjectConfigWhenNoExplicitPath(t *testing.T) {
+	projectDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(projectDir, "pnpm-workspace.yaml"), []byte("packages:\n  - apps/*\n"), 0o600); err != nil {
+		t.Fatalf("write workspace marker: %v", err)
+	}
+	configFile := filepath.Join(projectDir, "taskdaemon.yaml")
+	content := []byte(`
+server:
+  port: 9191
+database:
+  driver: postgres
+  dsn: postgres://project
+`)
+	if err := os.WriteFile(configFile, content, 0o600); err != nil {
+		t.Fatalf("write project config: %v", err)
+	}
+
+	oldWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(oldWD); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	cfg, err := Load(LoadOptions{Optional: true})
+	if err != nil {
+		t.Fatalf("load project config: %v", err)
+	}
+
+	if cfg.Server.Port != 9191 {
+		t.Fatalf("server port = %d, want project config", cfg.Server.Port)
+	}
+	if cfg.Database.Driver != "postgres" {
+		t.Fatalf("database driver = %s, want postgres", cfg.Database.Driver)
+	}
+	if cfg.Database.DSN != "postgres://project" {
+		t.Fatalf("database dsn = %s, want project config", cfg.Database.DSN)
+	}
+}
+
+// TestLoadSkipsProjectConfigOutsideWorkspace 验证非工作区环境不会自动读取项目内配置文件。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestLoadSkipsProjectConfigOutsideWorkspace(t *testing.T) {
+	projectDir := t.TempDir()
+	configFile := filepath.Join(projectDir, "taskdaemon.yaml")
+	content := []byte(`
+server:
+  port: 9494
+database:
+  driver: postgres
+  dsn: postgres://project
+`)
+	if err := os.WriteFile(configFile, content, 0o600); err != nil {
+		t.Fatalf("write project config: %v", err)
+	}
+
+	t.Setenv("APPDATA", filepath.Join(t.TempDir(), "appdata"))
+	t.Setenv("XDG_CONFIG_HOME", filepath.Join(t.TempDir(), "xdg"))
+	t.Setenv("HOME", filepath.Join(t.TempDir(), "home"))
+
+	oldWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(oldWD); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	cfg, err := Load(LoadOptions{Optional: true})
+	if err != nil {
+		t.Fatalf("load config: %v", err)
+	}
+
+	if cfg.Server.Port != 8080 {
+		t.Fatalf("server port = %d, want default", cfg.Server.Port)
+	}
+	if cfg.Database.Driver != "sqlite" {
+		t.Fatalf("database driver = %s, want default", cfg.Database.Driver)
+	}
+}
+
+// TestProjectPathFindsFirstProjectConfig 验证项目内配置文件会按约定顺序发现。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestProjectPathFindsFirstProjectConfig(t *testing.T) {
+	projectDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(projectDir, "pnpm-workspace.yaml"), []byte("packages:\n  - apps/*\n"), 0o600); err != nil {
+		t.Fatalf("write workspace marker: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(projectDir, "config.yml"), []byte("server:\n  port: 9393\n"), 0o600); err != nil {
+		t.Fatalf("write project config: %v", err)
+	}
+
+	oldWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(oldWD); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	path, found, err := ProjectPath()
+	if err != nil {
+		t.Fatalf("project path: %v", err)
+	}
+	if !found {
+		t.Fatal("project config should be found")
+	}
+	if path != filepath.Join(projectDir, "config.yml") {
+		t.Fatalf("project path = %s, want config.yml", path)
+	}
+}
+
+// TestProjectPathReturnsMissingWhenNoProjectConfig 验证当前目录没有项目内配置时返回未找到。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestProjectPathReturnsMissingWhenNoProjectConfig(t *testing.T) {
+	projectDir := t.TempDir()
+
+	oldWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(oldWD); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	path, found, err := ProjectPath()
+	if err != nil {
+		t.Fatalf("project path: %v", err)
+	}
+	if found {
+		t.Fatalf("project config path = %s, want missing", path)
+	}
+}
+
+// TestExplicitConfigPathIgnoresProjectConfig 验证 --config 显式路径优先，不会再叠加项目内配置。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestExplicitConfigPathIgnoresProjectConfig(t *testing.T) {
+	projectDir := t.TempDir()
+	projectConfig := []byte(`
+server:
+  port: 9191
+database:
+  dsn: postgres://project
+`)
+	if err := os.WriteFile(filepath.Join(projectDir, "taskdaemon.yaml"), projectConfig, 0o600); err != nil {
+		t.Fatalf("write project config: %v", err)
+	}
+
+	explicitConfig := filepath.Join(t.TempDir(), "custom.yaml")
+	explicitContent := []byte(`
+server:
+  port: 9292
+database:
+  dsn: postgres://explicit
+`)
+	if err := os.WriteFile(explicitConfig, explicitContent, 0o600); err != nil {
+		t.Fatalf("write explicit config: %v", err)
+	}
+
+	oldWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(oldWD); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	cfg, err := Load(LoadOptions{ConfigPath: explicitConfig})
+	if err != nil {
+		t.Fatalf("load explicit config: %v", err)
+	}
+
+	if cfg.Server.Port != 9292 {
+		t.Fatalf("server port = %d, want explicit config", cfg.Server.Port)
+	}
+	if cfg.Database.DSN != "postgres://explicit" {
+		t.Fatalf("database dsn = %s, want explicit config", cfg.Database.DSN)
+	}
+}
