@@ -50,7 +50,7 @@ func TestListTasksCallsTaskService(t *testing.T) {
 	var response struct {
 		Tasks []taskResponse `json:"tasks"`
 	}
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
+	decodeAPIData(t, rec.Body.Bytes(), &response)
 	require.Len(t, response.Tasks, 1)
 	require.Equal(t, 9, response.Tasks[0].ID)
 	require.Equal(t, "backup", response.Tasks[0].Name)
@@ -74,7 +74,9 @@ func TestCreateTaskRequiresSession(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusUnauthorized, rec.Code)
-	require.JSONEq(t, `{"error":{"code":"unauthorized","message":"Authentication required","details":null}}`, rec.Body.String())
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	require.Equal(t, "unauthorized", envelope.Error.Code)
+	require.Equal(t, "Authentication required", envelope.Error.Message)
 }
 
 // TestCreateTaskCallsTaskService 验证登录后创建任务会调用调度服务并返回任务摘要。
@@ -102,7 +104,7 @@ func TestCreateTaskCallsTaskService(t *testing.T) {
 	require.Equal(t, runner.TypeShell, service.createInput.Runner.Type)
 	require.Equal(t, time.Minute, service.createInput.Runner.Timeout)
 	var response taskResponse
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
+	decodeAPIData(t, rec.Body.Bytes(), &response)
 	require.Equal(t, 9, response.ID)
 	require.Equal(t, "backup", response.Name)
 	require.Equal(t, "30 9 * * *", response.CronExpression)
@@ -133,7 +135,7 @@ func TestUpdateTaskCallsTaskService(t *testing.T) {
 	require.Equal(t, runner.TypePython, service.updateInput.Runner.Type)
 	require.Equal(t, "jobs/backup.py", service.updateInput.Runner.ScriptPath)
 	var response taskResponse
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
+	decodeAPIData(t, rec.Body.Bytes(), &response)
 	require.Equal(t, "backup-new", response.Name)
 }
 
@@ -181,7 +183,7 @@ func TestTriggerTaskCallsTaskService(t *testing.T) {
 	require.Equal(t, http.StatusOK, rec.Code)
 	require.Equal(t, 7, service.triggeredID)
 	var response runResponse
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
+	decodeAPIData(t, rec.Body.Bytes(), &response)
 	require.Equal(t, 11, response.ID)
 	require.Equal(t, entrun.StatusSuccess, response.Status)
 	require.NotNil(t, response.ExitCode)
@@ -204,8 +206,12 @@ func TestCancelTaskCallsTaskService(t *testing.T) {
 
 	router.ServeHTTP(rec, req)
 
-	require.Equal(t, http.StatusNoContent, rec.Code)
+	require.Equal(t, http.StatusOK, rec.Code)
 	require.Equal(t, 7, service.cancelledID)
+	var envelope apiResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &envelope))
+	require.Equal(t, responseEnvelopeSuccessCode, envelope.Code)
+	require.Nil(t, envelope.Data)
 }
 
 // TestCancelTaskMapsNotRunningError 验证未运行任务的取消错误映射为稳定机器码。
@@ -224,7 +230,9 @@ func TestCancelTaskMapsNotRunningError(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusConflict, rec.Code)
-	require.JSONEq(t, `{"error":{"code":"task_not_running","message":"Task is not running","details":null}}`, rec.Body.String())
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	require.Equal(t, "task_not_running", envelope.Error.Code)
+	require.Equal(t, "Task is not running", envelope.Error.Message)
 }
 
 // TestListTaskRunsCallsTaskService 验证执行历史 API 会查询指定任务历史。
@@ -250,7 +258,7 @@ func TestListTaskRunsCallsTaskService(t *testing.T) {
 	var response struct {
 		Runs []runResponse `json:"runs"`
 	}
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
+	decodeAPIData(t, rec.Body.Bytes(), &response)
 	require.Len(t, response.Runs, 1)
 	require.Equal(t, 11, response.Runs[0].ID)
 	require.Equal(t, entrun.StatusSuccess, response.Runs[0].Status)

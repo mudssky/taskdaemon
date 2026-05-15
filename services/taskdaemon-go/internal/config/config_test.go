@@ -47,6 +47,15 @@ server:
 database:
   driver: postgres
   dsn: postgres://example
+logging:
+  level: debug
+  output: file
+  file:
+    path: ./file.log
+    maxSizeMB: 10
+observability:
+  traceId:
+    includeInResponse: false
 `)
 	if err := os.WriteFile(configFile, content, 0o600); err != nil {
 		t.Fatalf("write config: %v", err)
@@ -54,11 +63,14 @@ database:
 
 	t.Setenv("TASKDAEMON_SERVER_PORT", "7070")
 	t.Setenv("TASKDAEMON_DATABASE_DSN", "postgres://env")
+	t.Setenv("TASKDAEMON_LOGGING_FILE_MAX_SIZE_MB", "20")
+	t.Setenv("TASKDAEMON_OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE", "true")
 
 	cfg, err := Load(LoadOptions{
 		ConfigPath: configFile,
 		Overrides: map[string]any{
-			"server.host": "0.0.0.0",
+			"server.host":    "0.0.0.0",
+			"logging.output": "both",
 		},
 	})
 	if err != nil {
@@ -79,6 +91,18 @@ database:
 	}
 	if cfg.Database.DSN != "postgres://env" {
 		t.Fatalf("database dsn = %s, want env override", cfg.Database.DSN)
+	}
+	if cfg.Logging.Level != "debug" {
+		t.Fatalf("logging level = %s, want file config", cfg.Logging.Level)
+	}
+	if cfg.Logging.Output != "both" {
+		t.Fatalf("logging output = %s, want override", cfg.Logging.Output)
+	}
+	if cfg.Logging.File.MaxSizeMB != 20 {
+		t.Fatalf("logging file max size = %d, want env alias override", cfg.Logging.File.MaxSizeMB)
+	}
+	if !cfg.Observability.TraceID.IncludeInResponse {
+		t.Fatal("trace id response flag should be overridden by env alias")
 	}
 }
 

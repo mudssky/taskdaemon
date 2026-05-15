@@ -13,6 +13,10 @@ describe("apiClient", () => {
         async () =>
           new Response(
             JSON.stringify({
+              code: 1,
+              msg: "nope",
+              data: null,
+              traceId: "trace-1",
               error: { code: "unauthorized", message: "nope" },
             }),
             { status: 401 },
@@ -25,6 +29,7 @@ describe("apiClient", () => {
       status: 401,
       code: "unauthorized",
       message: "nope",
+      traceId: "trace-1",
     } satisfies Partial<ApiClientError>);
   });
 
@@ -32,11 +37,17 @@ describe("apiClient", () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       if (String(input).endsWith("/trigger")) {
         return new Response(
-          JSON.stringify({ id: 3, status: "success", exitCode: 0 }),
+          JSON.stringify({
+            code: 0,
+            msg: "ok",
+            data: { id: 3, status: "success", exitCode: 0 },
+          }),
           { status: 200 },
         );
       }
-      return new Response(null, { status: 204 });
+      return new Response(JSON.stringify({ code: 0, msg: "ok", data: null }), {
+        status: 200,
+      });
     });
     vi.stubGlobal("fetch", fetchMock);
 
@@ -61,18 +72,29 @@ describe("apiClient", () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       if (String(input).endsWith("/status")) {
         return new Response(
-          JSON.stringify({ initialized: false, authenticated: false }),
+          JSON.stringify({
+            code: 0,
+            msg: "ok",
+            data: { initialized: false, authenticated: false },
+          }),
           { status: 200 },
         );
       }
       if (String(input).endsWith("/logout")) {
-        return new Response(null, { status: 204 });
+        return new Response(
+          JSON.stringify({ code: 0, msg: "ok", data: null }),
+          { status: 200 },
+        );
       }
       return new Response(
         JSON.stringify({
-          adminId: 7,
-          username: "admin",
-          csrfToken: "csrf-token",
+          code: 0,
+          msg: "ok",
+          data: {
+            adminId: 7,
+            username: "admin",
+            csrfToken: "csrf-token",
+          },
         }),
         { status: 201 },
       );

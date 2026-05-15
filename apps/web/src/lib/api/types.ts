@@ -98,9 +98,21 @@ export type AuthStatus = {
 };
 
 export type ApiErrorBody = {
+  code?: number;
+  msg?: string;
+  data?: null;
+  traceId?: string;
   error?: {
     code?: string;
     message?: string;
     details?: unknown;
   };
+};
+
+export type ApiEnvelope<T> = {
+  code: number;
+  msg: string;
+  data: T;
+  traceId?: string;
+  error?: ApiErrorBody["error"];
 };

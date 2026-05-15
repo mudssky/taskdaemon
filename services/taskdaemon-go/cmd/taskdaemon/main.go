@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"os"
 	"os/signal"
 
@@ -12,6 +11,7 @@ import (
 	"taskdaemon/internal/cli"
 	"taskdaemon/internal/config"
 	"taskdaemon/internal/desktop"
+	"taskdaemon/internal/logging"
 )
 
 // main 是 taskdaemon 单二进制入口，负责分发 serve、desktop 与 CLI-only 子命令。
@@ -25,8 +25,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer stop()
 
-	logger := slog.New(slog.NewTextHandler(os.Stderr, nil))
-	if err := run(ctx, logger, os.Args[1:]); err != nil && !errors.Is(err, context.Canceled) {
+	if err := run(ctx, os.Args[1:]); err != nil && !errors.Is(err, context.Canceled) {
 		fmt.Fprintf(os.Stderr, "taskdaemon: %v\n", err)
 		os.Exit(1)
 	}
@@ -36,29 +35,53 @@ func main() {
 //
 // 参数:
 //   - ctx: 控制命令生命周期的 context。
-//   - logger: 结构化 logger。
 //   - args: 命令行参数，不包含程序名。
 //
 // 返回值:
 //   - error: 命令执行失败时返回错误。
-func run(ctx context.Context, logger *slog.Logger, args []string) error {
+func run(ctx context.Context, args []string) error {
 	return cli.Execute(ctx, cli.Options{
 		Args: args,
 		Hooks: cli.Hooks{
 			Serve: func(ctx context.Context, cfg config.Config) error {
-				return app.New(cfg, logger).Serve(ctx)
+				logger, err := logging.New(cfg.Logging, logging.Options{})
+				if err != nil {
+					return err
+				}
+				defer logger.Close()
+				return app.New(cfg, logger.Logger).Serve(ctx)
 			},
 			Desktop: func(ctx context.Context, cfg config.Config) error {
-				return desktop.Run(ctx, cfg)
+				logger, err := logging.New(cfg.Logging, logging.Options{})
+				if err != nil {
+					return err
+				}
+				defer logger.Close()
+				return desktop.Run(ctx, cfg, logger.Logger)
 			},
 			DBMigrate: func(ctx context.Context, cfg config.Config) error {
-				return app.New(cfg, logger).MigrateSchema(ctx)
+				logger, err := logging.New(cfg.Logging, logging.Options{})
+				if err != nil {
+					return err
+				}
+				defer logger.Close()
+				return app.New(cfg, logger.Logger).MigrateSchema(ctx)
 			},
 			TaskTrigger: func(ctx context.Context, cfg config.Config, taskID int) error {
-				return app.New(cfg, logger).TriggerTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
+				logger, err := logging.New(cfg.Logging, logging.Options{})
+				if err != nil {
+					return err
+				}
+				defer logger.Close()
+				return app.New(cfg, logger.Logger).TriggerTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
 			},
 			TaskCancel: func(ctx context.Context, cfg config.Config, taskID int) error {
-				return app.New(cfg, logger).CancelTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
+				logger, err := logging.New(cfg.Logging, logging.Options{})
+				if err != nil {
+					return err
+				}
+				defer logger.Close()
+				return app.New(cfg, logger.Logger).CancelTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
 			},
 		},
 	})

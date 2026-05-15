@@ -42,12 +42,29 @@ taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，
 
 ---
 
-## API Error Responses
+## API Responses
 
-第一版 API 错误响应保持稳定结构，便于前端表单和 CLI 复用：
+HTTP API 使用统一 envelope。HTTP 状态码仍保持真实 2xx/4xx/5xx；顶层 `code` 只表达 envelope 成败，`0` 表示成功，`1` 表示失败。响应体默认带 `traceId`，可通过 `observability.traceId.includeInResponse=false` 关闭；响应头始终带 `X-Trace-Id`。
+
+成功响应：
 
 ```json
 {
+  "code": 0,
+  "msg": "ok",
+  "data": {},
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736"
+}
+```
+
+失败响应：
+
+```json
+{
+  "code": 1,
+  "msg": "Cron expression is invalid",
+  "data": null,
+  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
   "error": {
     "code": "cron_invalid",
     "message": "Cron expression is invalid",
@@ -58,9 +75,12 @@ taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，
 }
 ```
 
-* `code` 是稳定机器码，前端根据它决定字段错误、toast 或确认对话框。
-* `message` 是简短默认说明，不承载敏感信息。
-* `details` 只放可安全展示的结构化信息，例如字段名、警告类型、允许范围。
+* 顶层 `code` 固定为数字成败位，不放业务错误码。
+* `msg` 是默认提示；失败时通常与 `error.message` 一致。
+* `error.code` 是稳定机器码，前端根据它决定字段错误、toast 或确认对话框。
+* `error.message` 是简短默认说明，不承载敏感信息。
+* `error.details` 只放可安全展示的结构化信息，例如字段名、警告类型、允许范围。
+* 原本无内容成功响应统一改为 `200 OK` + `{"code":0,"msg":"ok","data":null}`。
 * 软警告使用不同响应或字段表达 `warnings`，不能和硬错误混在同一个阻断结果里。
 
 ### Auth API Error Contracts
@@ -74,7 +94,7 @@ taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，
 | 已存在管理员时再次初始化 | `auth.ErrAdminAlreadyInitialized` | 409 | `admin_already_initialized` |
 | 认证服务未注入 | n/a | 503 | `auth_unavailable` |
 
-`POST /api/auth/logout` 对缺失或空 session cookie 保持幂等，返回 204 并写入过期 Cookie；删除 session 时发生系统错误才返回 `500 internal_error`。
+`POST /api/auth/logout` 对缺失或空 session cookie 保持幂等，返回 `200 OK` envelope 并写入过期 Cookie；删除 session 时发生系统错误才返回 `500 internal_error`。
 
 `POST /api/auth/init` 与 `POST /api/auth/login` 的请求体契约为：
 
@@ -99,6 +119,9 @@ handler 可以 trim `username` 后再传给认证服务，但不能 trim 或记�
 
 ```json
 {
+  "code": 1,
+  "msg": "Authentication required",
+  "data": null,
   "error": {
     "code": "unauthorized",
     "message": "Authentication required",

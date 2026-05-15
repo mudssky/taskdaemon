@@ -25,12 +25,19 @@ func TestHealthEndpoint(t *testing.T) {
 		t.Fatalf("status = %d, want %d", rec.Code, http.StatusOK)
 	}
 
-	var body map[string]string
+	var body apiResponse
 	if err := json.Unmarshal(rec.Body.Bytes(), &body); err != nil {
 		t.Fatalf("decode body: %v", err)
 	}
-	if body["status"] != "ok" {
-		t.Fatalf("status body = %q, want ok", body["status"])
+	if body.Code != responseEnvelopeSuccessCode {
+		t.Fatalf("code = %d, want success", body.Code)
+	}
+	data, ok := body.Data.(map[string]any)
+	if !ok {
+		t.Fatalf("data = %T, want map", body.Data)
+	}
+	if data["status"] != "ok" {
+		t.Fatalf("status body = %q, want ok", data["status"])
 	}
 }
 

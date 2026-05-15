@@ -8,7 +8,7 @@
 
 taskdaemon 后端第一版使用 Go 标准库 `log/slog` 作为日志基础。日志服务于 daemon 排障、任务执行追踪和部署问题定位；用户可见的执行历史仍写入数据库，不能只存在日志里。
 
-当前仓库还没有正式 logging package。实现时应把 logger 作为应用依赖注入到 `services/taskdaemon-go/internal/app`、`services/taskdaemon-go/internal/httpapi`、`services/taskdaemon-go/internal/scheduler`、`services/taskdaemon-go/internal/runner` 等边界，避免在业务代码中散落全局 logger。
+当前仓库的 logger 工厂位于 `services/taskdaemon-go/internal/logging`。实现时应把 logger 作为应用依赖注入到 `services/taskdaemon-go/internal/app`、`services/taskdaemon-go/internal/httpapi`、`services/taskdaemon-go/internal/scheduler`、`services/taskdaemon-go/internal/runner` 等边界，避免在业务代码中散落全局 logger。
 
 ---
 
@@ -24,8 +24,8 @@ taskdaemon 后端第一版使用 Go 标准库 `log/slog` 作为日志基础。�
 ## Structured Logging
 
 * 使用 `slog` 结构化字段，不拼接大段不可解析字符串。
-* 常用字段名保持稳定：`task_id`、`run_id`、`trigger`、`status`、`duration_ms`、`exit_code`、`component`、`error`。
-* request 相关日志保留 `method`、`path`、`status`、`duration_ms`，不要默认记录 body。
+* 常用字段名保持稳定：`trace_id`、`task_id`、`run_id`、`trigger`、`status`、`duration_ms`、`exit_code`、`component`、`error`。
+* request 相关日志保留 `method`、`path`、`status`、`duration_ms`、`trace_id`，不要默认记录 body。
 * runner 日志记录脚本路径、runner 类型、工作目录、退出码和耗时；stdout/stderr 内容以数据库截断历史为准，日志里只放摘要。
 * Desktop/Wails 专属日志加 `component=desktop`，不要和 HTTP API 生命周期混淆。
 
@@ -54,7 +54,11 @@ taskdaemon 后端第一版使用 Go 标准库 `log/slog` 作为日志基础。�
 
 ## Operational Notes
 
-* 日志输出默认面向本地运行和守护进程部署，优先写 stdout/stderr；文件日志和轮转不是第一版范围。
+* 日志输出由 `logging` 配置段控制，支持 `console`、`file`、`both`。
+* console 默认使用 text 格式，方便本地阅读；file 默认使用 JSON，方便采集和检索。
+* 文件日志使用 `gopkg.in/natefinch/lumberjack.v2` 轮转，只使用其原生按大小轮转、备份数量、保留天数和压缩能力，不二次开发按日期切分。
+* 文件日志路径不可写时应用应 fail fast，避免用户误以为日志已经落盘。
+* 响应头始终写入 `X-Trace-Id`；响应 body 默认写入 `traceId`，可通过 `observability.traceId.includeInResponse=false` 关闭。
 * 如果未来加入系统服务安装器，再补充 Windows Service、systemd、launchd 的日志落点规范。
 * Swagger UI/docs route 通过配置开关启用；关闭时可以记录一次 info，不要每个请求重复告警。
 

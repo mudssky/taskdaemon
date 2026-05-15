@@ -84,9 +84,11 @@ func (app *App) Serve(ctx context.Context) error {
 	server := &http.Server{
 		Addr: app.cfg.Server.Address(),
 		Handler: httpapi.NewRouter(httpapi.Options{
-			EnableSwagger: app.cfg.Server.Swagger.Enabled,
-			Auth:          auth.New(store, auth.Options{}),
-			Tasks:         taskService,
+			EnableSwagger:          app.cfg.Server.Swagger.Enabled,
+			Auth:                   auth.New(store, auth.Options{}),
+			Tasks:                  taskService,
+			Logger:                 app.logger,
+			IncludeTraceInResponse: &app.cfg.Observability.TraceID.IncludeInResponse,
 		}),
 	}
 
@@ -140,7 +142,7 @@ func (app *App) TriggerTask(ctx context.Context, taskID int, sessionToken string
 // 返回值:
 //   - error: token 缺失、请求失败或 daemon 返回非成功状态时返回错误。
 func (app *App) CancelTask(ctx context.Context, taskID int, sessionToken string) error {
-	if err := app.callTaskAction(ctx, taskID, "cancel", sessionToken, 10*time.Second, http.StatusNoContent, http.StatusOK); err != nil {
+	if err := app.callTaskAction(ctx, taskID, "cancel", sessionToken, 10*time.Second, http.StatusOK); err != nil {
 		return err
 	}
 	app.logger.Info("task cancel requested", "task_id", taskID)

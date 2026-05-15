@@ -22,8 +22,10 @@ var projectConfigFilenames = []string{
 
 // Config 保存 taskdaemon 启动阶段需要的基础配置。
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
+	Server        ServerConfig
+	Database      DatabaseConfig
+	Logging       LoggingConfig
+	Observability ObservabilityConfig
 }
 
 // ServerConfig 保存 HTTP API 与文档路由配置。
@@ -42,6 +44,39 @@ type SwaggerConfig struct {
 type DatabaseConfig struct {
 	Driver string
 	DSN    string
+}
+
+// LoggingConfig 保存应用日志输出配置。
+type LoggingConfig struct {
+	Level   string
+	Output  string
+	Console LoggingConsoleConfig
+	File    LoggingFileConfig
+}
+
+// LoggingConsoleConfig 保存控制台日志配置。
+type LoggingConsoleConfig struct {
+	Format string
+}
+
+// LoggingFileConfig 保存文件日志与轮转配置。
+type LoggingFileConfig struct {
+	Path       string
+	Format     string
+	MaxSizeMB  int
+	MaxBackups int
+	MaxAgeDays int
+	Compress   bool
+}
+
+// ObservabilityConfig 保存可观测性相关配置。
+type ObservabilityConfig struct {
+	TraceID TraceIDConfig
+}
+
+// TraceIDConfig 控制 trace id 的响应暴露行为。
+type TraceIDConfig struct {
+	IncludeInResponse bool
 }
 
 // LoadOptions 控制配置加载来源和覆盖值。
@@ -70,6 +105,26 @@ func Default() Config {
 		Database: DatabaseConfig{
 			Driver: "sqlite",
 			DSN:    defaultDatabaseDSN(),
+		},
+		Logging: LoggingConfig{
+			Level:  "info",
+			Output: "console",
+			Console: LoggingConsoleConfig{
+				Format: "text",
+			},
+			File: LoggingFileConfig{
+				Path:       "./logs/taskdaemon.log",
+				Format:     "json",
+				MaxSizeMB:  100,
+				MaxBackups: 7,
+				MaxAgeDays: 30,
+				Compress:   true,
+			},
+		},
+		Observability: ObservabilityConfig{
+			TraceID: TraceIDConfig{
+				IncludeInResponse: true,
+			},
 		},
 	}
 }
@@ -175,6 +230,26 @@ func Load(opts LoadOptions) (Config, error) {
 			Driver: k.String("database.driver"),
 			DSN:    k.String("database.dsn"),
 		},
+		Logging: LoggingConfig{
+			Level:  k.String("logging.level"),
+			Output: k.String("logging.output"),
+			Console: LoggingConsoleConfig{
+				Format: k.String("logging.console.format"),
+			},
+			File: LoggingFileConfig{
+				Path:       k.String("logging.file.path"),
+				Format:     k.String("logging.file.format"),
+				MaxSizeMB:  k.Int("logging.file.maxSizeMB"),
+				MaxBackups: k.Int("logging.file.maxBackups"),
+				MaxAgeDays: k.Int("logging.file.maxAgeDays"),
+				Compress:   k.Bool("logging.file.compress"),
+			},
+		},
+		Observability: ObservabilityConfig{
+			TraceID: TraceIDConfig{
+				IncludeInResponse: k.Bool("observability.traceId.includeInResponse"),
+			},
+		},
 	}, nil
 }
 
@@ -263,11 +338,21 @@ func existsFileOrDir(path string) bool {
 func defaultMap() map[string]any {
 	defaults := Default()
 	return map[string]any{
-		"server.host":            defaults.Server.Host,
-		"server.port":            defaults.Server.Port,
-		"server.swagger.enabled": defaults.Server.Swagger.Enabled,
-		"database.driver":        defaults.Database.Driver,
-		"database.dsn":           defaults.Database.DSN,
+		"server.host":                             defaults.Server.Host,
+		"server.port":                             defaults.Server.Port,
+		"server.swagger.enabled":                  defaults.Server.Swagger.Enabled,
+		"database.driver":                         defaults.Database.Driver,
+		"database.dsn":                            defaults.Database.DSN,
+		"logging.level":                           defaults.Logging.Level,
+		"logging.output":                          defaults.Logging.Output,
+		"logging.console.format":                  defaults.Logging.Console.Format,
+		"logging.file.path":                       defaults.Logging.File.Path,
+		"logging.file.format":                     defaults.Logging.File.Format,
+		"logging.file.maxSizeMB":                  defaults.Logging.File.MaxSizeMB,
+		"logging.file.maxBackups":                 defaults.Logging.File.MaxBackups,
+		"logging.file.maxAgeDays":                 defaults.Logging.File.MaxAgeDays,
+		"logging.file.compress":                   defaults.Logging.File.Compress,
+		"observability.traceId.includeInResponse": defaults.Observability.TraceID.IncludeInResponse,
 	}
 }
 
@@ -317,7 +402,29 @@ func envMap(prefix string) map[string]any {
 		normalized = strings.ToLower(strings.ReplaceAll(normalized, "_", "."))
 		values[normalized] = parseScalar(value)
 	}
+	applyEnvAlias(values, prefix, "LOGGING_FILE_MAX_SIZE_MB", "logging.file.maxSizeMB")
+	applyEnvAlias(values, prefix, "LOGGING_FILE_MAX_BACKUPS", "logging.file.maxBackups")
+	applyEnvAlias(values, prefix, "LOGGING_FILE_MAX_AGE_DAYS", "logging.file.maxAgeDays")
+	applyEnvAlias(values, prefix, "OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE", "observability.traceId.includeInResponse")
 	return values
+}
+
+// applyEnvAlias 为 camelCase 配置键提供自然的环境变量别名。
+//
+// 参数:
+//   - values: 已解析的环境变量配置 map。
+//   - prefix: 环境变量前缀，例如 TASKDAEMON_。
+//   - suffix: 不含前缀的环境变量名。
+//   - configKey: 对应的 koanf 点分配置键。
+//
+// 返回值:
+//   - 无。
+func applyEnvAlias(values map[string]any, prefix string, suffix string, configKey string) {
+	value, ok := os.LookupEnv(prefix + suffix)
+	if !ok {
+		return
+	}
+	values[configKey] = parseScalar(value)
 }
 
 // flattenMap 将嵌套 YAML map 转为点分键 map。

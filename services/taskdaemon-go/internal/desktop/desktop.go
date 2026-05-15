@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -25,12 +26,16 @@ type App struct {
 // 参数:
 //   - ctx: 控制 desktop 生命周期的 context。
 //   - cfg: 已加载的应用配置。
+//   - logger: 结构化 logger；为空时使用 slog.Default。
 //
 // 返回值:
 //   - error: Wails runtime 启动失败时返回错误。
-func Run(ctx context.Context, cfg config.Config) error {
+func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 	if err := ctx.Err(); err != nil {
 		return err
+	}
+	if logger == nil {
+		logger = slog.Default()
 	}
 	runCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -62,7 +67,7 @@ func Run(ctx context.Context, cfg config.Config) error {
 
 	apiErrCh := make(chan error, 1)
 	go func() {
-		err := app.New(cfg, nil).Serve(runCtx)
+		err := app.New(cfg, logger).Serve(runCtx)
 		if err != nil && !errors.Is(err, context.Canceled) {
 			cancel()
 			desktopApp.Quit()

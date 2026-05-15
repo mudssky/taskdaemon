@@ -89,7 +89,8 @@ func TestCancelTaskCallsDaemonAPIWithSessionCookie(t *testing.T) {
 			t.Fatalf("session cookie missing: %v", err)
 		}
 		sessionToken = cookie.Value
-		writer.WriteHeader(http.StatusNoContent)
+		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"ok","data":null}`))
 	}))
 	defer server.Close()
 	cfg := config.Default()
@@ -220,6 +221,11 @@ type authStatus struct {
 	Authenticated bool `json:"authenticated"`
 }
 
+type authStatusEnvelope struct {
+	Code int        `json:"code"`
+	Data authStatus `json:"data"`
+}
+
 // waitForAuthStatus 等待测试 HTTP server 返回认证状态。
 //
 // 参数:
@@ -269,11 +275,14 @@ func requestAuthStatus(client *http.Client, endpoint string) (authStatus, bool) 
 	if resp.StatusCode != http.StatusOK {
 		return authStatus{}, false
 	}
-	var status authStatus
-	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+	var envelope authStatusEnvelope
+	if err := json.NewDecoder(resp.Body).Decode(&envelope); err != nil {
 		return authStatus{}, false
 	}
-	return status, true
+	if envelope.Code != 0 {
+		return authStatus{}, false
+	}
+	return envelope.Data, true
 }
 
 // freeTCPPort 返回本机当前可用的 TCP 端口。

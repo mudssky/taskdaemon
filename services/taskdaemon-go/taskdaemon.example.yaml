@@ -25,9 +25,42 @@ database:
   # driver: postgres
   # dsn: postgres://taskdaemon:password@127.0.0.1:5432/taskdaemon?sslmode=disable
 
+logging:
+  # 支持 debug、info、warn、error。
+  level: info
+  # 支持 console、file、both。console 适合本地开发，file 会使用轮转。
+  output: console
+  console:
+    # 控制台默认 text，可读性更高。
+    format: text
+  file:
+    # 文件日志默认 JSON，便于采集和检索。
+    path: ./logs/taskdaemon.log
+    format: json
+    # lumberjack 原生轮转配置：按大小轮转，限制备份数量、保留天数和 gzip 压缩。
+    maxSizeMB: 100
+    maxBackups: 7
+    maxAgeDays: 30
+    compress: true
+
+observability:
+  traceId:
+    # 响应头始终写入 X-Trace-Id；响应体默认也写入 traceId，方便排障复制。
+    includeInResponse: true
+
 # 环境变量覆盖示例：
 # TASKDAEMON_SERVER_HOST=127.0.0.1
 # TASKDAEMON_SERVER_PORT=39245
 # TASKDAEMON_SERVER_SWAGGER_ENABLED=false
 # TASKDAEMON_DATABASE_DRIVER=sqlite
 # TASKDAEMON_DATABASE_DSN=file:taskdaemon.db?_fk=1
+# TASKDAEMON_LOGGING_LEVEL=info
+# TASKDAEMON_LOGGING_OUTPUT=both
+# TASKDAEMON_LOGGING_CONSOLE_FORMAT=text
+# TASKDAEMON_LOGGING_FILE_PATH=./logs/taskdaemon.log
+# TASKDAEMON_LOGGING_FILE_FORMAT=json
+# TASKDAEMON_LOGGING_FILE_MAX_SIZE_MB=100
+# TASKDAEMON_LOGGING_FILE_MAX_BACKUPS=7
+# TASKDAEMON_LOGGING_FILE_MAX_AGE_DAYS=30
+# TASKDAEMON_LOGGING_FILE_COMPRESS=true
+# TASKDAEMON_OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE=true

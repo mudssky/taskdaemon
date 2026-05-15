@@ -1,4 +1,5 @@
 import type {
+  ApiEnvelope,
   ApiErrorBody,
   AuthLoginResponse,
   AuthPrincipal,
@@ -12,13 +13,21 @@ export class ApiClientError extends Error {
   readonly status: number;
   readonly code: string;
   readonly details: unknown;
+  readonly traceId: string | null;
 
-  constructor(status: number, code: string, message: string, details: unknown) {
+  constructor(
+    status: number,
+    code: string,
+    message: string,
+    details: unknown,
+    traceId: string | null,
+  ) {
     super(message);
     this.name = "ApiClientError";
     this.status = status;
     this.code = code;
     this.details = details;
+    this.traceId = traceId;
   }
 }
 
@@ -53,13 +62,12 @@ async function requestJSON<T>(
       body.error?.code ?? "unknown_error",
       body.error?.message ?? response.statusText,
       body.error?.details ?? null,
+      body.traceId ?? response.headers.get("X-Trace-Id"),
     );
   }
 
-  if (response.status === 204) {
-    return undefined as T;
-  }
-  return (await response.json()) as T;
+  const body = (await response.json()) as ApiEnvelope<T>;
+  return body.data;
 }
 
 export const apiClient = {

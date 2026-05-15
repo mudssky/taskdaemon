@@ -29,7 +29,9 @@ func TestAuthMeRequiresSession(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusUnauthorized, rec.Code)
-	require.JSONEq(t, `{"error":{"code":"unauthorized","message":"Authentication required","details":null}}`, rec.Body.String())
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	require.Equal(t, "unauthorized", envelope.Error.Code)
+	require.Equal(t, "Authentication required", envelope.Message)
 }
 
 // TestLoginSetsSessionCookie 验证登录成功后 API 写入 HttpOnly session cookie。
@@ -60,9 +62,9 @@ func TestLoginSetsSessionCookie(t *testing.T) {
 	require.Equal(t, "session-token", cookies[0].Value)
 	require.True(t, cookies[0].HttpOnly)
 
-	var response map[string]any
-	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &response))
-	require.Equal(t, "csrf-token", response["csrfToken"])
+	var response loginResponse
+	decodeAPIData(t, rec.Body.Bytes(), &response)
+	require.Equal(t, "csrf-token", response.CSRFToken)
 }
 
 // TestInitializeAdminCreatesSession 验证初始化接口会创建首个管理员账号并直接写入登录态。
@@ -95,7 +97,9 @@ func TestInitializeAdminCreatesSession(t *testing.T) {
 	require.Equal(t, SessionCookieName, cookies[0].Name)
 	require.Equal(t, "session-token", cookies[0].Value)
 	require.True(t, cookies[0].HttpOnly)
-	require.JSONEq(t, `{"adminId":7,"username":"admin","csrfToken":"csrf-token"}`, rec.Body.String())
+	var response initializeAdminResponse
+	decodeAPIData(t, rec.Body.Bytes(), &response)
+	require.Equal(t, initializeAdminResponse{AdminID: 7, Username: "admin", CSRFToken: "csrf-token"}, response)
 }
 
 // TestInitializeAdminReportsMissingCredentialField 验证初始化接口会返回具体缺失字段，避免把字段错误误报成 body 错误。
@@ -114,7 +118,9 @@ func TestInitializeAdminReportsMissingCredentialField(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusBadRequest, rec.Code)
-	require.JSONEq(t, `{"error":{"code":"bad_request","message":"Password is required","details":{"field":"password"}}}`, rec.Body.String())
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	require.Equal(t, "bad_request", envelope.Error.Code)
+	require.Equal(t, "Password is required", envelope.Error.Message)
 }
 
 // TestInitializeAdminReportsMalformedBody 验证初始化接口仍会把 JSON 解析失败标记为 body 错误。
@@ -133,7 +139,9 @@ func TestInitializeAdminReportsMalformedBody(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusBadRequest, rec.Code)
-	require.JSONEq(t, `{"error":{"code":"bad_request","message":"Invalid request body","details":{"field":"body"}}}`, rec.Body.String())
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	require.Equal(t, "bad_request", envelope.Error.Code)
+	require.Equal(t, "Invalid request body", envelope.Error.Message)
 }
 
 // TestLoginReportsMissingCredentialField 验证登录接口复用认证字段校验并返回具体字段。
@@ -152,7 +160,9 @@ func TestLoginReportsMissingCredentialField(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusBadRequest, rec.Code)
-	require.JSONEq(t, `{"error":{"code":"bad_request","message":"Username is required","details":{"field":"username"}}}`, rec.Body.String())
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	require.Equal(t, "bad_request", envelope.Error.Code)
+	require.Equal(t, "Username is required", envelope.Error.Message)
 }
 
 // TestInitializeAdminRejectsRepeatedSetup 验证初始化接口会拒绝重复创建管理员。
@@ -173,7 +183,9 @@ func TestInitializeAdminRejectsRepeatedSetup(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusConflict, rec.Code)
-	require.JSONEq(t, `{"error":{"code":"admin_already_initialized","message":"Admin is already initialized","details":null}}`, rec.Body.String())
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	require.Equal(t, "admin_already_initialized", envelope.Error.Code)
+	require.Equal(t, "Admin is already initialized", envelope.Error.Message)
 }
 
 // TestAuthStatusReportsUninitialized 验证状态接口会暴露首次启动尚未初始化的状态。
@@ -191,7 +203,10 @@ func TestAuthStatusReportsUninitialized(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusOK, rec.Code)
-	require.JSONEq(t, `{"initialized":false,"authenticated":false}`, rec.Body.String())
+	var response authStatusResponse
+	decodeAPIData(t, rec.Body.Bytes(), &response)
+	require.False(t, response.Initialized)
+	require.False(t, response.Authenticated)
 }
 
 // TestAuthStatusReportsInitializedAnonymous 验证状态接口在已初始化但未登录时不返回管理员信息。
@@ -212,7 +227,10 @@ func TestAuthStatusReportsInitializedAnonymous(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusOK, rec.Code)
-	require.JSONEq(t, `{"initialized":true,"authenticated":false}`, rec.Body.String())
+	var response authStatusResponse
+	decodeAPIData(t, rec.Body.Bytes(), &response)
+	require.True(t, response.Initialized)
+	require.False(t, response.Authenticated)
 }
 
 // TestAuthStatusReportsAuthenticated 验证状态接口在已有有效 session 时返回当前管理员。
@@ -235,7 +253,12 @@ func TestAuthStatusReportsAuthenticated(t *testing.T) {
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusOK, rec.Code)
-	require.JSONEq(t, `{"initialized":true,"authenticated":true,"admin":{"adminId":7,"username":"admin"}}`, rec.Body.String())
+	var response authStatusResponse
+	decodeAPIData(t, rec.Body.Bytes(), &response)
+	require.True(t, response.Initialized)
+	require.True(t, response.Authenticated)
+	require.NotNil(t, response.Admin)
+	require.Equal(t, 7, response.Admin.AdminID)
 }
 
 // TestLogoutClearsSessionCookie 验证退出登录会删除服务端 session 并清理浏览器 Cookie。
@@ -254,12 +277,16 @@ func TestLogoutClearsSessionCookie(t *testing.T) {
 
 	router.ServeHTTP(rec, req)
 
-	require.Equal(t, http.StatusNoContent, rec.Code)
+	require.Equal(t, http.StatusOK, rec.Code)
 	require.Equal(t, "session-token", logoutToken)
 	cookies := rec.Result().Cookies()
 	require.Len(t, cookies, 1)
 	require.Equal(t, SessionCookieName, cookies[0].Name)
 	require.Equal(t, -1, cookies[0].MaxAge)
+	var envelope apiResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &envelope))
+	require.Equal(t, responseEnvelopeSuccessCode, envelope.Code)
+	require.Nil(t, envelope.Data)
 }
 
 // fakeAuthService 是 HTTP API 测试使用的认证服务替身。

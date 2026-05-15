@@ -29,9 +29,13 @@ describe("AdminSetupPanel", () => {
       async () =>
         new Response(
           JSON.stringify({
-            adminId: 7,
-            username: "admin",
-            csrfToken: "csrf-token",
+            code: 0,
+            msg: "ok",
+            data: {
+              adminId: 7,
+              username: "admin",
+              csrfToken: "csrf-token",
+            },
           }),
           { status: 201 },
         ),
