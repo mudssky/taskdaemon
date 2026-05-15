@@ -10,6 +10,7 @@ pnpm build:web
 pnpm sync:web-assets
 pnpm dev:web
 pnpm dev:backend
+pnpm dev:desktop
 pnpm desktop
 pnpm migrate
 pnpm typecheck
@@ -54,7 +55,7 @@ Swagger route 默认关闭，打开 `server.swagger.enabled` 后注册 `/swagger
 
 ## 前端嵌入
 
-前端开发期在 `apps/web` 独立运行。Desktop 壳使用 Wails v3，`services/taskdaemon-go/wails.json` 采用 v3 的嵌套 `frontend` 配置并指向 `../../apps/web`，发布前先执行 `pnpm build:web` 生成 `apps/web/dist`，再执行 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`，由 Go `embed` 边界打入二进制。`services/taskdaemon-go/web/embedded/dist` 会提交到仓库，保证干净 checkout 也能通过 Go 编译。
+前端开发期在 `apps/web` 独立运行。Desktop 壳使用 Wails v3，`services/taskdaemon-go/wails.json` 采用 v3 的嵌套 `frontend` 配置并指向 `../../apps/web`。开发桌面端时使用 `pnpm dev:desktop` 进入 Wails dev 模式：前端由 Vite 提供 HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。发布前先执行 `pnpm build:web` 生成 `apps/web/dist`，再执行 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`，由 Go `embed` 边界打入二进制。`services/taskdaemon-go/web/embedded/dist` 会提交到仓库，保证干净 checkout 也能通过 Go 编译。
 
 ## 提交前检查
 

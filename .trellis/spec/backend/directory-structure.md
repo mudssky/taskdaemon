@@ -74,6 +74,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 
 * `taskdaemon serve` 启动 HTTP API，不初始化 Wails Desktop。
 * `taskdaemon desktop` 启动 Wails v3 runtime，并加载 `services/taskdaemon-go/web/embedded` 中的同一套前端构建产物。
+* `pnpm dev:desktop` 通过 `go run github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-alpha.91 dev` 启动 Wails v3 开发模式；前端走 Vite HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
 * `taskdaemon db migrate` 是 CLI-only 入口，不初始化 Desktop。
 * `--config <path>` 是根级 persistent flag，所有子命令都应加载同一份配置。
 * 未显式传入 `--config` 时，`internal/config` 只在开发工作区里自动查找项目内配置文件，按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 的顺序匹配；非工作区环境不会自动读取当前目录同名文件，找不到时回退到 `os.UserConfigDir()/taskdaemon/config.yaml`。
@@ -111,4 +112,4 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 ## Examples
 
 * gocron 调度库 spike：`services/taskdaemon-go/internal/scheduler` 附近的测试或实验代码，结论同步到调度核心任务。
-* Web/Desktop 共用 UI：`apps/web`，Wails v3 通过 `services/taskdaemon-go/wails.json` 的嵌套 `frontend.dir = ../../apps/web` 指向开发期前端目录；发布期通过 `pnpm build:web` + `pnpm sync:web-assets` 将构建产物同步到 `services/taskdaemon-go/web/embedded/dist`。
+* Web/Desktop 共用 UI：`apps/web`，Wails v3 通过 `services/taskdaemon-go/wails.json` 的嵌套 `frontend.dir = ../../apps/web` 指向开发期前端目录；开发桌面壳使用 `pnpm dev:desktop`，发布期通过 `pnpm build:web` + `pnpm sync:web-assets` 将构建产物同步到 `services/taskdaemon-go/web/embedded/dist`。

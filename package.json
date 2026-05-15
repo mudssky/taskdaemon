@@ -7,6 +7,7 @@
     "build:web": "pnpm --filter @taskdaemon/web build",
     "build:backend": "pnpm --filter @taskdaemon/service-go build",
     "dev:backend": "pnpm --filter @taskdaemon/service-go dev",
+    "dev:desktop": "pnpm --filter @taskdaemon/service-go dev:desktop",
     "desktop": "pnpm --filter @taskdaemon/service-go desktop",
     "migrate": "pnpm --filter @taskdaemon/service-go migrate",
     "sync:web-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-web-assets.ps1",
