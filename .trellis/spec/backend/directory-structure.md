@@ -76,13 +76,14 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 
 * `taskdaemon serve` 启动 HTTP API，不初始化 Wails Desktop。
 * `taskdaemon desktop` 启动 Wails v3 runtime，并加载 `services/taskdaemon-go/web/embedded` 中的同一套前端构建产物。
-* `pnpm dev:desktop` 通过 `go tool wails3 dev -config ./build/config.yml` 启动 Wails v3 开发模式；前端走 Vite HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
+* `pnpm dev:desktop` 通过 `go tool wails3 dev -config ./build/config.yml -port 9245` 启动 Wails v3 开发模式；前端走 Vite HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
 * `taskdaemon db migrate` 是 CLI-only 入口，不初始化 Desktop。
 * `--config <path>` 是根级 persistent flag，所有子命令都应加载同一份配置。
 * 未显式传入 `--config` 时，`internal/config` 只在开发工作区里自动查找项目内配置文件，按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 的顺序匹配；非工作区环境不会自动读取当前目录同名文件，找不到时回退到 `os.UserConfigDir()/taskdaemon/config.yaml`。
 * 显式 `--config <path>` 只读取指定文件，不再叠加项目内配置文件。
 * 默认配置路径为 `os.UserConfigDir()/taskdaemon/config.yaml`。
 * 配置示例归属 Go service 边界，放在 `services/taskdaemon-go/taskdaemon.example.yaml`；开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml`，发布时复制到用户配置目录或通过 `--config` 显式指定。
+* 开发默认端口固定为前端 `127.0.0.1:9245`、后端 `127.0.0.1:39245`。端口冲突时应 fail fast，不自动漂移；并行多实例通过 `TASKDAEMON_SERVER_PORT`、配置文件 `server.port`、Wails `-port`、`TASKDAEMON_WEB_PORT` 和前端代理目标环境变量显式覆盖。
 * `/api/health` 是后端探活 endpoint；Swagger route 默认关闭，只在 `server.swagger.enabled=true` 时注册。
 
 ---

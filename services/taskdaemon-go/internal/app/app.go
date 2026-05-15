@@ -106,6 +106,9 @@ func (app *App) Serve(ctx context.Context) error {
 		if errors.Is(err, http.ErrServerClosed) {
 			return nil
 		}
+		if isAddressInUse(err) {
+			return fmt.Errorf("http api address %s is already in use; stop the process using it or set TASKDAEMON_SERVER_PORT / server.port to an explicit alternate port: %w", server.Addr, err)
+		}
 		return err
 	}
 }
@@ -238,4 +241,23 @@ func daemonClientAddress(server config.ServerConfig) string {
 		host = "127.0.0.1"
 	}
 	return net.JoinHostPort(host, strconv.Itoa(server.Port))
+}
+
+// isAddressInUse 判断 HTTP server 启动错误是否为监听地址已被占用。
+//
+// 参数:
+//   - err: server 启动返回的错误。
+//
+// 返回值:
+//   - bool: true 表示错误来自地址占用。
+func isAddressInUse(err error) bool {
+	var opErr *net.OpError
+	if !errors.As(err, &opErr) {
+		return false
+	}
+	if opErr.Op != "listen" {
+		return false
+	}
+	return strings.Contains(strings.ToLower(opErr.Err.Error()), "address already in use") ||
+		strings.Contains(strings.ToLower(opErr.Err.Error()), "only one usage of each socket address")
 }

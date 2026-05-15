@@ -57,8 +57,8 @@ services/
 * `apps/web/src/lib/api` 放 API client 和后端 DTO 映射；后续接 OpenAPI 生成时仍保持前端调用点稳定。
 * `apps/web/src/lib` 中的通用工具必须有明确复用场景；只被单个 feature 使用的逻辑留在 feature 内。
 * `apps/web/dist` 是 Vite 构建输出，受 `.gitignore` 管理；发布前用 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`，该目录由 Go embed 编译进二进制并需要提交，保证干净 checkout 也能通过 Go 编译。
-* `services/taskdaemon-go/wails.json` 使用 Wails v3 嵌套配置：`frontend.dir = ../../apps/web`、`frontend.devServerUrl = http://127.0.0.1:5173`；不要恢复成 Wails 默认 `frontend/` 目录，也不要退回 v2 的 `frontend:*` 扁平键。桌面开发使用 `pnpm dev:desktop` 进入 Wails dev 模式，实际 dev watcher 配置在 `services/taskdaemon-go/build/config.yml`，前端仍由 Vite 提供 HMR。
-* `apps/web/vite.config.ts` 的普通开发端口保持 `5173`；Wails dev 会注入 `WAILS_VITE_PORT`，Vite 需要优先使用该端口，并在该场景下启用 strict port，避免 Wails 代理地址与实际 Vite 端口漂移。
+* `services/taskdaemon-go/wails.json` 使用 Wails v3 嵌套配置：`frontend.dir = ../../apps/web`、`frontend.devServerUrl = http://127.0.0.1:9245`；不要恢复成 Wails 默认 `frontend/` 目录，也不要退回 v2 的 `frontend:*` 扁平键。桌面开发使用 `pnpm dev:desktop` 进入 Wails dev 模式，实际 dev watcher 配置在 `services/taskdaemon-go/build/config.yml`，前端仍由 Vite 提供 HMR。
+* `apps/web/vite.config.ts` 的普通开发端口固定为 `9245`，Vite proxy 默认转发 `/api` 到 `http://127.0.0.1:39245`。Wails dev 会注入 `WAILS_VITE_PORT`，Vite 需要优先使用该端口；所有开发模式都启用 strict port，端口冲突时直接失败，不自动漂移到随机端口。并行多实例通过 `TASKDAEMON_WEB_PORT`、Wails `-port`、`TASKDAEMON_API_ORIGIN` 或 `VITE_TASKDAEMON_API_ORIGIN` 显式覆盖。
 * TypeScript 6 会检查 CSS side-effect import 的类型声明；`apps/web/src/vite-env.d.ts` 必须保留 `/// <reference types="vite/client" />`，否则 `import "./styles.css"` 会在 `tsc --noEmit` 下失败。
 
 ---

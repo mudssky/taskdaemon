@@ -164,6 +164,42 @@ func TestServeMigratesEmptySQLiteBeforeRegisteringTasks(t *testing.T) {
 	}
 }
 
+// TestServeReportsPortConflictWithOverrideHint 验证固定端口被占用时返回可操作的覆盖提示。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestServeReportsPortConflictWithOverrideHint(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen occupied port: %v", err)
+	}
+	defer listener.Close()
+
+	cfg := config.Default()
+	cfg.Server.Host = "127.0.0.1"
+	cfg.Server.Port = listener.Addr().(*net.TCPAddr).Port
+	cfg.Database = config.DatabaseConfig{
+		Driver: "sqlite",
+		DSN:    "file:" + filepath.Join(t.TempDir(), "taskdaemon.db") + "?_fk=1",
+	}
+
+	err = New(cfg, discardLogger()).Serve(context.Background())
+
+	if err == nil {
+		t.Fatal("serve should fail when fixed port is occupied")
+	}
+	message := err.Error()
+	if !strings.Contains(message, cfg.Server.Address()) {
+		t.Fatalf("error = %q, want occupied address", message)
+	}
+	if !strings.Contains(message, "TASKDAEMON_SERVER_PORT") {
+		t.Fatalf("error = %q, want TASKDAEMON_SERVER_PORT override hint", message)
+	}
+}
+
 // TestDaemonClientAddressUsesLoopbackForWildcardHost 验证 wildcard 监听地址会转换为 CLI 可访问的 loopback 地址。
 //
 // 参数:
@@ -172,10 +208,10 @@ func TestServeMigratesEmptySQLiteBeforeRegisteringTasks(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
 func TestDaemonClientAddressUsesLoopbackForWildcardHost(t *testing.T) {
-	address := daemonClientAddress(config.ServerConfig{Host: "0.0.0.0", Port: 8080})
+	address := daemonClientAddress(config.ServerConfig{Host: "0.0.0.0", Port: 39245})
 
-	if address != "127.0.0.1:8080" {
-		t.Fatalf("address = %s, want 127.0.0.1:8080", address)
+	if address != "127.0.0.1:39245" {
+		t.Fatalf("address = %s, want 127.0.0.1:39245", address)
 	}
 }
 

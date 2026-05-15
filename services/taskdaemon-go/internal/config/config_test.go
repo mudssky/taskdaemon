@@ -101,7 +101,7 @@ func TestLoadDefaultsWhenConfigFileIsMissing(t *testing.T) {
 	if cfg.Server.Host != "127.0.0.1" {
 		t.Fatalf("server host = %s, want default", cfg.Server.Host)
 	}
-	if cfg.Server.Port != 8080 {
+	if cfg.Server.Port != 39245 {
 		t.Fatalf("server port = %d, want default", cfg.Server.Port)
 	}
 	if cfg.Database.Driver != "sqlite" {
@@ -205,7 +205,7 @@ database:
 		t.Fatalf("load config: %v", err)
 	}
 
-	if cfg.Server.Port != 8080 {
+	if cfg.Server.Port != 39245 {
 		t.Fatalf("server port = %d, want default", cfg.Server.Port)
 	}
 	if cfg.Database.Driver != "sqlite" {

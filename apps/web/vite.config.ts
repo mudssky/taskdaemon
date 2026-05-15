@@ -1,7 +1,25 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
-const wailsVitePort = Number.parseInt(process.env.WAILS_VITE_PORT ?? "", 10);
+const defaultWebPort = 9245;
+const defaultApiOrigin = "http://127.0.0.1:39245";
+
+const webPort =
+  parsePort(process.env.WAILS_VITE_PORT) ??
+  parsePort(process.env.TASKDAEMON_WEB_PORT) ??
+  defaultWebPort;
+const apiOrigin =
+  process.env.TASKDAEMON_API_ORIGIN ??
+  process.env.VITE_TASKDAEMON_API_ORIGIN ??
+  defaultApiOrigin;
+
+function parsePort(value: string | undefined) {
+  if (value === undefined || value.trim() === "") {
+    return undefined;
+  }
+  const parsed = Number.parseInt(value, 10);
+  return Number.isNaN(parsed) ? undefined : parsed;
+}
 
 export default defineConfig({
   plugins: [react()],
@@ -12,10 +30,10 @@ export default defineConfig({
   },
   server: {
     host: "127.0.0.1",
-    port: Number.isNaN(wailsVitePort) ? 5173 : wailsVitePort,
-    strictPort: !Number.isNaN(wailsVitePort),
+    port: webPort,
+    strictPort: true,
     proxy: {
-      "/api": "http://127.0.0.1:8080",
+      "/api": apiOrigin,
     },
   },
   build: {

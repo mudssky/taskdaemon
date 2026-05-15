@@ -54,7 +54,9 @@ Swagger route 默认关闭，打开 `server.swagger.enabled` 后注册 `/swagger
 
 ## 前端嵌入
 
-前端开发期在 `apps/web` 独立运行。普通 Web 开发使用 `pnpm dev:web`，Vite 默认监听 `127.0.0.1:5173`。Desktop 壳使用 Wails v3，开发桌面端时使用 `pnpm dev:desktop` 进入 Wails dev 模式：Wails 读取 `services/taskdaemon-go/build/config.yml`，后台启动 Vite，前端由 Vite 提供 HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
+前端开发期在 `apps/web` 独立运行。普通 Web 开发使用 `pnpm dev:web`，Vite 默认固定监听 `127.0.0.1:9245`，并通过 Vite proxy 转发 `/api` 到后端默认 `http://127.0.0.1:39245`。Desktop 壳使用 Wails v3，开发桌面端时使用 `pnpm dev:desktop` 进入 Wails dev 模式：Wails 读取 `services/taskdaemon-go/build/config.yml`，后台启动 Vite，前端由 Vite 提供 HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
+
+开发端口采用稳定地址优先策略：前端 `9245`、后端 `39245`。端口冲突时不会自动漂移到随机端口，而是直接失败，避免浏览器、Wails 和 API proxy 指向不同实例。确实需要并行多实例时，可以显式覆盖：前端设置 `TASKDAEMON_WEB_PORT` 或 Wails `-port`，后端设置 `TASKDAEMON_SERVER_PORT` 或配置文件 `server.port`，前端 API 代理设置 `TASKDAEMON_API_ORIGIN` 或 `VITE_TASKDAEMON_API_ORIGIN`。
 
 `services/taskdaemon-go/package.json` 通过 `go tool wails3` 调用 Wails CLI，实际 Wails 版本由 `services/taskdaemon-go/go.mod` 的 `github.com/wailsapp/wails/v3` 与 `tool github.com/wailsapp/wails/v3/cmd/wails3` 管理。升级 Wails 时在 Go module 内更新依赖即可，脚本不需要同步改 `@version`。
 

@@ -62,7 +62,7 @@ func Default() Config {
 	return Config{
 		Server: ServerConfig{
 			Host: "127.0.0.1",
-			Port: 8080,
+			Port: 39245,
 			Swagger: SwaggerConfig{
 				Enabled: false,
 			},

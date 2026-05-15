@@ -388,3 +388,11 @@
 **Decision**: 默认配置示例放在 `services/taskdaemon-go/taskdaemon.example.yaml`。开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml`，发布时复制到用户配置目录或通过 `--config` 显式指定。
 
 **Consequences**: 示例配置和 Go service 启动目录保持一致；仓库根目录不承担运行配置语义。
+
+### Decision (ADR-lite): 开发端口固定且冲突时不自动漂移
+
+**Context**: 首次创建管理员时出现 `/api/auth/init` 请求体无效的表象，排查后发现后端 handler 可直接处理同样 JSON，更可能是前端开发代理仍指向旧后端端口，导致浏览器、Vite proxy 和 Wails API 实例不一致。
+
+**Decision**: 开发期默认固定前端端口 `9245`、后端端口 `39245`。Vite proxy 默认转发 `/api` 到 `http://127.0.0.1:39245`；所有 Vite dev 模式启用 strict port。端口冲突时 fail fast 并提示显式覆盖方式，不自动换到随机端口。并行多实例通过 `TASKDAEMON_WEB_PORT`、Wails `-port`、`TASKDAEMON_API_ORIGIN` / `VITE_TASKDAEMON_API_ORIGIN`、`TASKDAEMON_SERVER_PORT` 或 `server.port` 显式配置。
+
+**Consequences**: 日常开发地址稳定，`/api` 代理不会悄悄连到旧实例；代价是端口被占用时需要开发者停止占用进程或显式指定备用端口。后端端口占用错误需要返回包含监听地址和覆盖方式的可操作提示。
