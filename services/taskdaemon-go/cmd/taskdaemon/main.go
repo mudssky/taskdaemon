@@ -54,6 +54,12 @@ func run(ctx context.Context, logger *slog.Logger, args []string) error {
 			DBMigrate: func(ctx context.Context, cfg config.Config) error {
 				return app.New(cfg, logger).MigrateSchema(ctx)
 			},
+			TaskTrigger: func(ctx context.Context, cfg config.Config, taskID int) error {
+				return app.New(cfg, logger).TriggerTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
+			},
+			TaskCancel: func(ctx context.Context, cfg config.Config, taskID int) error {
+				return app.New(cfg, logger).CancelTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
+			},
 		},
 	})
 }

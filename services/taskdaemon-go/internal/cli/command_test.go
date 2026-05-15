@@ -129,6 +129,138 @@ func TestDesktopCommandUsesDesktopHook(t *testing.T) {
 	}
 }
 
+// TestTaskTriggerCommandLoadsConfigAndRunsHook 验证 task trigger 会加载配置并调用手动触发 hook。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestTaskTriggerCommandLoadsConfigAndRunsHook(t *testing.T) {
+	var triggeredID int
+	var sessionToken string
+	err := Execute(context.Background(), Options{
+		Args:       []string{"--session-token", "session-token", "task", "trigger", "42"},
+		Stdout:     &bytes.Buffer{},
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+		Hooks: Hooks{
+			TaskTrigger: func(ctx context.Context, _ config.Config, taskID int) error {
+				triggeredID = taskID
+				sessionToken = SessionTokenFromContext(ctx)
+				return nil
+			},
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("execute task trigger: %v", err)
+	}
+	if triggeredID != 42 {
+		t.Fatalf("triggered task ID = %d, want 42", triggeredID)
+	}
+	if sessionToken != "session-token" {
+		t.Fatalf("session token = %s, want session-token", sessionToken)
+	}
+}
+
+// TestTaskCancelCommandLoadsConfigAndRunsHook 验证 task cancel 会加载配置并调用取消 hook。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestTaskCancelCommandLoadsConfigAndRunsHook(t *testing.T) {
+	var cancelledID int
+	var sessionToken string
+	err := Execute(context.Background(), Options{
+		Args:       []string{"--session-token", "session-token", "task", "cancel", "42"},
+		Stdout:     &bytes.Buffer{},
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+		Hooks: Hooks{
+			TaskCancel: func(ctx context.Context, _ config.Config, taskID int) error {
+				cancelledID = taskID
+				sessionToken = SessionTokenFromContext(ctx)
+				return nil
+			},
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("execute task cancel: %v", err)
+	}
+	if cancelledID != 42 {
+		t.Fatalf("cancelled task ID = %d, want 42", cancelledID)
+	}
+	if sessionToken != "session-token" {
+		t.Fatalf("session token = %s, want session-token", sessionToken)
+	}
+}
+
+// TestTaskCancelCommandReadsSessionTokenFromEnv 验证 task cancel 可从环境变量读取 session token。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestTaskCancelCommandReadsSessionTokenFromEnv(t *testing.T) {
+	t.Setenv("TASKDAEMON_SESSION_TOKEN", "env-session-token")
+	var sessionToken string
+	err := Execute(context.Background(), Options{
+		Args:       []string{"task", "cancel", "42"},
+		Stdout:     &bytes.Buffer{},
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+		Hooks: Hooks{
+			TaskCancel: func(ctx context.Context, _ config.Config, _ int) error {
+				sessionToken = SessionTokenFromContext(ctx)
+				return nil
+			},
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("execute task cancel: %v", err)
+	}
+	if sessionToken != "env-session-token" {
+		t.Fatalf("session token = %s, want env-session-token", sessionToken)
+	}
+}
+
+// TestSessionTokenFromContextPrefersFlag 验证 flag token 优先于环境变量。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestSessionTokenFromContextPrefersFlag(t *testing.T) {
+	t.Setenv("TASKDAEMON_SESSION_TOKEN", "env-session-token")
+	ctx := withSessionToken(context.Background(), "flag-session-token")
+
+	if got := SessionTokenFromContext(ctx); got != "flag-session-token" {
+		t.Fatalf("session token = %s, want flag-session-token", got)
+	}
+}
+
+// TestSessionTokenFromContextReturnsEmptyWhenUnset 验证未配置时不伪造 session token。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestSessionTokenFromContextReturnsEmptyWhenUnset(t *testing.T) {
+	t.Setenv("TASKDAEMON_SESSION_TOKEN", "")
+
+	if got := SessionTokenFromContext(context.Background()); got != "" {
+		t.Fatalf("session token = %s, want empty", got)
+	}
+}
+
 // staticConfigLoader 返回测试使用的静态配置加载函数。
 //
 // 参数:

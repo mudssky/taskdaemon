@@ -4,13 +4,20 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"log/slog"
+	"net"
 	"net/http"
+	"strconv"
+	"strings"
+	"time"
 
 	"taskdaemon/internal/auth"
 	"taskdaemon/internal/config"
 	"taskdaemon/internal/data"
 	"taskdaemon/internal/httpapi"
+	"taskdaemon/internal/runner"
+	"taskdaemon/internal/scheduler"
 )
 
 // App 组合 taskdaemon 的共享后端能力。
@@ -55,11 +62,27 @@ func (app *App) Serve(ctx context.Context) error {
 		}
 	}()
 
+	taskService := scheduler.NewService(store, scheduler.Options{
+		Runner: runner.NewExecutor(),
+	})
+	if err := taskService.RegisterEnabledTasks(ctx); err != nil {
+		return fmt.Errorf("register enabled tasks: %w", err)
+	}
+	if err := taskService.Start(); err != nil {
+		return fmt.Errorf("start scheduler: %w", err)
+	}
+	defer func() {
+		if err := taskService.Shutdown(); err != nil {
+			app.logger.Warn("shutdown scheduler failed", "component", "scheduler", "error", err)
+		}
+	}()
+
 	server := &http.Server{
 		Addr: app.cfg.Server.Address(),
 		Handler: httpapi.NewRouter(httpapi.Options{
 			EnableSwagger: app.cfg.Server.Swagger.Enabled,
 			Auth:          auth.New(store, auth.Options{}),
+			Tasks:         taskService,
 		}),
 	}
 
@@ -81,6 +104,80 @@ func (app *App) Serve(ctx context.Context) error {
 		}
 		return err
 	}
+}
+
+// TriggerTask 通过正在运行的 daemon HTTP API 手动触发任务。
+//
+// 参数:
+//   - ctx: 控制 HTTP 请求和任务执行生命周期的 context。
+//   - taskID: 任务 ID。
+//   - sessionToken: 管理员 session token，会作为 session cookie 发送。
+//
+// 返回值:
+//   - error: token 缺失、请求失败或 daemon 返回非成功状态时返回错误。
+func (app *App) TriggerTask(ctx context.Context, taskID int, sessionToken string) error {
+	if err := app.callTaskAction(ctx, taskID, "trigger", sessionToken, 0, http.StatusOK); err != nil {
+		return err
+	}
+	app.logger.Info("task trigger requested", "task_id", taskID)
+	return nil
+}
+
+// CancelTask 通过正在运行的 daemon HTTP API 取消任务。
+//
+// 参数:
+//   - ctx: 控制 HTTP 请求生命周期的 context。
+//   - taskID: 任务 ID。
+//   - sessionToken: 管理员 session token，会作为 session cookie 发送。
+//
+// 返回值:
+//   - error: token 缺失、请求失败或 daemon 返回非成功状态时返回错误。
+func (app *App) CancelTask(ctx context.Context, taskID int, sessionToken string) error {
+	if err := app.callTaskAction(ctx, taskID, "cancel", sessionToken, 10*time.Second, http.StatusNoContent, http.StatusOK); err != nil {
+		return err
+	}
+	app.logger.Info("task cancel requested", "task_id", taskID)
+	return nil
+}
+
+// callTaskAction 调用 daemon HTTP API 中的任务动作端点。
+//
+// 参数:
+//   - ctx: 控制 HTTP 请求生命周期的 context。
+//   - taskID: 任务 ID。
+//   - action: 动作名称，例如 trigger 或 cancel。
+//   - sessionToken: 管理员 session token。
+//   - clientTimeout: HTTP client timeout；0 表示只使用 ctx 控制。
+//   - successStatuses: 视为成功的 HTTP 状态码。
+//
+// 返回值:
+//   - error: token 缺失、请求失败或 daemon 返回非成功状态时返回错误。
+func (app *App) callTaskAction(ctx context.Context, taskID int, action string, sessionToken string, clientTimeout time.Duration, successStatuses ...int) error {
+	sessionToken = strings.TrimSpace(sessionToken)
+	if sessionToken == "" {
+		return fmt.Errorf("task %s requires --session-token or TASKDAEMON_SESSION_TOKEN", action)
+	}
+
+	endpoint := fmt.Sprintf("http://%s/api/tasks/%d/%s", daemonClientAddress(app.cfg.Server), taskID, action)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, endpoint, nil)
+	if err != nil {
+		return fmt.Errorf("create %s request: %w", action, err)
+	}
+	req.AddCookie(&http.Cookie{Name: httpapi.SessionCookieName, Value: sessionToken})
+
+	client := &http.Client{Timeout: clientTimeout}
+	resp, err := client.Do(req)
+	if err != nil {
+		return fmt.Errorf("call daemon %s API: %w", action, err)
+	}
+	defer resp.Body.Close()
+	for _, status := range successStatuses {
+		if resp.StatusCode == status {
+			return nil
+		}
+	}
+	body, _ := io.ReadAll(io.LimitReader(resp.Body, 512))
+	return fmt.Errorf("daemon %s API returned %s: %s", action, resp.Status, strings.TrimSpace(string(body)))
 }
 
 // MigrateSchema 对当前配置数据库执行 schema migration。
@@ -107,4 +204,19 @@ func (app *App) MigrateSchema(ctx context.Context) error {
 	}
 	app.logger.Info("schema migration completed", "driver", app.cfg.Database.Driver)
 	return nil
+}
+
+// daemonClientAddress 返回 CLI 访问本机 daemon API 时使用的地址。
+//
+// 参数:
+//   - server: server 监听配置。
+//
+// 返回值:
+//   - string: host:port 格式客户端地址。
+func daemonClientAddress(server config.ServerConfig) string {
+	host := strings.TrimSpace(server.Host)
+	if host == "" || host == "0.0.0.0" || host == "::" || host == "[::]" {
+		host = "127.0.0.1"
+	}
+	return net.JoinHostPort(host, strconv.Itoa(server.Port))
 }
