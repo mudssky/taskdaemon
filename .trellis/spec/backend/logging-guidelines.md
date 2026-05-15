@@ -58,11 +58,13 @@ taskdaemon 后端第一版使用 Go 标准库 `log/slog` 作为日志基础。�
 ## Operational Notes
 
 * 日志输出由 `logging` 配置段控制，支持 `console`、`file`、`both`。
-* console 默认使用 text 格式，方便本地阅读；file 默认使用 JSON，方便采集和检索。
+* console 默认使用 text 格式，但由项目自定义 pretty handler 输出，方便本地阅读；file 默认使用 JSON，方便采集和检索。
+* console 中 `http request` 使用访问日志风格单行输出：`WARN 15:04:05 POST /api/auth/init 400 3ms trace=<id> req=<body> res=<body>`。body map 必须格式化为紧凑 JSON，不能出现 Go 默认 `map[...]` 文本。
 * 文件日志使用 `gopkg.in/natefinch/lumberjack.v2` 轮转，只使用其原生按大小轮转、备份数量、保留天数和压缩能力，不二次开发按日期切分。
 * 文件日志路径不可写时应用应 fail fast，避免用户误以为日志已经落盘。
 * 响应头始终写入 `X-Trace-Id`；响应 body 默认写入 `traceId`，可通过 `observability.traceId.includeInResponse=false` 关闭。
 * 本地开发排查 body 时，优先把 `logging.http` 覆盖写入 `taskdaemon.local.yaml`，不要提交带 body 日志开关的共享配置。
+* 运行中的 daemon 支持通过 `taskdaemon config reload` 热更新 `logging.http` 与 `observability.traceId`；`logging.level`、`logging.output`、文件路径和轮转配置仍需重启，避免运行中替换 handler/文件句柄导致日志丢失。
 * 如果未来加入系统服务安装器，再补充 Windows Service、systemd、launchd 的日志落点规范。
 * Swagger UI/docs route 通过配置开关启用；关闭时可以记录一次 info，不要每个请求重复告警。
 

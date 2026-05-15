@@ -29,6 +29,8 @@ type Options struct {
 	Logger                 *slog.Logger
 	IncludeTraceInResponse *bool
 	HTTPLog                config.LoggingHTTPConfig
+	RuntimeConfig          *RuntimeConfig
+	ReloadConfig           func(context.Context) (config.ReloadResult, error)
 }
 
 // AuthService 定义 HTTP handler 依赖的认证服务能力。
@@ -64,9 +66,10 @@ func NewRouter(opts Options) http.Handler {
 	router := gin.New()
 
 	logger := loggerOrDefault(opts.Logger)
+	runtimeConfig := runtimeConfigOption(opts)
 	router.Use(traceIDMiddleware())
-	router.Use(responseOptionsMiddleware(includeTraceInResponseOption(opts.IncludeTraceInResponse)))
-	router.Use(requestLoggerMiddleware(logger, opts.HTTPLog))
+	router.Use(responseOptionsMiddleware(runtimeConfig))
+	router.Use(requestLoggerMiddleware(logger, runtimeConfig))
 	router.Use(recoveryMiddleware())
 
 	router.GET("/api/health", func(ctx *gin.Context) {
@@ -75,6 +78,7 @@ func NewRouter(opts Options) http.Handler {
 
 	registerAuthRoutes(router, opts.Auth)
 	registerTaskRoutes(router, opts.Auth, opts.Tasks)
+	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig)
 
 	if opts.EnableSwagger {
 		router.GET("/swagger/index.html", func(ctx *gin.Context) {
@@ -111,4 +115,21 @@ func includeTraceInResponseOption(value *bool) bool {
 		return true
 	}
 	return *value
+}
+
+// runtimeConfigOption 返回 router 使用的运行时配置。
+//
+// 参数:
+//   - opts: router 可选能力。
+//
+// 返回值:
+//   - *RuntimeConfig: 可供 middleware 读取的运行时配置。
+func runtimeConfigOption(opts Options) *RuntimeConfig {
+	if opts.RuntimeConfig != nil {
+		return opts.RuntimeConfig
+	}
+	cfg := config.Default()
+	cfg.Logging.HTTP = opts.HTTPLog
+	cfg.Observability.TraceID.IncludeInResponse = includeTraceInResponseOption(opts.IncludeTraceInResponse)
+	return NewRuntimeConfig(cfg)
 }

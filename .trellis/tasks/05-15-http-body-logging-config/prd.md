@@ -15,6 +15,10 @@
 * body 字段沿用日志生态推荐的 snake_case 命名。
 * 在开发工作区未显式传 `--config` 时，支持自动叠加本地配置文件：`taskdaemon.local.yaml`、`taskdaemon.local.yml`、`config.local.yaml`、`config.local.yml`。
 * 本地配置加载顺序为 `defaults < base config < local config < env < overrides`；显式 `--config` 时不自动叠加 local 文件。
+* 需要讨论配置变更生效机制：支持实时生效或通过命令触发重载，避免每次改日志开关都重启 daemon。
+* 需要完善 `config` 子命令，让用户能查看/定位/校验配置。
+* 需要优化 console 日志可读性；当前 `slog.TextHandler` 会输出 `time=... level=... msg=... request_body="" response_body="map[...]"`，人工阅读体验较差。
+* 需要增加开发期运行 CLI 的 package scripts，方便直接测试 `taskdaemon config ...` 等子命令。
 
 ## Acceptance Criteria
 
@@ -25,6 +29,10 @@
 * [ ] 请求体被日志读取后，业务 handler 仍能正常读取原请求体。
 * [ ] 项目内 `.local.yaml/.local.yml` 能覆盖基础项目配置，且环境变量仍然优先。
 * [ ] 显式 `--config` 时不会额外加载项目 local 配置。
+* [ ] 配置变更生效方式有明确 MVP 范围和不可热更新项说明。
+* [ ] `config` 子命令覆盖查看配置路径、打印合并后配置、校验配置这类基础排障能力。
+* [ ] console 日志对 HTTP 请求使用更适合人工阅读的格式，尤其是 body/envelope 不再打印成 Go map 字符串。
+* [ ] package scripts 支持从 workspace 根目录直接透传 CLI 参数，并支持安装本地 CLI 二进制。
 * [ ] 现有 Go 测试、vet 通过。
 
 ## Definition of Done
@@ -44,6 +52,15 @@
 * 响应体：包装 `gin.ResponseWriter`，透传写入同时缓存最多 N+1 字节。
 * 日志输出前对 body 进行截断和 JSON 字段脱敏。
 * 配置加载层在发现项目基础配置后，按约定查找同目录 local 配置并叠加。
+* 配置重载候选方向：
+  * 推荐 MVP：`taskdaemon config reload` 通过 daemon HTTP 管理端点触发重载，仅应用运行时安全配置，例如 logging/observability；server/database 等需要重启。
+  * 备选：文件监听自动热加载，开发体验更顺，但跨平台 watcher、错误回滚和日志噪音更复杂。
+* `config` 子命令候选能力：`path`、`show`、`validate`、`reload`。
+* console 日志候选方向：保留 file JSON；console 使用自定义 pretty handler 或 HTTP request 专用格式化输出，body JSON 以紧凑 JSON 字符串展示。
+* package scripts 候选方向：
+  * `pnpm cli -- <args>`：开发期直接 `go run ./cmd/taskdaemon <args>`，不需要安装。
+  * `pnpm install:cli`：执行 `go install ./cmd/taskdaemon`，把当前版本安装到 `GOBIN` / `GOPATH/bin`。
+  * `pnpm build:backend`：继续输出到仓库 `build/bin/taskdaemon`，适合固定路径调试。
 
 ## Out of Scope
 
@@ -52,6 +69,8 @@
 * 不改变现有响应 envelope 结构。
 * 不调整日志轮转策略。
 * 不让显式 `--config` 自动发现旁边的 `.local.yaml`。
+* 不让 server host/port、database driver/dsn 在运行中无缝热切换；这些配置变更需要重启。
+* 不在本任务里实现系统级 service 安装器；这里只处理开发期 CLI 运行/安装脚本。
 
 ## Technical Notes
 
@@ -61,3 +80,8 @@
   * `services/taskdaemon-go/internal/config/config.go`
   * `services/taskdaemon-go/internal/logging/logger.go`
 * 用户偏好：默认文件日志 JSON、console 可读格式；body 日志默认关闭，开发/排障时按配置打开。
+* 当前代码事实：
+  * `internal/cli` 暂无 `config` 子命令。
+  * `internal/config.Load` 只在命令启动时加载一次配置。
+  * `internal/logging.New` 的 console text handler 会把结构化 map 以 Go 文本形式打印，`response_body=map[...]` 可读性差。
+  * 根 `package.json` 已有 `dev:backend`/`build:backend`，service `package.json` 已有 `dev`/`build`，但缺少任意 CLI 参数透传和 `go install` 脚本。

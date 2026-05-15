@@ -43,13 +43,13 @@ func run(ctx context.Context, args []string) error {
 	return cli.Execute(ctx, cli.Options{
 		Args: args,
 		Hooks: cli.Hooks{
-			Serve: func(ctx context.Context, cfg config.Config) error {
+			Serve: func(ctx context.Context, cfg config.Config, loadOptions config.LoadOptions) error {
 				logger, err := logging.New(cfg.Logging, logging.Options{})
 				if err != nil {
 					return err
 				}
 				defer logger.Close()
-				return app.New(cfg, logger.Logger).Serve(ctx)
+				return app.New(cfg, logger.Logger).WithConfigReload(config.Load, loadOptions).Serve(ctx)
 			},
 			Desktop: func(ctx context.Context, cfg config.Config) error {
 				logger, err := logging.New(cfg.Logging, logging.Options{})
@@ -82,6 +82,14 @@ func run(ctx context.Context, args []string) error {
 				}
 				defer logger.Close()
 				return app.New(cfg, logger.Logger).CancelTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
+			},
+			ConfigReload: func(ctx context.Context, cfg config.Config) (config.ReloadResult, error) {
+				logger, err := logging.New(cfg.Logging, logging.Options{})
+				if err != nil {
+					return config.ReloadResult{}, err
+				}
+				defer logger.Close()
+				return app.New(cfg, logger.Logger).ReloadDaemonConfig(ctx, cli.SessionTokenFromContext(ctx))
 			},
 		},
 	})

@@ -124,8 +124,8 @@ func TestRecoveryMiddlewareUsesAPIEnvelope(t *testing.T) {
 	logger := slog.New(slog.NewTextHandler(&logs, nil))
 	router := gin.New()
 	router.Use(traceIDMiddleware())
-	router.Use(responseOptionsMiddleware(true))
-	router.Use(requestLoggerMiddleware(logger, config.LoggingHTTPConfig{}))
+	router.Use(responseOptionsMiddleware(NewRuntimeConfig(config.Default())))
+	router.Use(requestLoggerMiddleware(logger, NewRuntimeConfig(config.Default())))
 	router.Use(recoveryMiddleware())
 	router.GET("/panic", func(*gin.Context) {
 		panic("secret panic value")
@@ -254,10 +254,13 @@ func TestRequestLoggerMarksTruncatedBodies(t *testing.T) {
 func bodyLoggingTestRouter(t *testing.T, logs *bytes.Buffer, cfg config.LoggingHTTPConfig) http.Handler {
 	t.Helper()
 	logger := slog.New(slog.NewTextHandler(logs, nil))
+	appConfig := config.Default()
+	appConfig.Logging.HTTP = cfg
+	runtimeConfig := NewRuntimeConfig(appConfig)
 	router := gin.New()
 	router.Use(traceIDMiddleware())
-	router.Use(responseOptionsMiddleware(true))
-	router.Use(requestLoggerMiddleware(logger, cfg))
+	router.Use(responseOptionsMiddleware(runtimeConfig))
+	router.Use(requestLoggerMiddleware(logger, runtimeConfig))
 	router.POST("/echo", func(ctx *gin.Context) {
 		body, err := io.ReadAll(ctx.Request.Body)
 		if err != nil {

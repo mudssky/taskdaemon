@@ -78,12 +78,15 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * `taskdaemon desktop` 启动 Wails v3 runtime，并加载 `services/taskdaemon-go/web/embedded` 中的同一套前端构建产物。
 * `pnpm dev:desktop` 通过 `go tool wails3 dev -config ./build/config.yml -port 9245` 启动 Wails v3 开发模式；前端走 Vite HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
 * `taskdaemon db migrate` 是 CLI-only 入口，不初始化 Desktop。
+* `taskdaemon config path/show/validate/reload` 是 CLI-only 配置排障入口；`reload` 通过 daemon HTTP API 触发运行时重载，需要管理员 session token。
+* 开发期从 workspace 根目录运行 CLI 优先用 `pnpm cli -- <args>`，它会透传到 `go run ./cmd/taskdaemon <args>`；需要安装真实命令时使用 `pnpm install:cli`。
 * `--config <path>` 是根级 persistent flag，所有子命令都应加载同一份配置。
 * 未显式传入 `--config` 时，`internal/config` 只在开发工作区里自动查找项目内配置文件，按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 的顺序匹配；非工作区环境不会自动读取当前目录同名文件，找不到时回退到 `os.UserConfigDir()/taskdaemon/config.yaml`。
 * 未显式传入 `--config` 且处于开发工作区时，`internal/config` 会额外查找同目录本地覆盖文件，按 `taskdaemon.local.yaml`、`taskdaemon.local.yml`、`config.local.yaml`、`config.local.yml` 的顺序匹配，并在基础配置后、环境变量前叠加。
 * 显式 `--config <path>` 只读取指定文件，不再叠加项目内配置文件或 local 配置。
 * 默认配置路径为 `os.UserConfigDir()/taskdaemon/config.yaml`。
 * 配置示例归属 Go service 边界，放在 `services/taskdaemon-go/taskdaemon.example.yaml`；开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml`，本机私有覆盖写入 `services/taskdaemon-go/taskdaemon.local.yaml`，发布时复制到用户配置目录或通过 `--config` 显式指定。
+* 运行时配置重载只应用 `logging.http` 与 `observability.traceId`。`server.*`、`database.*`、`logging.level/output/file/console` 这类涉及监听地址、连接池或 handler/文件句柄的配置变更需要重启。
 * 开发默认端口固定为前端 `127.0.0.1:9245`、后端 `127.0.0.1:39245`。端口冲突时应 fail fast，不自动漂移；并行多实例通过 `TASKDAEMON_SERVER_PORT`、配置文件 `server.port`、Wails `-port`、`TASKDAEMON_WEB_PORT` 和前端代理目标环境变量显式覆盖。
 * `/api/health` 是后端探活 endpoint；Swagger route 默认关闭，只在 `server.swagger.enabled=true` 时注册。
 

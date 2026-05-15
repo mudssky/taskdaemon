@@ -7,6 +7,8 @@
     "build:web": "pnpm --filter @taskdaemon/web build",
     "build:backend": "pnpm --filter @taskdaemon/service-go build",
     "dev:backend": "pnpm --filter @taskdaemon/service-go dev",
+    "cli": "pnpm --filter @taskdaemon/service-go cli --",
+    "install:cli": "pnpm --filter @taskdaemon/service-go install:cli",
     "dev:desktop": "pnpm --filter @taskdaemon/service-go dev:desktop",
     "desktop": "pnpm --filter @taskdaemon/service-go desktop",
     "migrate": "pnpm --filter @taskdaemon/service-go migrate",

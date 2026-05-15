@@ -97,6 +97,53 @@ func TestNewRejectsUnknownLevel(t *testing.T) {
 	}
 }
 
+// TestPrettyHandlerFormatsHTTPRequestBodiesAsJSON 验证控制台 HTTP 请求日志会把 body map 格式化为 JSON。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestPrettyHandlerFormatsHTTPRequestBodiesAsJSON(t *testing.T) {
+	var console bytes.Buffer
+	cfg := config.Default().Logging
+	cfg.Output = "console"
+	cfg.Console.Format = "text"
+
+	logger, err := New(cfg, Options{ConsoleWriter: &console})
+	if err != nil {
+		t.Fatalf("create logger: %v", err)
+	}
+	defer logger.Close()
+	logger.Warn(
+		"http request",
+		"method", "POST",
+		"path", "/api/auth/init",
+		"status", 400,
+		"duration_ms", 3,
+		"trace_id", "trace-1",
+		"request_body", "",
+		"response_body", map[string]any{
+			"code": 1,
+			"msg":  "Invalid request body",
+			"error": map[string]any{
+				"code": "bad_request",
+			},
+		},
+	)
+
+	text := console.String()
+	if !strings.Contains(text, "WARN") ||
+		!strings.Contains(text, "POST /api/auth/init 400 3ms") ||
+		!strings.Contains(text, "trace=trace-1") ||
+		!strings.Contains(text, `res={"code":1`) {
+		t.Fatalf("console http log = %q, want pretty access log", text)
+	}
+	if strings.Contains(text, "map[") || strings.Contains(text, "response_body=") {
+		t.Fatalf("console http log should not use slog text map format: %q", text)
+	}
+}
+
 // TestFanoutHandlerPreservesAttrs 验证 fan-out handler 会保留 WithAttrs 附加字段。
 //
 // 参数:

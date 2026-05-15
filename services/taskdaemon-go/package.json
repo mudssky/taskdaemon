@@ -3,6 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "go run ./cmd/taskdaemon serve",
+    "cli": "go run ./cmd/taskdaemon",
+    "install:cli": "go install ./cmd/taskdaemon",
     "dev:desktop": "go tool wails3 dev -config ./build/config.yml -port 9245",
     "desktop": "go run ./cmd/taskdaemon desktop",
     "migrate": "go run ./cmd/taskdaemon db migrate",

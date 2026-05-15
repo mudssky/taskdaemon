@@ -35,6 +35,22 @@ type Config struct {
 	Observability ObservabilityConfig
 }
 
+// ResolvedPaths 保存本次配置加载会使用的文件路径。
+type ResolvedPaths struct {
+	ConfigPath         string
+	ConfigExists       bool
+	ConfigOptional     bool
+	LocalConfigPath    string
+	LocalConfigExists  bool
+	ExplicitConfigPath bool
+}
+
+// ReloadResult 描述一次运行时配置重载的结果。
+type ReloadResult struct {
+	Applied         []string `json:"applied" yaml:"applied"`
+	RestartRequired []string `json:"restartRequired" yaml:"restartRequired"`
+}
+
 // ServerConfig 保存 HTTP API 与文档路由配置。
 type ServerConfig struct {
 	Host    string
@@ -202,6 +218,54 @@ func ProjectPath() (string, bool, error) {
 	return projectPathInDir(workingDir)
 }
 
+// ResolvePaths 解析本次配置加载涉及的基础配置和本地覆盖配置路径。
+//
+// 参数:
+//   - opts: 配置加载选项。
+//
+// 返回值:
+//   - ResolvedPaths: 解析后的配置路径信息。
+//   - error: 读取默认路径、工作目录或检查文件状态失败时返回错误。
+func ResolvePaths(opts LoadOptions) (ResolvedPaths, error) {
+	result := ResolvedPaths{
+		ConfigPath:         opts.ConfigPath,
+		ConfigOptional:     opts.Optional,
+		ExplicitConfigPath: opts.ConfigPath != "",
+	}
+	if result.ConfigPath == "" {
+		discoveredPath, found, err := ProjectPath()
+		if err != nil {
+			return ResolvedPaths{}, err
+		}
+		if found {
+			result.ConfigPath = discoveredPath
+		} else {
+			defaultPath, err := DefaultPath()
+			if err != nil {
+				return ResolvedPaths{}, err
+			}
+			result.ConfigPath = defaultPath
+		}
+		result.ConfigOptional = true
+
+		discoveredLocalPath, localFound, err := ProjectLocalPath()
+		if err != nil {
+			return ResolvedPaths{}, err
+		}
+		if localFound {
+			result.LocalConfigPath = discoveredLocalPath
+			result.LocalConfigExists = true
+		}
+	}
+
+	exists, err := fileExists(result.ConfigPath)
+	if err != nil {
+		return ResolvedPaths{}, err
+	}
+	result.ConfigExists = exists
+	return result, nil
+}
+
 // Load 按 defaults < file < env < overrides 的顺序加载配置。
 //
 // 未显式指定 ConfigPath 时，仅在开发工作区里自动查找当前目录的项目配置文件；
@@ -220,37 +284,15 @@ func Load(opts LoadOptions) (Config, error) {
 		return Config{}, fmt.Errorf("load defaults: %w", err)
 	}
 
-	configPath := opts.ConfigPath
-	localConfigPath := ""
-	if configPath == "" {
-		discoveredPath, found, err := ProjectPath()
-		if err != nil {
-			return Config{}, err
-		}
-		if found {
-			configPath = discoveredPath
-		} else {
-			defaultPath, err := DefaultPath()
-			if err != nil {
-				return Config{}, err
-			}
-			configPath = defaultPath
-		}
-		discoveredLocalPath, localFound, err := ProjectLocalPath()
-		if err != nil {
-			return Config{}, err
-		}
-		if localFound {
-			localConfigPath = discoveredLocalPath
-		}
-		opts.Optional = true
-	}
-
-	if err := loadFile(k, configPath, opts.Optional); err != nil {
+	paths, err := ResolvePaths(opts)
+	if err != nil {
 		return Config{}, err
 	}
-	if localConfigPath != "" {
-		if err := loadFile(k, localConfigPath, true); err != nil {
+	if err := loadFile(k, paths.ConfigPath, paths.ConfigOptional); err != nil {
+		return Config{}, err
+	}
+	if paths.LocalConfigPath != "" {
+		if err := loadFile(k, paths.LocalConfigPath, true); err != nil {
 			return Config{}, err
 		}
 	}
@@ -429,6 +471,25 @@ func projectConfigSearchEnabled(dir string) (bool, error) {
 func existsFileOrDir(path string) bool {
 	_, err := os.Stat(path)
 	return err == nil
+}
+
+// fileExists 判断文件路径是否存在。
+//
+// 参数:
+//   - path: 待检查路径。
+//
+// 返回值:
+//   - bool: true 表示路径存在且不是目录。
+//   - error: 检查文件状态失败时返回错误。
+func fileExists(path string) (bool, error) {
+	info, err := os.Stat(path)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return false, nil
+		}
+		return false, fmt.Errorf("stat config file %s: %w", path, err)
+	}
+	return !info.IsDir(), nil
 }
 
 // defaultMap 返回 koanf 使用的默认配置 map。

@@ -42,13 +42,13 @@ func traceIDMiddleware() gin.HandlerFunc {
 // responseOptionsMiddleware 保存响应 envelope 的运行时选项。
 //
 // 参数:
-//   - includeTraceInResponse: 是否在响应 body 中写入 traceId。
+//   - runtimeConfig: HTTP API 运行时配置。
 //
 // 返回值:
 //   - gin.HandlerFunc: 响应选项 middleware。
-func responseOptionsMiddleware(includeTraceInResponse bool) gin.HandlerFunc {
+func responseOptionsMiddleware(runtimeConfig *RuntimeConfig) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.Set(includeTraceInResponseKey, includeTraceInResponse)
+		ctx.Set(includeTraceInResponseKey, runtimeConfig.IncludeTraceInResponse())
 		ctx.Next()
 	}
 }
@@ -59,14 +59,14 @@ const redactedLogValue = "[REDACTED]"
 //
 // 参数:
 //   - logger: 结构化 logger。
-//   - cfg: HTTP 请求日志配置。
+//   - runtimeConfig: HTTP API 运行时配置。
 //
 // 返回值:
 //   - gin.HandlerFunc: 请求日志 middleware。
-func requestLoggerMiddleware(logger *slog.Logger, cfg config.LoggingHTTPConfig) gin.HandlerFunc {
+func requestLoggerMiddleware(logger *slog.Logger, runtimeConfig *RuntimeConfig) gin.HandlerFunc {
 	logger = loggerOrDefault(logger)
-	cfg = normalizedHTTPLogConfig(cfg)
 	return func(ctx *gin.Context) {
+		cfg := normalizedHTTPLogConfig(runtimeConfig.HTTPLog())
 		start := time.Now()
 		var requestBody loggedBody
 		if cfg.IncludeRequestBody {

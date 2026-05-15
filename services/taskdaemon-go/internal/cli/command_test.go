@@ -17,10 +17,12 @@ import (
 //   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
 func TestServeCommandLoadsConfigAndRunsServe(t *testing.T) {
 	var loadedPath string
+	var hookLoadPath string
 	var served bool
 	hooks := Hooks{
-		Serve: func(_ context.Context, cfg config.Config) error {
+		Serve: func(_ context.Context, cfg config.Config, opts config.LoadOptions) error {
 			served = true
+			hookLoadPath = opts.ConfigPath
 			if cfg.Server.Port != 9090 {
 				t.Fatalf("serve config port = %d, want 9090", cfg.Server.Port)
 			}
@@ -48,6 +50,9 @@ func TestServeCommandLoadsConfigAndRunsServe(t *testing.T) {
 	}
 	if !served {
 		t.Fatal("serve hook was not called")
+	}
+	if hookLoadPath != "custom.yaml" {
+		t.Fatalf("serve load path = %s, want custom.yaml", hookLoadPath)
 	}
 }
 
@@ -105,7 +110,7 @@ func TestDesktopCommandUsesDesktopHook(t *testing.T) {
 			desktopStarted = true
 			return nil
 		},
-		Serve: func(context.Context, config.Config) error {
+		Serve: func(context.Context, config.Config, config.LoadOptions) error {
 			served = true
 			return nil
 		},
@@ -126,6 +131,107 @@ func TestDesktopCommandUsesDesktopHook(t *testing.T) {
 	}
 	if served {
 		t.Fatal("serve hook should not be called for desktop")
+	}
+}
+
+// TestConfigShowPrintsMergedConfig 验证 config show 会输出脱敏后的合并配置。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestConfigShowPrintsMergedConfig(t *testing.T) {
+	var stdout bytes.Buffer
+	err := Execute(context.Background(), Options{
+		Args:   []string{"config", "show"},
+		Stdout: &stdout,
+		Stderr: &bytes.Buffer{},
+		LoadConfig: func(config.LoadOptions) (config.Config, error) {
+			cfg := config.Default()
+			cfg.Database.DSN = "postgres://taskdaemon:password@127.0.0.1/taskdaemon"
+			cfg.Logging.HTTP.IncludeRequestBody = true
+			return cfg, nil
+		},
+	})
+	if err != nil {
+		t.Fatalf("execute config show: %v", err)
+	}
+	text := stdout.String()
+	if !bytes.Contains(stdout.Bytes(), []byte("includeRequestBody: true")) {
+		t.Fatalf("config show output = %q, want http logging config", text)
+	}
+	if bytes.Contains(stdout.Bytes(), []byte("postgres://taskdaemon:password")) {
+		t.Fatalf("config show leaked dsn: %q", text)
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("[REDACTED]")) {
+		t.Fatalf("config show output = %q, want redacted marker", text)
+	}
+}
+
+// TestConfigValidateLoadsConfig 验证 config validate 只要配置可加载就输出成功。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestConfigValidateLoadsConfig(t *testing.T) {
+	var stdout bytes.Buffer
+	var loaded bool
+	err := Execute(context.Background(), Options{
+		Args:   []string{"config", "validate"},
+		Stdout: &stdout,
+		Stderr: &bytes.Buffer{},
+		LoadConfig: func(config.LoadOptions) (config.Config, error) {
+			loaded = true
+			return config.Default(), nil
+		},
+	})
+	if err != nil {
+		t.Fatalf("execute config validate: %v", err)
+	}
+	if !loaded {
+		t.Fatal("config loader should be called")
+	}
+	if stdout.String() != "config ok\n" {
+		t.Fatalf("stdout = %q, want config ok", stdout.String())
+	}
+}
+
+// TestConfigReloadCallsHookWithSession 验证 config reload 会调用 hook 并传递 session token。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestConfigReloadCallsHookWithSession(t *testing.T) {
+	var stdout bytes.Buffer
+	var sessionToken string
+	err := Execute(context.Background(), Options{
+		Args:       []string{"--session-token", "session-token", "config", "reload"},
+		Stdout:     &stdout,
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+		Hooks: Hooks{
+			ConfigReload: func(ctx context.Context, _ config.Config) (config.ReloadResult, error) {
+				sessionToken = SessionTokenFromContext(ctx)
+				return config.ReloadResult{
+					Applied:         []string{"logging.http"},
+					RestartRequired: []string{"server"},
+				}, nil
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("execute config reload: %v", err)
+	}
+	if sessionToken != "session-token" {
+		t.Fatalf("session token = %s, want session-token", sessionToken)
+	}
+	if !bytes.Contains(stdout.Bytes(), []byte("logging.http")) || !bytes.Contains(stdout.Bytes(), []byte("server")) {
+		t.Fatalf("reload output = %q, want result fields", stdout.String())
 	}
 }
 
