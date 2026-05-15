@@ -20,56 +20,56 @@ type AdminDelete struct {
 }
 
 // Where appends a list predicates to the AdminDelete builder.
-func (ad *AdminDelete) Where(ps ...predicate.Admin) *AdminDelete {
-	ad.mutation.Where(ps...)
-	return ad
+func (_d *AdminDelete) Where(ps ...predicate.Admin) *AdminDelete {
+	_d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query and returns how many vertices were deleted.
-func (ad *AdminDelete) Exec(ctx context.Context) (int, error) {
-	return withHooks(ctx, ad.sqlExec, ad.mutation, ad.hooks)
+func (_d *AdminDelete) Exec(ctx context.Context) (int, error) {
+	return withHooks(ctx, _d.sqlExec, _d.mutation, _d.hooks)
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ad *AdminDelete) ExecX(ctx context.Context) int {
-	n, err := ad.Exec(ctx)
+func (_d *AdminDelete) ExecX(ctx context.Context) int {
+	n, err := _d.Exec(ctx)
 	if err != nil {
 		panic(err)
 	}
 	return n
 }
 
-func (ad *AdminDelete) sqlExec(ctx context.Context) (int, error) {
+func (_d *AdminDelete) sqlExec(ctx context.Context) (int, error) {
 	_spec := sqlgraph.NewDeleteSpec(admin.Table, sqlgraph.NewFieldSpec(admin.FieldID, field.TypeInt))
-	if ps := ad.mutation.predicates; len(ps) > 0 {
+	if ps := _d.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	affected, err := sqlgraph.DeleteNodes(ctx, ad.driver, _spec)
+	affected, err := sqlgraph.DeleteNodes(ctx, _d.driver, _spec)
 	if err != nil && sqlgraph.IsConstraintError(err) {
 		err = &ConstraintError{msg: err.Error(), wrap: err}
 	}
-	ad.mutation.done = true
+	_d.mutation.done = true
 	return affected, err
 }
 
 // AdminDeleteOne is the builder for deleting a single Admin entity.
 type AdminDeleteOne struct {
-	ad *AdminDelete
+	_d *AdminDelete
 }
 
 // Where appends a list predicates to the AdminDelete builder.
-func (ado *AdminDeleteOne) Where(ps ...predicate.Admin) *AdminDeleteOne {
-	ado.ad.mutation.Where(ps...)
-	return ado
+func (_d *AdminDeleteOne) Where(ps ...predicate.Admin) *AdminDeleteOne {
+	_d._d.mutation.Where(ps...)
+	return _d
 }
 
 // Exec executes the deletion query.
-func (ado *AdminDeleteOne) Exec(ctx context.Context) error {
-	n, err := ado.ad.Exec(ctx)
+func (_d *AdminDeleteOne) Exec(ctx context.Context) error {
+	n, err := _d._d.Exec(ctx)
 	switch {
 	case err != nil:
 		return err
@@ -81,8 +81,8 @@ func (ado *AdminDeleteOne) Exec(ctx context.Context) error {
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ado *AdminDeleteOne) ExecX(ctx context.Context) {
-	if err := ado.Exec(ctx); err != nil {
+func (_d *AdminDeleteOne) ExecX(ctx context.Context) {
+	if err := _d.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

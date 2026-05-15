@@ -22,184 +22,184 @@ type RunCreate struct {
 }
 
 // SetTrigger sets the "trigger" field.
-func (rc *RunCreate) SetTrigger(r run.Trigger) *RunCreate {
-	rc.mutation.SetTrigger(r)
-	return rc
+func (_c *RunCreate) SetTrigger(v run.Trigger) *RunCreate {
+	_c.mutation.SetTrigger(v)
+	return _c
 }
 
 // SetNillableTrigger sets the "trigger" field if the given value is not nil.
-func (rc *RunCreate) SetNillableTrigger(r *run.Trigger) *RunCreate {
-	if r != nil {
-		rc.SetTrigger(*r)
+func (_c *RunCreate) SetNillableTrigger(v *run.Trigger) *RunCreate {
+	if v != nil {
+		_c.SetTrigger(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetStatus sets the "status" field.
-func (rc *RunCreate) SetStatus(r run.Status) *RunCreate {
-	rc.mutation.SetStatus(r)
-	return rc
+func (_c *RunCreate) SetStatus(v run.Status) *RunCreate {
+	_c.mutation.SetStatus(v)
+	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (rc *RunCreate) SetNillableStatus(r *run.Status) *RunCreate {
-	if r != nil {
-		rc.SetStatus(*r)
+func (_c *RunCreate) SetNillableStatus(v *run.Status) *RunCreate {
+	if v != nil {
+		_c.SetStatus(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetExitCode sets the "exit_code" field.
-func (rc *RunCreate) SetExitCode(i int) *RunCreate {
-	rc.mutation.SetExitCode(i)
-	return rc
+func (_c *RunCreate) SetExitCode(v int) *RunCreate {
+	_c.mutation.SetExitCode(v)
+	return _c
 }
 
 // SetNillableExitCode sets the "exit_code" field if the given value is not nil.
-func (rc *RunCreate) SetNillableExitCode(i *int) *RunCreate {
-	if i != nil {
-		rc.SetExitCode(*i)
+func (_c *RunCreate) SetNillableExitCode(v *int) *RunCreate {
+	if v != nil {
+		_c.SetExitCode(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetStartedAt sets the "started_at" field.
-func (rc *RunCreate) SetStartedAt(t time.Time) *RunCreate {
-	rc.mutation.SetStartedAt(t)
-	return rc
+func (_c *RunCreate) SetStartedAt(v time.Time) *RunCreate {
+	_c.mutation.SetStartedAt(v)
+	return _c
 }
 
 // SetNillableStartedAt sets the "started_at" field if the given value is not nil.
-func (rc *RunCreate) SetNillableStartedAt(t *time.Time) *RunCreate {
-	if t != nil {
-		rc.SetStartedAt(*t)
+func (_c *RunCreate) SetNillableStartedAt(v *time.Time) *RunCreate {
+	if v != nil {
+		_c.SetStartedAt(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetFinishedAt sets the "finished_at" field.
-func (rc *RunCreate) SetFinishedAt(t time.Time) *RunCreate {
-	rc.mutation.SetFinishedAt(t)
-	return rc
+func (_c *RunCreate) SetFinishedAt(v time.Time) *RunCreate {
+	_c.mutation.SetFinishedAt(v)
+	return _c
 }
 
 // SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
-func (rc *RunCreate) SetNillableFinishedAt(t *time.Time) *RunCreate {
-	if t != nil {
-		rc.SetFinishedAt(*t)
+func (_c *RunCreate) SetNillableFinishedAt(v *time.Time) *RunCreate {
+	if v != nil {
+		_c.SetFinishedAt(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetDurationMs sets the "duration_ms" field.
-func (rc *RunCreate) SetDurationMs(i int64) *RunCreate {
-	rc.mutation.SetDurationMs(i)
-	return rc
+func (_c *RunCreate) SetDurationMs(v int64) *RunCreate {
+	_c.mutation.SetDurationMs(v)
+	return _c
 }
 
 // SetNillableDurationMs sets the "duration_ms" field if the given value is not nil.
-func (rc *RunCreate) SetNillableDurationMs(i *int64) *RunCreate {
-	if i != nil {
-		rc.SetDurationMs(*i)
+func (_c *RunCreate) SetNillableDurationMs(v *int64) *RunCreate {
+	if v != nil {
+		_c.SetDurationMs(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetErrorSummary sets the "error_summary" field.
-func (rc *RunCreate) SetErrorSummary(s string) *RunCreate {
-	rc.mutation.SetErrorSummary(s)
-	return rc
+func (_c *RunCreate) SetErrorSummary(v string) *RunCreate {
+	_c.mutation.SetErrorSummary(v)
+	return _c
 }
 
 // SetNillableErrorSummary sets the "error_summary" field if the given value is not nil.
-func (rc *RunCreate) SetNillableErrorSummary(s *string) *RunCreate {
-	if s != nil {
-		rc.SetErrorSummary(*s)
+func (_c *RunCreate) SetNillableErrorSummary(v *string) *RunCreate {
+	if v != nil {
+		_c.SetErrorSummary(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetStdout sets the "stdout" field.
-func (rc *RunCreate) SetStdout(s string) *RunCreate {
-	rc.mutation.SetStdout(s)
-	return rc
+func (_c *RunCreate) SetStdout(v string) *RunCreate {
+	_c.mutation.SetStdout(v)
+	return _c
 }
 
 // SetNillableStdout sets the "stdout" field if the given value is not nil.
-func (rc *RunCreate) SetNillableStdout(s *string) *RunCreate {
-	if s != nil {
-		rc.SetStdout(*s)
+func (_c *RunCreate) SetNillableStdout(v *string) *RunCreate {
+	if v != nil {
+		_c.SetStdout(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetStderr sets the "stderr" field.
-func (rc *RunCreate) SetStderr(s string) *RunCreate {
-	rc.mutation.SetStderr(s)
-	return rc
+func (_c *RunCreate) SetStderr(v string) *RunCreate {
+	_c.mutation.SetStderr(v)
+	return _c
 }
 
 // SetNillableStderr sets the "stderr" field if the given value is not nil.
-func (rc *RunCreate) SetNillableStderr(s *string) *RunCreate {
-	if s != nil {
-		rc.SetStderr(*s)
+func (_c *RunCreate) SetNillableStderr(v *string) *RunCreate {
+	if v != nil {
+		_c.SetStderr(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (rc *RunCreate) SetCreatedAt(t time.Time) *RunCreate {
-	rc.mutation.SetCreatedAt(t)
-	return rc
+func (_c *RunCreate) SetCreatedAt(v time.Time) *RunCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (rc *RunCreate) SetNillableCreatedAt(t *time.Time) *RunCreate {
-	if t != nil {
-		rc.SetCreatedAt(*t)
+func (_c *RunCreate) SetNillableCreatedAt(v *time.Time) *RunCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (rc *RunCreate) SetUpdatedAt(t time.Time) *RunCreate {
-	rc.mutation.SetUpdatedAt(t)
-	return rc
+func (_c *RunCreate) SetUpdatedAt(v time.Time) *RunCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (rc *RunCreate) SetNillableUpdatedAt(t *time.Time) *RunCreate {
-	if t != nil {
-		rc.SetUpdatedAt(*t)
+func (_c *RunCreate) SetNillableUpdatedAt(v *time.Time) *RunCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return rc
+	return _c
 }
 
 // SetTaskID sets the "task" edge to the Task entity by ID.
-func (rc *RunCreate) SetTaskID(id int) *RunCreate {
-	rc.mutation.SetTaskID(id)
-	return rc
+func (_c *RunCreate) SetTaskID(id int) *RunCreate {
+	_c.mutation.SetTaskID(id)
+	return _c
 }
 
 // SetTask sets the "task" edge to the Task entity.
-func (rc *RunCreate) SetTask(t *Task) *RunCreate {
-	return rc.SetTaskID(t.ID)
+func (_c *RunCreate) SetTask(v *Task) *RunCreate {
+	return _c.SetTaskID(v.ID)
 }
 
 // Mutation returns the RunMutation object of the builder.
-func (rc *RunCreate) Mutation() *RunMutation {
-	return rc.mutation
+func (_c *RunCreate) Mutation() *RunMutation {
+	return _c.mutation
 }
 
 // Save creates the Run in the database.
-func (rc *RunCreate) Save(ctx context.Context) (*Run, error) {
-	rc.defaults()
-	return withHooks(ctx, rc.sqlSave, rc.mutation, rc.hooks)
+func (_c *RunCreate) Save(ctx context.Context) (*Run, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (rc *RunCreate) SaveX(ctx context.Context) *Run {
-	v, err := rc.Save(ctx)
+func (_c *RunCreate) SaveX(ctx context.Context) *Run {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -207,81 +207,81 @@ func (rc *RunCreate) SaveX(ctx context.Context) *Run {
 }
 
 // Exec executes the query.
-func (rc *RunCreate) Exec(ctx context.Context) error {
-	_, err := rc.Save(ctx)
+func (_c *RunCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rc *RunCreate) ExecX(ctx context.Context) {
-	if err := rc.Exec(ctx); err != nil {
+func (_c *RunCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (rc *RunCreate) defaults() {
-	if _, ok := rc.mutation.Trigger(); !ok {
+func (_c *RunCreate) defaults() {
+	if _, ok := _c.mutation.Trigger(); !ok {
 		v := run.DefaultTrigger
-		rc.mutation.SetTrigger(v)
+		_c.mutation.SetTrigger(v)
 	}
-	if _, ok := rc.mutation.Status(); !ok {
+	if _, ok := _c.mutation.Status(); !ok {
 		v := run.DefaultStatus
-		rc.mutation.SetStatus(v)
+		_c.mutation.SetStatus(v)
 	}
-	if _, ok := rc.mutation.StartedAt(); !ok {
+	if _, ok := _c.mutation.StartedAt(); !ok {
 		v := run.DefaultStartedAt()
-		rc.mutation.SetStartedAt(v)
+		_c.mutation.SetStartedAt(v)
 	}
-	if _, ok := rc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := run.DefaultCreatedAt()
-		rc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := rc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := run.DefaultUpdatedAt()
-		rc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (rc *RunCreate) check() error {
-	if _, ok := rc.mutation.Trigger(); !ok {
+func (_c *RunCreate) check() error {
+	if _, ok := _c.mutation.Trigger(); !ok {
 		return &ValidationError{Name: "trigger", err: errors.New(`ent: missing required field "Run.trigger"`)}
 	}
-	if v, ok := rc.mutation.Trigger(); ok {
+	if v, ok := _c.mutation.Trigger(); ok {
 		if err := run.TriggerValidator(v); err != nil {
 			return &ValidationError{Name: "trigger", err: fmt.Errorf(`ent: validator failed for field "Run.trigger": %w`, err)}
 		}
 	}
-	if _, ok := rc.mutation.Status(); !ok {
+	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Run.status"`)}
 	}
-	if v, ok := rc.mutation.Status(); ok {
+	if v, ok := _c.mutation.Status(); ok {
 		if err := run.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Run.status": %w`, err)}
 		}
 	}
-	if _, ok := rc.mutation.StartedAt(); !ok {
+	if _, ok := _c.mutation.StartedAt(); !ok {
 		return &ValidationError{Name: "started_at", err: errors.New(`ent: missing required field "Run.started_at"`)}
 	}
-	if _, ok := rc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Run.created_at"`)}
 	}
-	if _, ok := rc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Run.updated_at"`)}
 	}
-	if _, ok := rc.mutation.TaskID(); !ok {
+	if len(_c.mutation.TaskIDs()) == 0 {
 		return &ValidationError{Name: "task", err: errors.New(`ent: missing required edge "Run.task"`)}
 	}
 	return nil
 }
 
-func (rc *RunCreate) sqlSave(ctx context.Context) (*Run, error) {
-	if err := rc.check(); err != nil {
+func (_c *RunCreate) sqlSave(ctx context.Context) (*Run, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := rc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, rc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -289,61 +289,61 @@ func (rc *RunCreate) sqlSave(ctx context.Context) (*Run, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	rc.mutation.id = &_node.ID
-	rc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (rc *RunCreate) createSpec() (*Run, *sqlgraph.CreateSpec) {
+func (_c *RunCreate) createSpec() (*Run, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Run{config: rc.config}
+		_node = &Run{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(run.Table, sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt))
 	)
-	if value, ok := rc.mutation.Trigger(); ok {
+	if value, ok := _c.mutation.Trigger(); ok {
 		_spec.SetField(run.FieldTrigger, field.TypeEnum, value)
 		_node.Trigger = value
 	}
-	if value, ok := rc.mutation.Status(); ok {
+	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(run.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if value, ok := rc.mutation.ExitCode(); ok {
+	if value, ok := _c.mutation.ExitCode(); ok {
 		_spec.SetField(run.FieldExitCode, field.TypeInt, value)
 		_node.ExitCode = &value
 	}
-	if value, ok := rc.mutation.StartedAt(); ok {
+	if value, ok := _c.mutation.StartedAt(); ok {
 		_spec.SetField(run.FieldStartedAt, field.TypeTime, value)
 		_node.StartedAt = value
 	}
-	if value, ok := rc.mutation.FinishedAt(); ok {
+	if value, ok := _c.mutation.FinishedAt(); ok {
 		_spec.SetField(run.FieldFinishedAt, field.TypeTime, value)
 		_node.FinishedAt = &value
 	}
-	if value, ok := rc.mutation.DurationMs(); ok {
+	if value, ok := _c.mutation.DurationMs(); ok {
 		_spec.SetField(run.FieldDurationMs, field.TypeInt64, value)
 		_node.DurationMs = value
 	}
-	if value, ok := rc.mutation.ErrorSummary(); ok {
+	if value, ok := _c.mutation.ErrorSummary(); ok {
 		_spec.SetField(run.FieldErrorSummary, field.TypeString, value)
 		_node.ErrorSummary = value
 	}
-	if value, ok := rc.mutation.Stdout(); ok {
+	if value, ok := _c.mutation.Stdout(); ok {
 		_spec.SetField(run.FieldStdout, field.TypeString, value)
 		_node.Stdout = value
 	}
-	if value, ok := rc.mutation.Stderr(); ok {
+	if value, ok := _c.mutation.Stderr(); ok {
 		_spec.SetField(run.FieldStderr, field.TypeString, value)
 		_node.Stderr = value
 	}
-	if value, ok := rc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(run.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := rc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(run.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := rc.mutation.TaskIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -371,16 +371,16 @@ type RunCreateBulk struct {
 }
 
 // Save creates the Run entities in the database.
-func (rcb *RunCreateBulk) Save(ctx context.Context) ([]*Run, error) {
-	if rcb.err != nil {
-		return nil, rcb.err
+func (_c *RunCreateBulk) Save(ctx context.Context) ([]*Run, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(rcb.builders))
-	nodes := make([]*Run, len(rcb.builders))
-	mutators := make([]Mutator, len(rcb.builders))
-	for i := range rcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Run, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := rcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*RunMutation)
@@ -394,11 +394,11 @@ func (rcb *RunCreateBulk) Save(ctx context.Context) ([]*Run, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, rcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, rcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -422,7 +422,7 @@ func (rcb *RunCreateBulk) Save(ctx context.Context) ([]*Run, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, rcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -430,8 +430,8 @@ func (rcb *RunCreateBulk) Save(ctx context.Context) ([]*Run, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (rcb *RunCreateBulk) SaveX(ctx context.Context) []*Run {
-	v, err := rcb.Save(ctx)
+func (_c *RunCreateBulk) SaveX(ctx context.Context) []*Run {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -439,14 +439,14 @@ func (rcb *RunCreateBulk) SaveX(ctx context.Context) []*Run {
 }
 
 // Exec executes the query.
-func (rcb *RunCreateBulk) Exec(ctx context.Context) error {
-	_, err := rcb.Save(ctx)
+func (_c *RunCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (rcb *RunCreateBulk) ExecX(ctx context.Context) {
-	if err := rcb.Exec(ctx); err != nil {
+func (_c *RunCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

@@ -24,109 +24,109 @@ type AdminUpdate struct {
 }
 
 // Where appends a list predicates to the AdminUpdate builder.
-func (au *AdminUpdate) Where(ps ...predicate.Admin) *AdminUpdate {
-	au.mutation.Where(ps...)
-	return au
+func (_u *AdminUpdate) Where(ps ...predicate.Admin) *AdminUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetUsername sets the "username" field.
-func (au *AdminUpdate) SetUsername(s string) *AdminUpdate {
-	au.mutation.SetUsername(s)
-	return au
+func (_u *AdminUpdate) SetUsername(v string) *AdminUpdate {
+	_u.mutation.SetUsername(v)
+	return _u
 }
 
 // SetNillableUsername sets the "username" field if the given value is not nil.
-func (au *AdminUpdate) SetNillableUsername(s *string) *AdminUpdate {
-	if s != nil {
-		au.SetUsername(*s)
+func (_u *AdminUpdate) SetNillableUsername(v *string) *AdminUpdate {
+	if v != nil {
+		_u.SetUsername(*v)
 	}
-	return au
+	return _u
 }
 
 // SetPasswordHash sets the "password_hash" field.
-func (au *AdminUpdate) SetPasswordHash(s string) *AdminUpdate {
-	au.mutation.SetPasswordHash(s)
-	return au
+func (_u *AdminUpdate) SetPasswordHash(v string) *AdminUpdate {
+	_u.mutation.SetPasswordHash(v)
+	return _u
 }
 
 // SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
-func (au *AdminUpdate) SetNillablePasswordHash(s *string) *AdminUpdate {
-	if s != nil {
-		au.SetPasswordHash(*s)
+func (_u *AdminUpdate) SetNillablePasswordHash(v *string) *AdminUpdate {
+	if v != nil {
+		_u.SetPasswordHash(*v)
 	}
-	return au
+	return _u
 }
 
 // SetActive sets the "active" field.
-func (au *AdminUpdate) SetActive(b bool) *AdminUpdate {
-	au.mutation.SetActive(b)
-	return au
+func (_u *AdminUpdate) SetActive(v bool) *AdminUpdate {
+	_u.mutation.SetActive(v)
+	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (au *AdminUpdate) SetNillableActive(b *bool) *AdminUpdate {
-	if b != nil {
-		au.SetActive(*b)
+func (_u *AdminUpdate) SetNillableActive(v *bool) *AdminUpdate {
+	if v != nil {
+		_u.SetActive(*v)
 	}
-	return au
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (au *AdminUpdate) SetUpdatedAt(t time.Time) *AdminUpdate {
-	au.mutation.SetUpdatedAt(t)
-	return au
+func (_u *AdminUpdate) SetUpdatedAt(v time.Time) *AdminUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (au *AdminUpdate) AddSessionIDs(ids ...int) *AdminUpdate {
-	au.mutation.AddSessionIDs(ids...)
-	return au
+func (_u *AdminUpdate) AddSessionIDs(ids ...int) *AdminUpdate {
+	_u.mutation.AddSessionIDs(ids...)
+	return _u
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (au *AdminUpdate) AddSessions(s ...*Session) *AdminUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *AdminUpdate) AddSessions(v ...*Session) *AdminUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.AddSessionIDs(ids...)
+	return _u.AddSessionIDs(ids...)
 }
 
 // Mutation returns the AdminMutation object of the builder.
-func (au *AdminUpdate) Mutation() *AdminMutation {
-	return au.mutation
+func (_u *AdminUpdate) Mutation() *AdminMutation {
+	return _u.mutation
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
-func (au *AdminUpdate) ClearSessions() *AdminUpdate {
-	au.mutation.ClearSessions()
-	return au
+func (_u *AdminUpdate) ClearSessions() *AdminUpdate {
+	_u.mutation.ClearSessions()
+	return _u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (au *AdminUpdate) RemoveSessionIDs(ids ...int) *AdminUpdate {
-	au.mutation.RemoveSessionIDs(ids...)
-	return au
+func (_u *AdminUpdate) RemoveSessionIDs(ids ...int) *AdminUpdate {
+	_u.mutation.RemoveSessionIDs(ids...)
+	return _u
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (au *AdminUpdate) RemoveSessions(s ...*Session) *AdminUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *AdminUpdate) RemoveSessions(v ...*Session) *AdminUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return au.RemoveSessionIDs(ids...)
+	return _u.RemoveSessionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (au *AdminUpdate) Save(ctx context.Context) (int, error) {
-	au.defaults()
-	return withHooks(ctx, au.sqlSave, au.mutation, au.hooks)
+func (_u *AdminUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (au *AdminUpdate) SaveX(ctx context.Context) int {
-	affected, err := au.Save(ctx)
+func (_u *AdminUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -134,29 +134,29 @@ func (au *AdminUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (au *AdminUpdate) Exec(ctx context.Context) error {
-	_, err := au.Save(ctx)
+func (_u *AdminUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (au *AdminUpdate) ExecX(ctx context.Context) {
-	if err := au.Exec(ctx); err != nil {
+func (_u *AdminUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (au *AdminUpdate) defaults() {
-	if _, ok := au.mutation.UpdatedAt(); !ok {
+func (_u *AdminUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := admin.UpdateDefaultUpdatedAt()
-		au.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (au *AdminUpdate) check() error {
-	if v, ok := au.mutation.Username(); ok {
+func (_u *AdminUpdate) check() error {
+	if v, ok := _u.mutation.Username(); ok {
 		if err := admin.UsernameValidator(v); err != nil {
 			return &ValidationError{Name: "username", err: fmt.Errorf(`ent: validator failed for field "Admin.username": %w`, err)}
 		}
@@ -164,31 +164,31 @@ func (au *AdminUpdate) check() error {
 	return nil
 }
 
-func (au *AdminUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := au.check(); err != nil {
-		return n, err
+func (_u *AdminUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(admin.Table, admin.Columns, sqlgraph.NewFieldSpec(admin.FieldID, field.TypeInt))
-	if ps := au.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := au.mutation.Username(); ok {
+	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(admin.FieldUsername, field.TypeString, value)
 	}
-	if value, ok := au.mutation.PasswordHash(); ok {
+	if value, ok := _u.mutation.PasswordHash(); ok {
 		_spec.SetField(admin.FieldPasswordHash, field.TypeString, value)
 	}
-	if value, ok := au.mutation.Active(); ok {
+	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(admin.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := au.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(admin.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if au.mutation.SessionsCleared() {
+	if _u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -201,7 +201,7 @@ func (au *AdminUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !au.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -217,7 +217,7 @@ func (au *AdminUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := au.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -233,7 +233,7 @@ func (au *AdminUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{admin.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -241,8 +241,8 @@ func (au *AdminUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	au.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // AdminUpdateOne is the builder for updating a single Admin entity.
@@ -254,116 +254,116 @@ type AdminUpdateOne struct {
 }
 
 // SetUsername sets the "username" field.
-func (auo *AdminUpdateOne) SetUsername(s string) *AdminUpdateOne {
-	auo.mutation.SetUsername(s)
-	return auo
+func (_u *AdminUpdateOne) SetUsername(v string) *AdminUpdateOne {
+	_u.mutation.SetUsername(v)
+	return _u
 }
 
 // SetNillableUsername sets the "username" field if the given value is not nil.
-func (auo *AdminUpdateOne) SetNillableUsername(s *string) *AdminUpdateOne {
-	if s != nil {
-		auo.SetUsername(*s)
+func (_u *AdminUpdateOne) SetNillableUsername(v *string) *AdminUpdateOne {
+	if v != nil {
+		_u.SetUsername(*v)
 	}
-	return auo
+	return _u
 }
 
 // SetPasswordHash sets the "password_hash" field.
-func (auo *AdminUpdateOne) SetPasswordHash(s string) *AdminUpdateOne {
-	auo.mutation.SetPasswordHash(s)
-	return auo
+func (_u *AdminUpdateOne) SetPasswordHash(v string) *AdminUpdateOne {
+	_u.mutation.SetPasswordHash(v)
+	return _u
 }
 
 // SetNillablePasswordHash sets the "password_hash" field if the given value is not nil.
-func (auo *AdminUpdateOne) SetNillablePasswordHash(s *string) *AdminUpdateOne {
-	if s != nil {
-		auo.SetPasswordHash(*s)
+func (_u *AdminUpdateOne) SetNillablePasswordHash(v *string) *AdminUpdateOne {
+	if v != nil {
+		_u.SetPasswordHash(*v)
 	}
-	return auo
+	return _u
 }
 
 // SetActive sets the "active" field.
-func (auo *AdminUpdateOne) SetActive(b bool) *AdminUpdateOne {
-	auo.mutation.SetActive(b)
-	return auo
+func (_u *AdminUpdateOne) SetActive(v bool) *AdminUpdateOne {
+	_u.mutation.SetActive(v)
+	return _u
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (auo *AdminUpdateOne) SetNillableActive(b *bool) *AdminUpdateOne {
-	if b != nil {
-		auo.SetActive(*b)
+func (_u *AdminUpdateOne) SetNillableActive(v *bool) *AdminUpdateOne {
+	if v != nil {
+		_u.SetActive(*v)
 	}
-	return auo
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (auo *AdminUpdateOne) SetUpdatedAt(t time.Time) *AdminUpdateOne {
-	auo.mutation.SetUpdatedAt(t)
-	return auo
+func (_u *AdminUpdateOne) SetUpdatedAt(v time.Time) *AdminUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (auo *AdminUpdateOne) AddSessionIDs(ids ...int) *AdminUpdateOne {
-	auo.mutation.AddSessionIDs(ids...)
-	return auo
+func (_u *AdminUpdateOne) AddSessionIDs(ids ...int) *AdminUpdateOne {
+	_u.mutation.AddSessionIDs(ids...)
+	return _u
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (auo *AdminUpdateOne) AddSessions(s ...*Session) *AdminUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *AdminUpdateOne) AddSessions(v ...*Session) *AdminUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.AddSessionIDs(ids...)
+	return _u.AddSessionIDs(ids...)
 }
 
 // Mutation returns the AdminMutation object of the builder.
-func (auo *AdminUpdateOne) Mutation() *AdminMutation {
-	return auo.mutation
+func (_u *AdminUpdateOne) Mutation() *AdminMutation {
+	return _u.mutation
 }
 
 // ClearSessions clears all "sessions" edges to the Session entity.
-func (auo *AdminUpdateOne) ClearSessions() *AdminUpdateOne {
-	auo.mutation.ClearSessions()
-	return auo
+func (_u *AdminUpdateOne) ClearSessions() *AdminUpdateOne {
+	_u.mutation.ClearSessions()
+	return _u
 }
 
 // RemoveSessionIDs removes the "sessions" edge to Session entities by IDs.
-func (auo *AdminUpdateOne) RemoveSessionIDs(ids ...int) *AdminUpdateOne {
-	auo.mutation.RemoveSessionIDs(ids...)
-	return auo
+func (_u *AdminUpdateOne) RemoveSessionIDs(ids ...int) *AdminUpdateOne {
+	_u.mutation.RemoveSessionIDs(ids...)
+	return _u
 }
 
 // RemoveSessions removes "sessions" edges to Session entities.
-func (auo *AdminUpdateOne) RemoveSessions(s ...*Session) *AdminUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_u *AdminUpdateOne) RemoveSessions(v ...*Session) *AdminUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return auo.RemoveSessionIDs(ids...)
+	return _u.RemoveSessionIDs(ids...)
 }
 
 // Where appends a list predicates to the AdminUpdate builder.
-func (auo *AdminUpdateOne) Where(ps ...predicate.Admin) *AdminUpdateOne {
-	auo.mutation.Where(ps...)
-	return auo
+func (_u *AdminUpdateOne) Where(ps ...predicate.Admin) *AdminUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (auo *AdminUpdateOne) Select(field string, fields ...string) *AdminUpdateOne {
-	auo.fields = append([]string{field}, fields...)
-	return auo
+func (_u *AdminUpdateOne) Select(field string, fields ...string) *AdminUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Admin entity.
-func (auo *AdminUpdateOne) Save(ctx context.Context) (*Admin, error) {
-	auo.defaults()
-	return withHooks(ctx, auo.sqlSave, auo.mutation, auo.hooks)
+func (_u *AdminUpdateOne) Save(ctx context.Context) (*Admin, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (auo *AdminUpdateOne) SaveX(ctx context.Context) *Admin {
-	node, err := auo.Save(ctx)
+func (_u *AdminUpdateOne) SaveX(ctx context.Context) *Admin {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -371,29 +371,29 @@ func (auo *AdminUpdateOne) SaveX(ctx context.Context) *Admin {
 }
 
 // Exec executes the query on the entity.
-func (auo *AdminUpdateOne) Exec(ctx context.Context) error {
-	_, err := auo.Save(ctx)
+func (_u *AdminUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (auo *AdminUpdateOne) ExecX(ctx context.Context) {
-	if err := auo.Exec(ctx); err != nil {
+func (_u *AdminUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (auo *AdminUpdateOne) defaults() {
-	if _, ok := auo.mutation.UpdatedAt(); !ok {
+func (_u *AdminUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := admin.UpdateDefaultUpdatedAt()
-		auo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (auo *AdminUpdateOne) check() error {
-	if v, ok := auo.mutation.Username(); ok {
+func (_u *AdminUpdateOne) check() error {
+	if v, ok := _u.mutation.Username(); ok {
 		if err := admin.UsernameValidator(v); err != nil {
 			return &ValidationError{Name: "username", err: fmt.Errorf(`ent: validator failed for field "Admin.username": %w`, err)}
 		}
@@ -401,17 +401,17 @@ func (auo *AdminUpdateOne) check() error {
 	return nil
 }
 
-func (auo *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error) {
-	if err := auo.check(); err != nil {
+func (_u *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(admin.Table, admin.Columns, sqlgraph.NewFieldSpec(admin.FieldID, field.TypeInt))
-	id, ok := auo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Admin.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := auo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, admin.FieldID)
 		for _, f := range fields {
@@ -423,26 +423,26 @@ func (auo *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error
 			}
 		}
 	}
-	if ps := auo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := auo.mutation.Username(); ok {
+	if value, ok := _u.mutation.Username(); ok {
 		_spec.SetField(admin.FieldUsername, field.TypeString, value)
 	}
-	if value, ok := auo.mutation.PasswordHash(); ok {
+	if value, ok := _u.mutation.PasswordHash(); ok {
 		_spec.SetField(admin.FieldPasswordHash, field.TypeString, value)
 	}
-	if value, ok := auo.mutation.Active(); ok {
+	if value, ok := _u.mutation.Active(); ok {
 		_spec.SetField(admin.FieldActive, field.TypeBool, value)
 	}
-	if value, ok := auo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(admin.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if auo.mutation.SessionsCleared() {
+	if _u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -455,7 +455,7 @@ func (auo *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !auo.mutation.SessionsCleared() {
+	if nodes := _u.mutation.RemovedSessionsIDs(); len(nodes) > 0 && !_u.mutation.SessionsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -471,7 +471,7 @@ func (auo *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := auo.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -487,10 +487,10 @@ func (auo *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Admin{config: auo.config}
+	_node = &Admin{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, auo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{admin.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -498,6 +498,6 @@ func (auo *AdminUpdateOne) sqlSave(ctx context.Context) (_node *Admin, err error
 		}
 		return nil, err
 	}
-	auo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

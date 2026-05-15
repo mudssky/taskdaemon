@@ -75,7 +75,7 @@ func (*Admin) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Admin fields.
-func (a *Admin) assignValues(columns []string, values []any) error {
+func (_m *Admin) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -86,45 +86,45 @@ func (a *Admin) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			a.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case admin.FieldSingletonKey:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field singleton_key", values[i])
 			} else if value.Valid {
-				a.SingletonKey = value.String
+				_m.SingletonKey = value.String
 			}
 		case admin.FieldUsername:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field username", values[i])
 			} else if value.Valid {
-				a.Username = value.String
+				_m.Username = value.String
 			}
 		case admin.FieldPasswordHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field password_hash", values[i])
 			} else if value.Valid {
-				a.PasswordHash = value.String
+				_m.PasswordHash = value.String
 			}
 		case admin.FieldActive:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field active", values[i])
 			} else if value.Valid {
-				a.Active = value.Bool
+				_m.Active = value.Bool
 			}
 		case admin.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				a.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case admin.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				a.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		default:
-			a.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -132,54 +132,54 @@ func (a *Admin) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Admin.
 // This includes values selected through modifiers, order, etc.
-func (a *Admin) Value(name string) (ent.Value, error) {
-	return a.selectValues.Get(name)
+func (_m *Admin) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QuerySessions queries the "sessions" edge of the Admin entity.
-func (a *Admin) QuerySessions() *SessionQuery {
-	return NewAdminClient(a.config).QuerySessions(a)
+func (_m *Admin) QuerySessions() *SessionQuery {
+	return NewAdminClient(_m.config).QuerySessions(_m)
 }
 
 // Update returns a builder for updating this Admin.
 // Note that you need to call Admin.Unwrap() before calling this method if this Admin
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (a *Admin) Update() *AdminUpdateOne {
-	return NewAdminClient(a.config).UpdateOne(a)
+func (_m *Admin) Update() *AdminUpdateOne {
+	return NewAdminClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Admin entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (a *Admin) Unwrap() *Admin {
-	_tx, ok := a.config.driver.(*txDriver)
+func (_m *Admin) Unwrap() *Admin {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Admin is not a transactional entity")
 	}
-	a.config.driver = _tx.drv
-	return a
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (a *Admin) String() string {
+func (_m *Admin) String() string {
 	var builder strings.Builder
 	builder.WriteString("Admin(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("singleton_key=")
-	builder.WriteString(a.SingletonKey)
+	builder.WriteString(_m.SingletonKey)
 	builder.WriteString(", ")
 	builder.WriteString("username=")
-	builder.WriteString(a.Username)
+	builder.WriteString(_m.Username)
 	builder.WriteString(", ")
 	builder.WriteString("password_hash=<sensitive>")
 	builder.WriteString(", ")
 	builder.WriteString("active=")
-	builder.WriteString(fmt.Sprintf("%v", a.Active))
+	builder.WriteString(fmt.Sprintf("%v", _m.Active))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(a.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(a.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -4,6 +4,7 @@ package enttest
 
 import (
 	"context"
+
 	"taskdaemon/internal/data/ent"
 	// required by schema hooks.
 	_ "taskdaemon/internal/data/ent/runtime"

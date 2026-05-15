@@ -22,112 +22,112 @@ type SessionCreate struct {
 }
 
 // SetTokenHash sets the "token_hash" field.
-func (sc *SessionCreate) SetTokenHash(s string) *SessionCreate {
-	sc.mutation.SetTokenHash(s)
-	return sc
+func (_c *SessionCreate) SetTokenHash(v string) *SessionCreate {
+	_c.mutation.SetTokenHash(v)
+	return _c
 }
 
 // SetCsrfTokenHash sets the "csrf_token_hash" field.
-func (sc *SessionCreate) SetCsrfTokenHash(s string) *SessionCreate {
-	sc.mutation.SetCsrfTokenHash(s)
-	return sc
+func (_c *SessionCreate) SetCsrfTokenHash(v string) *SessionCreate {
+	_c.mutation.SetCsrfTokenHash(v)
+	return _c
 }
 
 // SetNillableCsrfTokenHash sets the "csrf_token_hash" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableCsrfTokenHash(s *string) *SessionCreate {
-	if s != nil {
-		sc.SetCsrfTokenHash(*s)
+func (_c *SessionCreate) SetNillableCsrfTokenHash(v *string) *SessionCreate {
+	if v != nil {
+		_c.SetCsrfTokenHash(*v)
 	}
-	return sc
+	return _c
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (sc *SessionCreate) SetExpiresAt(t time.Time) *SessionCreate {
-	sc.mutation.SetExpiresAt(t)
-	return sc
+func (_c *SessionCreate) SetExpiresAt(v time.Time) *SessionCreate {
+	_c.mutation.SetExpiresAt(v)
+	return _c
 }
 
 // SetUserAgent sets the "user_agent" field.
-func (sc *SessionCreate) SetUserAgent(s string) *SessionCreate {
-	sc.mutation.SetUserAgent(s)
-	return sc
+func (_c *SessionCreate) SetUserAgent(v string) *SessionCreate {
+	_c.mutation.SetUserAgent(v)
+	return _c
 }
 
 // SetNillableUserAgent sets the "user_agent" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableUserAgent(s *string) *SessionCreate {
-	if s != nil {
-		sc.SetUserAgent(*s)
+func (_c *SessionCreate) SetNillableUserAgent(v *string) *SessionCreate {
+	if v != nil {
+		_c.SetUserAgent(*v)
 	}
-	return sc
+	return _c
 }
 
 // SetIP sets the "ip" field.
-func (sc *SessionCreate) SetIP(s string) *SessionCreate {
-	sc.mutation.SetIP(s)
-	return sc
+func (_c *SessionCreate) SetIP(v string) *SessionCreate {
+	_c.mutation.SetIP(v)
+	return _c
 }
 
 // SetNillableIP sets the "ip" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableIP(s *string) *SessionCreate {
-	if s != nil {
-		sc.SetIP(*s)
+func (_c *SessionCreate) SetNillableIP(v *string) *SessionCreate {
+	if v != nil {
+		_c.SetIP(*v)
 	}
-	return sc
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (sc *SessionCreate) SetCreatedAt(t time.Time) *SessionCreate {
-	sc.mutation.SetCreatedAt(t)
-	return sc
+func (_c *SessionCreate) SetCreatedAt(v time.Time) *SessionCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableCreatedAt(t *time.Time) *SessionCreate {
-	if t != nil {
-		sc.SetCreatedAt(*t)
+func (_c *SessionCreate) SetNillableCreatedAt(v *time.Time) *SessionCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return sc
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (sc *SessionCreate) SetUpdatedAt(t time.Time) *SessionCreate {
-	sc.mutation.SetUpdatedAt(t)
-	return sc
+func (_c *SessionCreate) SetUpdatedAt(v time.Time) *SessionCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (sc *SessionCreate) SetNillableUpdatedAt(t *time.Time) *SessionCreate {
-	if t != nil {
-		sc.SetUpdatedAt(*t)
+func (_c *SessionCreate) SetNillableUpdatedAt(v *time.Time) *SessionCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return sc
+	return _c
 }
 
 // SetAdminID sets the "admin" edge to the Admin entity by ID.
-func (sc *SessionCreate) SetAdminID(id int) *SessionCreate {
-	sc.mutation.SetAdminID(id)
-	return sc
+func (_c *SessionCreate) SetAdminID(id int) *SessionCreate {
+	_c.mutation.SetAdminID(id)
+	return _c
 }
 
 // SetAdmin sets the "admin" edge to the Admin entity.
-func (sc *SessionCreate) SetAdmin(a *Admin) *SessionCreate {
-	return sc.SetAdminID(a.ID)
+func (_c *SessionCreate) SetAdmin(v *Admin) *SessionCreate {
+	return _c.SetAdminID(v.ID)
 }
 
 // Mutation returns the SessionMutation object of the builder.
-func (sc *SessionCreate) Mutation() *SessionMutation {
-	return sc.mutation
+func (_c *SessionCreate) Mutation() *SessionMutation {
+	return _c.mutation
 }
 
 // Save creates the Session in the database.
-func (sc *SessionCreate) Save(ctx context.Context) (*Session, error) {
-	sc.defaults()
-	return withHooks(ctx, sc.sqlSave, sc.mutation, sc.hooks)
+func (_c *SessionCreate) Save(ctx context.Context) (*Session, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (sc *SessionCreate) SaveX(ctx context.Context) *Session {
-	v, err := sc.Save(ctx)
+func (_c *SessionCreate) SaveX(ctx context.Context) *Session {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -135,61 +135,61 @@ func (sc *SessionCreate) SaveX(ctx context.Context) *Session {
 }
 
 // Exec executes the query.
-func (sc *SessionCreate) Exec(ctx context.Context) error {
-	_, err := sc.Save(ctx)
+func (_c *SessionCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (sc *SessionCreate) ExecX(ctx context.Context) {
-	if err := sc.Exec(ctx); err != nil {
+func (_c *SessionCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (sc *SessionCreate) defaults() {
-	if _, ok := sc.mutation.CreatedAt(); !ok {
+func (_c *SessionCreate) defaults() {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := session.DefaultCreatedAt()
-		sc.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := session.DefaultUpdatedAt()
-		sc.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (sc *SessionCreate) check() error {
-	if _, ok := sc.mutation.TokenHash(); !ok {
+func (_c *SessionCreate) check() error {
+	if _, ok := _c.mutation.TokenHash(); !ok {
 		return &ValidationError{Name: "token_hash", err: errors.New(`ent: missing required field "Session.token_hash"`)}
 	}
-	if v, ok := sc.mutation.TokenHash(); ok {
+	if v, ok := _c.mutation.TokenHash(); ok {
 		if err := session.TokenHashValidator(v); err != nil {
 			return &ValidationError{Name: "token_hash", err: fmt.Errorf(`ent: validator failed for field "Session.token_hash": %w`, err)}
 		}
 	}
-	if _, ok := sc.mutation.ExpiresAt(); !ok {
+	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expires_at", err: errors.New(`ent: missing required field "Session.expires_at"`)}
 	}
-	if _, ok := sc.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Session.created_at"`)}
 	}
-	if _, ok := sc.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Session.updated_at"`)}
 	}
-	if _, ok := sc.mutation.AdminID(); !ok {
+	if len(_c.mutation.AdminIDs()) == 0 {
 		return &ValidationError{Name: "admin", err: errors.New(`ent: missing required edge "Session.admin"`)}
 	}
 	return nil
 }
 
-func (sc *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
-	if err := sc.check(); err != nil {
+func (_c *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := sc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, sc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -197,45 +197,45 @@ func (sc *SessionCreate) sqlSave(ctx context.Context) (*Session, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	sc.mutation.id = &_node.ID
-	sc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (sc *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
+func (_c *SessionCreate) createSpec() (*Session, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Session{config: sc.config}
+		_node = &Session{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(session.Table, sqlgraph.NewFieldSpec(session.FieldID, field.TypeInt))
 	)
-	if value, ok := sc.mutation.TokenHash(); ok {
+	if value, ok := _c.mutation.TokenHash(); ok {
 		_spec.SetField(session.FieldTokenHash, field.TypeString, value)
 		_node.TokenHash = value
 	}
-	if value, ok := sc.mutation.CsrfTokenHash(); ok {
+	if value, ok := _c.mutation.CsrfTokenHash(); ok {
 		_spec.SetField(session.FieldCsrfTokenHash, field.TypeString, value)
 		_node.CsrfTokenHash = value
 	}
-	if value, ok := sc.mutation.ExpiresAt(); ok {
+	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(session.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
 	}
-	if value, ok := sc.mutation.UserAgent(); ok {
+	if value, ok := _c.mutation.UserAgent(); ok {
 		_spec.SetField(session.FieldUserAgent, field.TypeString, value)
 		_node.UserAgent = value
 	}
-	if value, ok := sc.mutation.IP(); ok {
+	if value, ok := _c.mutation.IP(); ok {
 		_spec.SetField(session.FieldIP, field.TypeString, value)
 		_node.IP = value
 	}
-	if value, ok := sc.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(session.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := sc.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(session.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := sc.mutation.AdminIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.AdminIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -263,16 +263,16 @@ type SessionCreateBulk struct {
 }
 
 // Save creates the Session entities in the database.
-func (scb *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
-	if scb.err != nil {
-		return nil, scb.err
+func (_c *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(scb.builders))
-	nodes := make([]*Session, len(scb.builders))
-	mutators := make([]Mutator, len(scb.builders))
-	for i := range scb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Session, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := scb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SessionMutation)
@@ -286,11 +286,11 @@ func (scb *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, scb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, scb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -314,7 +314,7 @@ func (scb *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, scb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -322,8 +322,8 @@ func (scb *SessionCreateBulk) Save(ctx context.Context) ([]*Session, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (scb *SessionCreateBulk) SaveX(ctx context.Context) []*Session {
-	v, err := scb.Save(ctx)
+func (_c *SessionCreateBulk) SaveX(ctx context.Context) []*Session {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -331,14 +331,14 @@ func (scb *SessionCreateBulk) SaveX(ctx context.Context) []*Session {
 }
 
 // Exec executes the query.
-func (scb *SessionCreateBulk) Exec(ctx context.Context) error {
-	_, err := scb.Save(ctx)
+func (_c *SessionCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (scb *SessionCreateBulk) ExecX(ctx context.Context) {
-	if err := scb.Exec(ctx); err != nil {
+func (_c *SessionCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

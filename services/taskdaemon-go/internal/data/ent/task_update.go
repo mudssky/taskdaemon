@@ -24,210 +24,210 @@ type TaskUpdate struct {
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (tu *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
-	tu.mutation.Where(ps...)
-	return tu
+func (_u *TaskUpdate) Where(ps ...predicate.Task) *TaskUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetName sets the "name" field.
-func (tu *TaskUpdate) SetName(s string) *TaskUpdate {
-	tu.mutation.SetName(s)
-	return tu
+func (_u *TaskUpdate) SetName(v string) *TaskUpdate {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableName(s *string) *TaskUpdate {
-	if s != nil {
-		tu.SetName(*s)
+func (_u *TaskUpdate) SetNillableName(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return tu
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (tu *TaskUpdate) SetDescription(s string) *TaskUpdate {
-	tu.mutation.SetDescription(s)
-	return tu
+func (_u *TaskUpdate) SetDescription(v string) *TaskUpdate {
+	_u.mutation.SetDescription(v)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableDescription(s *string) *TaskUpdate {
-	if s != nil {
-		tu.SetDescription(*s)
+func (_u *TaskUpdate) SetNillableDescription(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
-	return tu
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (tu *TaskUpdate) ClearDescription() *TaskUpdate {
-	tu.mutation.ClearDescription()
-	return tu
+func (_u *TaskUpdate) ClearDescription() *TaskUpdate {
+	_u.mutation.ClearDescription()
+	return _u
 }
 
 // SetEnabled sets the "enabled" field.
-func (tu *TaskUpdate) SetEnabled(b bool) *TaskUpdate {
-	tu.mutation.SetEnabled(b)
-	return tu
+func (_u *TaskUpdate) SetEnabled(v bool) *TaskUpdate {
+	_u.mutation.SetEnabled(v)
+	return _u
 }
 
 // SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableEnabled(b *bool) *TaskUpdate {
-	if b != nil {
-		tu.SetEnabled(*b)
+func (_u *TaskUpdate) SetNillableEnabled(v *bool) *TaskUpdate {
+	if v != nil {
+		_u.SetEnabled(*v)
 	}
-	return tu
+	return _u
 }
 
 // SetCronExpression sets the "cron_expression" field.
-func (tu *TaskUpdate) SetCronExpression(s string) *TaskUpdate {
-	tu.mutation.SetCronExpression(s)
-	return tu
+func (_u *TaskUpdate) SetCronExpression(v string) *TaskUpdate {
+	_u.mutation.SetCronExpression(v)
+	return _u
 }
 
 // SetNillableCronExpression sets the "cron_expression" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableCronExpression(s *string) *TaskUpdate {
-	if s != nil {
-		tu.SetCronExpression(*s)
+func (_u *TaskUpdate) SetNillableCronExpression(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetCronExpression(*v)
 	}
-	return tu
+	return _u
 }
 
 // ClearCronExpression clears the value of the "cron_expression" field.
-func (tu *TaskUpdate) ClearCronExpression() *TaskUpdate {
-	tu.mutation.ClearCronExpression()
-	return tu
+func (_u *TaskUpdate) ClearCronExpression() *TaskUpdate {
+	_u.mutation.ClearCronExpression()
+	return _u
 }
 
 // SetTimezone sets the "timezone" field.
-func (tu *TaskUpdate) SetTimezone(s string) *TaskUpdate {
-	tu.mutation.SetTimezone(s)
-	return tu
+func (_u *TaskUpdate) SetTimezone(v string) *TaskUpdate {
+	_u.mutation.SetTimezone(v)
+	return _u
 }
 
 // SetNillableTimezone sets the "timezone" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableTimezone(s *string) *TaskUpdate {
-	if s != nil {
-		tu.SetTimezone(*s)
+func (_u *TaskUpdate) SetNillableTimezone(v *string) *TaskUpdate {
+	if v != nil {
+		_u.SetTimezone(*v)
 	}
-	return tu
+	return _u
 }
 
 // SetRunnerType sets the "runner_type" field.
-func (tu *TaskUpdate) SetRunnerType(tt task.RunnerType) *TaskUpdate {
-	tu.mutation.SetRunnerType(tt)
-	return tu
+func (_u *TaskUpdate) SetRunnerType(v task.RunnerType) *TaskUpdate {
+	_u.mutation.SetRunnerType(v)
+	return _u
 }
 
 // SetNillableRunnerType sets the "runner_type" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableRunnerType(tt *task.RunnerType) *TaskUpdate {
-	if tt != nil {
-		tu.SetRunnerType(*tt)
+func (_u *TaskUpdate) SetNillableRunnerType(v *task.RunnerType) *TaskUpdate {
+	if v != nil {
+		_u.SetRunnerType(*v)
 	}
-	return tu
+	return _u
 }
 
 // SetRunnerConfig sets the "runner_config" field.
-func (tu *TaskUpdate) SetRunnerConfig(m map[string]interface{}) *TaskUpdate {
-	tu.mutation.SetRunnerConfig(m)
-	return tu
+func (_u *TaskUpdate) SetRunnerConfig(v map[string]interface{}) *TaskUpdate {
+	_u.mutation.SetRunnerConfig(v)
+	return _u
 }
 
 // ClearRunnerConfig clears the value of the "runner_config" field.
-func (tu *TaskUpdate) ClearRunnerConfig() *TaskUpdate {
-	tu.mutation.ClearRunnerConfig()
-	return tu
+func (_u *TaskUpdate) ClearRunnerConfig() *TaskUpdate {
+	_u.mutation.ClearRunnerConfig()
+	return _u
 }
 
 // SetTimeoutSeconds sets the "timeout_seconds" field.
-func (tu *TaskUpdate) SetTimeoutSeconds(i int) *TaskUpdate {
-	tu.mutation.ResetTimeoutSeconds()
-	tu.mutation.SetTimeoutSeconds(i)
-	return tu
+func (_u *TaskUpdate) SetTimeoutSeconds(v int) *TaskUpdate {
+	_u.mutation.ResetTimeoutSeconds()
+	_u.mutation.SetTimeoutSeconds(v)
+	return _u
 }
 
 // SetNillableTimeoutSeconds sets the "timeout_seconds" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableTimeoutSeconds(i *int) *TaskUpdate {
-	if i != nil {
-		tu.SetTimeoutSeconds(*i)
+func (_u *TaskUpdate) SetNillableTimeoutSeconds(v *int) *TaskUpdate {
+	if v != nil {
+		_u.SetTimeoutSeconds(*v)
 	}
-	return tu
+	return _u
 }
 
-// AddTimeoutSeconds adds i to the "timeout_seconds" field.
-func (tu *TaskUpdate) AddTimeoutSeconds(i int) *TaskUpdate {
-	tu.mutation.AddTimeoutSeconds(i)
-	return tu
+// AddTimeoutSeconds adds value to the "timeout_seconds" field.
+func (_u *TaskUpdate) AddTimeoutSeconds(v int) *TaskUpdate {
+	_u.mutation.AddTimeoutSeconds(v)
+	return _u
 }
 
 // SetOverlapPolicy sets the "overlap_policy" field.
-func (tu *TaskUpdate) SetOverlapPolicy(tp task.OverlapPolicy) *TaskUpdate {
-	tu.mutation.SetOverlapPolicy(tp)
-	return tu
+func (_u *TaskUpdate) SetOverlapPolicy(v task.OverlapPolicy) *TaskUpdate {
+	_u.mutation.SetOverlapPolicy(v)
+	return _u
 }
 
 // SetNillableOverlapPolicy sets the "overlap_policy" field if the given value is not nil.
-func (tu *TaskUpdate) SetNillableOverlapPolicy(tp *task.OverlapPolicy) *TaskUpdate {
-	if tp != nil {
-		tu.SetOverlapPolicy(*tp)
+func (_u *TaskUpdate) SetNillableOverlapPolicy(v *task.OverlapPolicy) *TaskUpdate {
+	if v != nil {
+		_u.SetOverlapPolicy(*v)
 	}
-	return tu
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (tu *TaskUpdate) SetUpdatedAt(t time.Time) *TaskUpdate {
-	tu.mutation.SetUpdatedAt(t)
-	return tu
+func (_u *TaskUpdate) SetUpdatedAt(v time.Time) *TaskUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // AddRunIDs adds the "runs" edge to the Run entity by IDs.
-func (tu *TaskUpdate) AddRunIDs(ids ...int) *TaskUpdate {
-	tu.mutation.AddRunIDs(ids...)
-	return tu
+func (_u *TaskUpdate) AddRunIDs(ids ...int) *TaskUpdate {
+	_u.mutation.AddRunIDs(ids...)
+	return _u
 }
 
 // AddRuns adds the "runs" edges to the Run entity.
-func (tu *TaskUpdate) AddRuns(r ...*Run) *TaskUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *TaskUpdate) AddRuns(v ...*Run) *TaskUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.AddRunIDs(ids...)
+	return _u.AddRunIDs(ids...)
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (tu *TaskUpdate) Mutation() *TaskMutation {
-	return tu.mutation
+func (_u *TaskUpdate) Mutation() *TaskMutation {
+	return _u.mutation
 }
 
 // ClearRuns clears all "runs" edges to the Run entity.
-func (tu *TaskUpdate) ClearRuns() *TaskUpdate {
-	tu.mutation.ClearRuns()
-	return tu
+func (_u *TaskUpdate) ClearRuns() *TaskUpdate {
+	_u.mutation.ClearRuns()
+	return _u
 }
 
 // RemoveRunIDs removes the "runs" edge to Run entities by IDs.
-func (tu *TaskUpdate) RemoveRunIDs(ids ...int) *TaskUpdate {
-	tu.mutation.RemoveRunIDs(ids...)
-	return tu
+func (_u *TaskUpdate) RemoveRunIDs(ids ...int) *TaskUpdate {
+	_u.mutation.RemoveRunIDs(ids...)
+	return _u
 }
 
 // RemoveRuns removes "runs" edges to Run entities.
-func (tu *TaskUpdate) RemoveRuns(r ...*Run) *TaskUpdate {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *TaskUpdate) RemoveRuns(v ...*Run) *TaskUpdate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tu.RemoveRunIDs(ids...)
+	return _u.RemoveRunIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (tu *TaskUpdate) Save(ctx context.Context) (int, error) {
-	tu.defaults()
-	return withHooks(ctx, tu.sqlSave, tu.mutation, tu.hooks)
+func (_u *TaskUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tu *TaskUpdate) SaveX(ctx context.Context) int {
-	affected, err := tu.Save(ctx)
+func (_u *TaskUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -235,44 +235,44 @@ func (tu *TaskUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (tu *TaskUpdate) Exec(ctx context.Context) error {
-	_, err := tu.Save(ctx)
+func (_u *TaskUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tu *TaskUpdate) ExecX(ctx context.Context) {
-	if err := tu.Exec(ctx); err != nil {
+func (_u *TaskUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tu *TaskUpdate) defaults() {
-	if _, ok := tu.mutation.UpdatedAt(); !ok {
+func (_u *TaskUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := task.UpdateDefaultUpdatedAt()
-		tu.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tu *TaskUpdate) check() error {
-	if v, ok := tu.mutation.Name(); ok {
+func (_u *TaskUpdate) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := task.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Task.name": %w`, err)}
 		}
 	}
-	if v, ok := tu.mutation.RunnerType(); ok {
+	if v, ok := _u.mutation.RunnerType(); ok {
 		if err := task.RunnerTypeValidator(v); err != nil {
 			return &ValidationError{Name: "runner_type", err: fmt.Errorf(`ent: validator failed for field "Task.runner_type": %w`, err)}
 		}
 	}
-	if v, ok := tu.mutation.TimeoutSeconds(); ok {
+	if v, ok := _u.mutation.TimeoutSeconds(); ok {
 		if err := task.TimeoutSecondsValidator(v); err != nil {
 			return &ValidationError{Name: "timeout_seconds", err: fmt.Errorf(`ent: validator failed for field "Task.timeout_seconds": %w`, err)}
 		}
 	}
-	if v, ok := tu.mutation.OverlapPolicy(); ok {
+	if v, ok := _u.mutation.OverlapPolicy(); ok {
 		if err := task.OverlapPolicyValidator(v); err != nil {
 			return &ValidationError{Name: "overlap_policy", err: fmt.Errorf(`ent: validator failed for field "Task.overlap_policy": %w`, err)}
 		}
@@ -280,61 +280,61 @@ func (tu *TaskUpdate) check() error {
 	return nil
 }
 
-func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := tu.check(); err != nil {
-		return n, err
+func (_u *TaskUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
-	if ps := tu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tu.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(task.FieldName, field.TypeString, value)
 	}
-	if value, ok := tu.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(task.FieldDescription, field.TypeString, value)
 	}
-	if tu.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(task.FieldDescription, field.TypeString)
 	}
-	if value, ok := tu.mutation.Enabled(); ok {
+	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(task.FieldEnabled, field.TypeBool, value)
 	}
-	if value, ok := tu.mutation.CronExpression(); ok {
+	if value, ok := _u.mutation.CronExpression(); ok {
 		_spec.SetField(task.FieldCronExpression, field.TypeString, value)
 	}
-	if tu.mutation.CronExpressionCleared() {
+	if _u.mutation.CronExpressionCleared() {
 		_spec.ClearField(task.FieldCronExpression, field.TypeString)
 	}
-	if value, ok := tu.mutation.Timezone(); ok {
+	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(task.FieldTimezone, field.TypeString, value)
 	}
-	if value, ok := tu.mutation.RunnerType(); ok {
+	if value, ok := _u.mutation.RunnerType(); ok {
 		_spec.SetField(task.FieldRunnerType, field.TypeEnum, value)
 	}
-	if value, ok := tu.mutation.RunnerConfig(); ok {
+	if value, ok := _u.mutation.RunnerConfig(); ok {
 		_spec.SetField(task.FieldRunnerConfig, field.TypeJSON, value)
 	}
-	if tu.mutation.RunnerConfigCleared() {
+	if _u.mutation.RunnerConfigCleared() {
 		_spec.ClearField(task.FieldRunnerConfig, field.TypeJSON)
 	}
-	if value, ok := tu.mutation.TimeoutSeconds(); ok {
+	if value, ok := _u.mutation.TimeoutSeconds(); ok {
 		_spec.SetField(task.FieldTimeoutSeconds, field.TypeInt, value)
 	}
-	if value, ok := tu.mutation.AddedTimeoutSeconds(); ok {
+	if value, ok := _u.mutation.AddedTimeoutSeconds(); ok {
 		_spec.AddField(task.FieldTimeoutSeconds, field.TypeInt, value)
 	}
-	if value, ok := tu.mutation.OverlapPolicy(); ok {
+	if value, ok := _u.mutation.OverlapPolicy(); ok {
 		_spec.SetField(task.FieldOverlapPolicy, field.TypeEnum, value)
 	}
-	if value, ok := tu.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(task.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if tu.mutation.RunsCleared() {
+	if _u.mutation.RunsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -347,7 +347,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedRunsIDs(); len(nodes) > 0 && !tu.mutation.RunsCleared() {
+	if nodes := _u.mutation.RemovedRunsIDs(); len(nodes) > 0 && !_u.mutation.RunsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -363,7 +363,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RunsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RunsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -379,7 +379,7 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -387,8 +387,8 @@ func (tu *TaskUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	tu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // TaskUpdateOne is the builder for updating a single Task entity.
@@ -400,217 +400,217 @@ type TaskUpdateOne struct {
 }
 
 // SetName sets the "name" field.
-func (tuo *TaskUpdateOne) SetName(s string) *TaskUpdateOne {
-	tuo.mutation.SetName(s)
-	return tuo
+func (_u *TaskUpdateOne) SetName(v string) *TaskUpdateOne {
+	_u.mutation.SetName(v)
+	return _u
 }
 
 // SetNillableName sets the "name" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableName(s *string) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetName(*s)
+func (_u *TaskUpdateOne) SetNillableName(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetName(*v)
 	}
-	return tuo
+	return _u
 }
 
 // SetDescription sets the "description" field.
-func (tuo *TaskUpdateOne) SetDescription(s string) *TaskUpdateOne {
-	tuo.mutation.SetDescription(s)
-	return tuo
+func (_u *TaskUpdateOne) SetDescription(v string) *TaskUpdateOne {
+	_u.mutation.SetDescription(v)
+	return _u
 }
 
 // SetNillableDescription sets the "description" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableDescription(s *string) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetDescription(*s)
+func (_u *TaskUpdateOne) SetNillableDescription(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetDescription(*v)
 	}
-	return tuo
+	return _u
 }
 
 // ClearDescription clears the value of the "description" field.
-func (tuo *TaskUpdateOne) ClearDescription() *TaskUpdateOne {
-	tuo.mutation.ClearDescription()
-	return tuo
+func (_u *TaskUpdateOne) ClearDescription() *TaskUpdateOne {
+	_u.mutation.ClearDescription()
+	return _u
 }
 
 // SetEnabled sets the "enabled" field.
-func (tuo *TaskUpdateOne) SetEnabled(b bool) *TaskUpdateOne {
-	tuo.mutation.SetEnabled(b)
-	return tuo
+func (_u *TaskUpdateOne) SetEnabled(v bool) *TaskUpdateOne {
+	_u.mutation.SetEnabled(v)
+	return _u
 }
 
 // SetNillableEnabled sets the "enabled" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableEnabled(b *bool) *TaskUpdateOne {
-	if b != nil {
-		tuo.SetEnabled(*b)
+func (_u *TaskUpdateOne) SetNillableEnabled(v *bool) *TaskUpdateOne {
+	if v != nil {
+		_u.SetEnabled(*v)
 	}
-	return tuo
+	return _u
 }
 
 // SetCronExpression sets the "cron_expression" field.
-func (tuo *TaskUpdateOne) SetCronExpression(s string) *TaskUpdateOne {
-	tuo.mutation.SetCronExpression(s)
-	return tuo
+func (_u *TaskUpdateOne) SetCronExpression(v string) *TaskUpdateOne {
+	_u.mutation.SetCronExpression(v)
+	return _u
 }
 
 // SetNillableCronExpression sets the "cron_expression" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableCronExpression(s *string) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetCronExpression(*s)
+func (_u *TaskUpdateOne) SetNillableCronExpression(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetCronExpression(*v)
 	}
-	return tuo
+	return _u
 }
 
 // ClearCronExpression clears the value of the "cron_expression" field.
-func (tuo *TaskUpdateOne) ClearCronExpression() *TaskUpdateOne {
-	tuo.mutation.ClearCronExpression()
-	return tuo
+func (_u *TaskUpdateOne) ClearCronExpression() *TaskUpdateOne {
+	_u.mutation.ClearCronExpression()
+	return _u
 }
 
 // SetTimezone sets the "timezone" field.
-func (tuo *TaskUpdateOne) SetTimezone(s string) *TaskUpdateOne {
-	tuo.mutation.SetTimezone(s)
-	return tuo
+func (_u *TaskUpdateOne) SetTimezone(v string) *TaskUpdateOne {
+	_u.mutation.SetTimezone(v)
+	return _u
 }
 
 // SetNillableTimezone sets the "timezone" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableTimezone(s *string) *TaskUpdateOne {
-	if s != nil {
-		tuo.SetTimezone(*s)
+func (_u *TaskUpdateOne) SetNillableTimezone(v *string) *TaskUpdateOne {
+	if v != nil {
+		_u.SetTimezone(*v)
 	}
-	return tuo
+	return _u
 }
 
 // SetRunnerType sets the "runner_type" field.
-func (tuo *TaskUpdateOne) SetRunnerType(tt task.RunnerType) *TaskUpdateOne {
-	tuo.mutation.SetRunnerType(tt)
-	return tuo
+func (_u *TaskUpdateOne) SetRunnerType(v task.RunnerType) *TaskUpdateOne {
+	_u.mutation.SetRunnerType(v)
+	return _u
 }
 
 // SetNillableRunnerType sets the "runner_type" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableRunnerType(tt *task.RunnerType) *TaskUpdateOne {
-	if tt != nil {
-		tuo.SetRunnerType(*tt)
+func (_u *TaskUpdateOne) SetNillableRunnerType(v *task.RunnerType) *TaskUpdateOne {
+	if v != nil {
+		_u.SetRunnerType(*v)
 	}
-	return tuo
+	return _u
 }
 
 // SetRunnerConfig sets the "runner_config" field.
-func (tuo *TaskUpdateOne) SetRunnerConfig(m map[string]interface{}) *TaskUpdateOne {
-	tuo.mutation.SetRunnerConfig(m)
-	return tuo
+func (_u *TaskUpdateOne) SetRunnerConfig(v map[string]interface{}) *TaskUpdateOne {
+	_u.mutation.SetRunnerConfig(v)
+	return _u
 }
 
 // ClearRunnerConfig clears the value of the "runner_config" field.
-func (tuo *TaskUpdateOne) ClearRunnerConfig() *TaskUpdateOne {
-	tuo.mutation.ClearRunnerConfig()
-	return tuo
+func (_u *TaskUpdateOne) ClearRunnerConfig() *TaskUpdateOne {
+	_u.mutation.ClearRunnerConfig()
+	return _u
 }
 
 // SetTimeoutSeconds sets the "timeout_seconds" field.
-func (tuo *TaskUpdateOne) SetTimeoutSeconds(i int) *TaskUpdateOne {
-	tuo.mutation.ResetTimeoutSeconds()
-	tuo.mutation.SetTimeoutSeconds(i)
-	return tuo
+func (_u *TaskUpdateOne) SetTimeoutSeconds(v int) *TaskUpdateOne {
+	_u.mutation.ResetTimeoutSeconds()
+	_u.mutation.SetTimeoutSeconds(v)
+	return _u
 }
 
 // SetNillableTimeoutSeconds sets the "timeout_seconds" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableTimeoutSeconds(i *int) *TaskUpdateOne {
-	if i != nil {
-		tuo.SetTimeoutSeconds(*i)
+func (_u *TaskUpdateOne) SetNillableTimeoutSeconds(v *int) *TaskUpdateOne {
+	if v != nil {
+		_u.SetTimeoutSeconds(*v)
 	}
-	return tuo
+	return _u
 }
 
-// AddTimeoutSeconds adds i to the "timeout_seconds" field.
-func (tuo *TaskUpdateOne) AddTimeoutSeconds(i int) *TaskUpdateOne {
-	tuo.mutation.AddTimeoutSeconds(i)
-	return tuo
+// AddTimeoutSeconds adds value to the "timeout_seconds" field.
+func (_u *TaskUpdateOne) AddTimeoutSeconds(v int) *TaskUpdateOne {
+	_u.mutation.AddTimeoutSeconds(v)
+	return _u
 }
 
 // SetOverlapPolicy sets the "overlap_policy" field.
-func (tuo *TaskUpdateOne) SetOverlapPolicy(tp task.OverlapPolicy) *TaskUpdateOne {
-	tuo.mutation.SetOverlapPolicy(tp)
-	return tuo
+func (_u *TaskUpdateOne) SetOverlapPolicy(v task.OverlapPolicy) *TaskUpdateOne {
+	_u.mutation.SetOverlapPolicy(v)
+	return _u
 }
 
 // SetNillableOverlapPolicy sets the "overlap_policy" field if the given value is not nil.
-func (tuo *TaskUpdateOne) SetNillableOverlapPolicy(tp *task.OverlapPolicy) *TaskUpdateOne {
-	if tp != nil {
-		tuo.SetOverlapPolicy(*tp)
+func (_u *TaskUpdateOne) SetNillableOverlapPolicy(v *task.OverlapPolicy) *TaskUpdateOne {
+	if v != nil {
+		_u.SetOverlapPolicy(*v)
 	}
-	return tuo
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (tuo *TaskUpdateOne) SetUpdatedAt(t time.Time) *TaskUpdateOne {
-	tuo.mutation.SetUpdatedAt(t)
-	return tuo
+func (_u *TaskUpdateOne) SetUpdatedAt(v time.Time) *TaskUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // AddRunIDs adds the "runs" edge to the Run entity by IDs.
-func (tuo *TaskUpdateOne) AddRunIDs(ids ...int) *TaskUpdateOne {
-	tuo.mutation.AddRunIDs(ids...)
-	return tuo
+func (_u *TaskUpdateOne) AddRunIDs(ids ...int) *TaskUpdateOne {
+	_u.mutation.AddRunIDs(ids...)
+	return _u
 }
 
 // AddRuns adds the "runs" edges to the Run entity.
-func (tuo *TaskUpdateOne) AddRuns(r ...*Run) *TaskUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *TaskUpdateOne) AddRuns(v ...*Run) *TaskUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.AddRunIDs(ids...)
+	return _u.AddRunIDs(ids...)
 }
 
 // Mutation returns the TaskMutation object of the builder.
-func (tuo *TaskUpdateOne) Mutation() *TaskMutation {
-	return tuo.mutation
+func (_u *TaskUpdateOne) Mutation() *TaskMutation {
+	return _u.mutation
 }
 
 // ClearRuns clears all "runs" edges to the Run entity.
-func (tuo *TaskUpdateOne) ClearRuns() *TaskUpdateOne {
-	tuo.mutation.ClearRuns()
-	return tuo
+func (_u *TaskUpdateOne) ClearRuns() *TaskUpdateOne {
+	_u.mutation.ClearRuns()
+	return _u
 }
 
 // RemoveRunIDs removes the "runs" edge to Run entities by IDs.
-func (tuo *TaskUpdateOne) RemoveRunIDs(ids ...int) *TaskUpdateOne {
-	tuo.mutation.RemoveRunIDs(ids...)
-	return tuo
+func (_u *TaskUpdateOne) RemoveRunIDs(ids ...int) *TaskUpdateOne {
+	_u.mutation.RemoveRunIDs(ids...)
+	return _u
 }
 
 // RemoveRuns removes "runs" edges to Run entities.
-func (tuo *TaskUpdateOne) RemoveRuns(r ...*Run) *TaskUpdateOne {
-	ids := make([]int, len(r))
-	for i := range r {
-		ids[i] = r[i].ID
+func (_u *TaskUpdateOne) RemoveRuns(v ...*Run) *TaskUpdateOne {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return tuo.RemoveRunIDs(ids...)
+	return _u.RemoveRunIDs(ids...)
 }
 
 // Where appends a list predicates to the TaskUpdate builder.
-func (tuo *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
-	tuo.mutation.Where(ps...)
-	return tuo
+func (_u *TaskUpdateOne) Where(ps ...predicate.Task) *TaskUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (tuo *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
-	tuo.fields = append([]string{field}, fields...)
-	return tuo
+func (_u *TaskUpdateOne) Select(field string, fields ...string) *TaskUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Task entity.
-func (tuo *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
-	tuo.defaults()
-	return withHooks(ctx, tuo.sqlSave, tuo.mutation, tuo.hooks)
+func (_u *TaskUpdateOne) Save(ctx context.Context) (*Task, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
-	node, err := tuo.Save(ctx)
+func (_u *TaskUpdateOne) SaveX(ctx context.Context) *Task {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -618,44 +618,44 @@ func (tuo *TaskUpdateOne) SaveX(ctx context.Context) *Task {
 }
 
 // Exec executes the query on the entity.
-func (tuo *TaskUpdateOne) Exec(ctx context.Context) error {
-	_, err := tuo.Save(ctx)
+func (_u *TaskUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (tuo *TaskUpdateOne) ExecX(ctx context.Context) {
-	if err := tuo.Exec(ctx); err != nil {
+func (_u *TaskUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (tuo *TaskUpdateOne) defaults() {
-	if _, ok := tuo.mutation.UpdatedAt(); !ok {
+func (_u *TaskUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := task.UpdateDefaultUpdatedAt()
-		tuo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (tuo *TaskUpdateOne) check() error {
-	if v, ok := tuo.mutation.Name(); ok {
+func (_u *TaskUpdateOne) check() error {
+	if v, ok := _u.mutation.Name(); ok {
 		if err := task.NameValidator(v); err != nil {
 			return &ValidationError{Name: "name", err: fmt.Errorf(`ent: validator failed for field "Task.name": %w`, err)}
 		}
 	}
-	if v, ok := tuo.mutation.RunnerType(); ok {
+	if v, ok := _u.mutation.RunnerType(); ok {
 		if err := task.RunnerTypeValidator(v); err != nil {
 			return &ValidationError{Name: "runner_type", err: fmt.Errorf(`ent: validator failed for field "Task.runner_type": %w`, err)}
 		}
 	}
-	if v, ok := tuo.mutation.TimeoutSeconds(); ok {
+	if v, ok := _u.mutation.TimeoutSeconds(); ok {
 		if err := task.TimeoutSecondsValidator(v); err != nil {
 			return &ValidationError{Name: "timeout_seconds", err: fmt.Errorf(`ent: validator failed for field "Task.timeout_seconds": %w`, err)}
 		}
 	}
-	if v, ok := tuo.mutation.OverlapPolicy(); ok {
+	if v, ok := _u.mutation.OverlapPolicy(); ok {
 		if err := task.OverlapPolicyValidator(v); err != nil {
 			return &ValidationError{Name: "overlap_policy", err: fmt.Errorf(`ent: validator failed for field "Task.overlap_policy": %w`, err)}
 		}
@@ -663,17 +663,17 @@ func (tuo *TaskUpdateOne) check() error {
 	return nil
 }
 
-func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
-	if err := tuo.check(); err != nil {
+func (_u *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(task.Table, task.Columns, sqlgraph.NewFieldSpec(task.FieldID, field.TypeInt))
-	id, ok := tuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Task.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := tuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, task.FieldID)
 		for _, f := range fields {
@@ -685,56 +685,56 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 			}
 		}
 	}
-	if ps := tuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Name(); ok {
+	if value, ok := _u.mutation.Name(); ok {
 		_spec.SetField(task.FieldName, field.TypeString, value)
 	}
-	if value, ok := tuo.mutation.Description(); ok {
+	if value, ok := _u.mutation.Description(); ok {
 		_spec.SetField(task.FieldDescription, field.TypeString, value)
 	}
-	if tuo.mutation.DescriptionCleared() {
+	if _u.mutation.DescriptionCleared() {
 		_spec.ClearField(task.FieldDescription, field.TypeString)
 	}
-	if value, ok := tuo.mutation.Enabled(); ok {
+	if value, ok := _u.mutation.Enabled(); ok {
 		_spec.SetField(task.FieldEnabled, field.TypeBool, value)
 	}
-	if value, ok := tuo.mutation.CronExpression(); ok {
+	if value, ok := _u.mutation.CronExpression(); ok {
 		_spec.SetField(task.FieldCronExpression, field.TypeString, value)
 	}
-	if tuo.mutation.CronExpressionCleared() {
+	if _u.mutation.CronExpressionCleared() {
 		_spec.ClearField(task.FieldCronExpression, field.TypeString)
 	}
-	if value, ok := tuo.mutation.Timezone(); ok {
+	if value, ok := _u.mutation.Timezone(); ok {
 		_spec.SetField(task.FieldTimezone, field.TypeString, value)
 	}
-	if value, ok := tuo.mutation.RunnerType(); ok {
+	if value, ok := _u.mutation.RunnerType(); ok {
 		_spec.SetField(task.FieldRunnerType, field.TypeEnum, value)
 	}
-	if value, ok := tuo.mutation.RunnerConfig(); ok {
+	if value, ok := _u.mutation.RunnerConfig(); ok {
 		_spec.SetField(task.FieldRunnerConfig, field.TypeJSON, value)
 	}
-	if tuo.mutation.RunnerConfigCleared() {
+	if _u.mutation.RunnerConfigCleared() {
 		_spec.ClearField(task.FieldRunnerConfig, field.TypeJSON)
 	}
-	if value, ok := tuo.mutation.TimeoutSeconds(); ok {
+	if value, ok := _u.mutation.TimeoutSeconds(); ok {
 		_spec.SetField(task.FieldTimeoutSeconds, field.TypeInt, value)
 	}
-	if value, ok := tuo.mutation.AddedTimeoutSeconds(); ok {
+	if value, ok := _u.mutation.AddedTimeoutSeconds(); ok {
 		_spec.AddField(task.FieldTimeoutSeconds, field.TypeInt, value)
 	}
-	if value, ok := tuo.mutation.OverlapPolicy(); ok {
+	if value, ok := _u.mutation.OverlapPolicy(); ok {
 		_spec.SetField(task.FieldOverlapPolicy, field.TypeEnum, value)
 	}
-	if value, ok := tuo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(task.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if tuo.mutation.RunsCleared() {
+	if _u.mutation.RunsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -747,7 +747,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedRunsIDs(); len(nodes) > 0 && !tuo.mutation.RunsCleared() {
+	if nodes := _u.mutation.RemovedRunsIDs(); len(nodes) > 0 && !_u.mutation.RunsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -763,7 +763,7 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RunsIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.RunsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -779,10 +779,10 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Task{config: tuo.config}
+	_node = &Task{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, tuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{task.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -790,6 +790,6 @@ func (tuo *TaskUpdateOne) sqlSave(ctx context.Context) (_node *Task, err error) 
 		}
 		return nil, err
 	}
-	tuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

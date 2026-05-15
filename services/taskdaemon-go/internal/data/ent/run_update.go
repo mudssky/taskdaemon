@@ -24,224 +24,224 @@ type RunUpdate struct {
 }
 
 // Where appends a list predicates to the RunUpdate builder.
-func (ru *RunUpdate) Where(ps ...predicate.Run) *RunUpdate {
-	ru.mutation.Where(ps...)
-	return ru
+func (_u *RunUpdate) Where(ps ...predicate.Run) *RunUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetTrigger sets the "trigger" field.
-func (ru *RunUpdate) SetTrigger(r run.Trigger) *RunUpdate {
-	ru.mutation.SetTrigger(r)
-	return ru
+func (_u *RunUpdate) SetTrigger(v run.Trigger) *RunUpdate {
+	_u.mutation.SetTrigger(v)
+	return _u
 }
 
 // SetNillableTrigger sets the "trigger" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableTrigger(r *run.Trigger) *RunUpdate {
-	if r != nil {
-		ru.SetTrigger(*r)
+func (_u *RunUpdate) SetNillableTrigger(v *run.Trigger) *RunUpdate {
+	if v != nil {
+		_u.SetTrigger(*v)
 	}
-	return ru
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (ru *RunUpdate) SetStatus(r run.Status) *RunUpdate {
-	ru.mutation.SetStatus(r)
-	return ru
+func (_u *RunUpdate) SetStatus(v run.Status) *RunUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableStatus(r *run.Status) *RunUpdate {
-	if r != nil {
-		ru.SetStatus(*r)
+func (_u *RunUpdate) SetNillableStatus(v *run.Status) *RunUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return ru
+	return _u
 }
 
 // SetExitCode sets the "exit_code" field.
-func (ru *RunUpdate) SetExitCode(i int) *RunUpdate {
-	ru.mutation.ResetExitCode()
-	ru.mutation.SetExitCode(i)
-	return ru
+func (_u *RunUpdate) SetExitCode(v int) *RunUpdate {
+	_u.mutation.ResetExitCode()
+	_u.mutation.SetExitCode(v)
+	return _u
 }
 
 // SetNillableExitCode sets the "exit_code" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableExitCode(i *int) *RunUpdate {
-	if i != nil {
-		ru.SetExitCode(*i)
+func (_u *RunUpdate) SetNillableExitCode(v *int) *RunUpdate {
+	if v != nil {
+		_u.SetExitCode(*v)
 	}
-	return ru
+	return _u
 }
 
-// AddExitCode adds i to the "exit_code" field.
-func (ru *RunUpdate) AddExitCode(i int) *RunUpdate {
-	ru.mutation.AddExitCode(i)
-	return ru
+// AddExitCode adds value to the "exit_code" field.
+func (_u *RunUpdate) AddExitCode(v int) *RunUpdate {
+	_u.mutation.AddExitCode(v)
+	return _u
 }
 
 // ClearExitCode clears the value of the "exit_code" field.
-func (ru *RunUpdate) ClearExitCode() *RunUpdate {
-	ru.mutation.ClearExitCode()
-	return ru
+func (_u *RunUpdate) ClearExitCode() *RunUpdate {
+	_u.mutation.ClearExitCode()
+	return _u
 }
 
 // SetStartedAt sets the "started_at" field.
-func (ru *RunUpdate) SetStartedAt(t time.Time) *RunUpdate {
-	ru.mutation.SetStartedAt(t)
-	return ru
+func (_u *RunUpdate) SetStartedAt(v time.Time) *RunUpdate {
+	_u.mutation.SetStartedAt(v)
+	return _u
 }
 
 // SetNillableStartedAt sets the "started_at" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableStartedAt(t *time.Time) *RunUpdate {
-	if t != nil {
-		ru.SetStartedAt(*t)
+func (_u *RunUpdate) SetNillableStartedAt(v *time.Time) *RunUpdate {
+	if v != nil {
+		_u.SetStartedAt(*v)
 	}
-	return ru
+	return _u
 }
 
 // SetFinishedAt sets the "finished_at" field.
-func (ru *RunUpdate) SetFinishedAt(t time.Time) *RunUpdate {
-	ru.mutation.SetFinishedAt(t)
-	return ru
+func (_u *RunUpdate) SetFinishedAt(v time.Time) *RunUpdate {
+	_u.mutation.SetFinishedAt(v)
+	return _u
 }
 
 // SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableFinishedAt(t *time.Time) *RunUpdate {
-	if t != nil {
-		ru.SetFinishedAt(*t)
+func (_u *RunUpdate) SetNillableFinishedAt(v *time.Time) *RunUpdate {
+	if v != nil {
+		_u.SetFinishedAt(*v)
 	}
-	return ru
+	return _u
 }
 
 // ClearFinishedAt clears the value of the "finished_at" field.
-func (ru *RunUpdate) ClearFinishedAt() *RunUpdate {
-	ru.mutation.ClearFinishedAt()
-	return ru
+func (_u *RunUpdate) ClearFinishedAt() *RunUpdate {
+	_u.mutation.ClearFinishedAt()
+	return _u
 }
 
 // SetDurationMs sets the "duration_ms" field.
-func (ru *RunUpdate) SetDurationMs(i int64) *RunUpdate {
-	ru.mutation.ResetDurationMs()
-	ru.mutation.SetDurationMs(i)
-	return ru
+func (_u *RunUpdate) SetDurationMs(v int64) *RunUpdate {
+	_u.mutation.ResetDurationMs()
+	_u.mutation.SetDurationMs(v)
+	return _u
 }
 
 // SetNillableDurationMs sets the "duration_ms" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableDurationMs(i *int64) *RunUpdate {
-	if i != nil {
-		ru.SetDurationMs(*i)
+func (_u *RunUpdate) SetNillableDurationMs(v *int64) *RunUpdate {
+	if v != nil {
+		_u.SetDurationMs(*v)
 	}
-	return ru
+	return _u
 }
 
-// AddDurationMs adds i to the "duration_ms" field.
-func (ru *RunUpdate) AddDurationMs(i int64) *RunUpdate {
-	ru.mutation.AddDurationMs(i)
-	return ru
+// AddDurationMs adds value to the "duration_ms" field.
+func (_u *RunUpdate) AddDurationMs(v int64) *RunUpdate {
+	_u.mutation.AddDurationMs(v)
+	return _u
 }
 
 // ClearDurationMs clears the value of the "duration_ms" field.
-func (ru *RunUpdate) ClearDurationMs() *RunUpdate {
-	ru.mutation.ClearDurationMs()
-	return ru
+func (_u *RunUpdate) ClearDurationMs() *RunUpdate {
+	_u.mutation.ClearDurationMs()
+	return _u
 }
 
 // SetErrorSummary sets the "error_summary" field.
-func (ru *RunUpdate) SetErrorSummary(s string) *RunUpdate {
-	ru.mutation.SetErrorSummary(s)
-	return ru
+func (_u *RunUpdate) SetErrorSummary(v string) *RunUpdate {
+	_u.mutation.SetErrorSummary(v)
+	return _u
 }
 
 // SetNillableErrorSummary sets the "error_summary" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableErrorSummary(s *string) *RunUpdate {
-	if s != nil {
-		ru.SetErrorSummary(*s)
+func (_u *RunUpdate) SetNillableErrorSummary(v *string) *RunUpdate {
+	if v != nil {
+		_u.SetErrorSummary(*v)
 	}
-	return ru
+	return _u
 }
 
 // ClearErrorSummary clears the value of the "error_summary" field.
-func (ru *RunUpdate) ClearErrorSummary() *RunUpdate {
-	ru.mutation.ClearErrorSummary()
-	return ru
+func (_u *RunUpdate) ClearErrorSummary() *RunUpdate {
+	_u.mutation.ClearErrorSummary()
+	return _u
 }
 
 // SetStdout sets the "stdout" field.
-func (ru *RunUpdate) SetStdout(s string) *RunUpdate {
-	ru.mutation.SetStdout(s)
-	return ru
+func (_u *RunUpdate) SetStdout(v string) *RunUpdate {
+	_u.mutation.SetStdout(v)
+	return _u
 }
 
 // SetNillableStdout sets the "stdout" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableStdout(s *string) *RunUpdate {
-	if s != nil {
-		ru.SetStdout(*s)
+func (_u *RunUpdate) SetNillableStdout(v *string) *RunUpdate {
+	if v != nil {
+		_u.SetStdout(*v)
 	}
-	return ru
+	return _u
 }
 
 // ClearStdout clears the value of the "stdout" field.
-func (ru *RunUpdate) ClearStdout() *RunUpdate {
-	ru.mutation.ClearStdout()
-	return ru
+func (_u *RunUpdate) ClearStdout() *RunUpdate {
+	_u.mutation.ClearStdout()
+	return _u
 }
 
 // SetStderr sets the "stderr" field.
-func (ru *RunUpdate) SetStderr(s string) *RunUpdate {
-	ru.mutation.SetStderr(s)
-	return ru
+func (_u *RunUpdate) SetStderr(v string) *RunUpdate {
+	_u.mutation.SetStderr(v)
+	return _u
 }
 
 // SetNillableStderr sets the "stderr" field if the given value is not nil.
-func (ru *RunUpdate) SetNillableStderr(s *string) *RunUpdate {
-	if s != nil {
-		ru.SetStderr(*s)
+func (_u *RunUpdate) SetNillableStderr(v *string) *RunUpdate {
+	if v != nil {
+		_u.SetStderr(*v)
 	}
-	return ru
+	return _u
 }
 
 // ClearStderr clears the value of the "stderr" field.
-func (ru *RunUpdate) ClearStderr() *RunUpdate {
-	ru.mutation.ClearStderr()
-	return ru
+func (_u *RunUpdate) ClearStderr() *RunUpdate {
+	_u.mutation.ClearStderr()
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ru *RunUpdate) SetUpdatedAt(t time.Time) *RunUpdate {
-	ru.mutation.SetUpdatedAt(t)
-	return ru
+func (_u *RunUpdate) SetUpdatedAt(v time.Time) *RunUpdate {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetTaskID sets the "task" edge to the Task entity by ID.
-func (ru *RunUpdate) SetTaskID(id int) *RunUpdate {
-	ru.mutation.SetTaskID(id)
-	return ru
+func (_u *RunUpdate) SetTaskID(id int) *RunUpdate {
+	_u.mutation.SetTaskID(id)
+	return _u
 }
 
 // SetTask sets the "task" edge to the Task entity.
-func (ru *RunUpdate) SetTask(t *Task) *RunUpdate {
-	return ru.SetTaskID(t.ID)
+func (_u *RunUpdate) SetTask(v *Task) *RunUpdate {
+	return _u.SetTaskID(v.ID)
 }
 
 // Mutation returns the RunMutation object of the builder.
-func (ru *RunUpdate) Mutation() *RunMutation {
-	return ru.mutation
+func (_u *RunUpdate) Mutation() *RunMutation {
+	return _u.mutation
 }
 
 // ClearTask clears the "task" edge to the Task entity.
-func (ru *RunUpdate) ClearTask() *RunUpdate {
-	ru.mutation.ClearTask()
-	return ru
+func (_u *RunUpdate) ClearTask() *RunUpdate {
+	_u.mutation.ClearTask()
+	return _u
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (ru *RunUpdate) Save(ctx context.Context) (int, error) {
-	ru.defaults()
-	return withHooks(ctx, ru.sqlSave, ru.mutation, ru.hooks)
+func (_u *RunUpdate) Save(ctx context.Context) (int, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ru *RunUpdate) SaveX(ctx context.Context) int {
-	affected, err := ru.Save(ctx)
+func (_u *RunUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -249,111 +249,111 @@ func (ru *RunUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (ru *RunUpdate) Exec(ctx context.Context) error {
-	_, err := ru.Save(ctx)
+func (_u *RunUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ru *RunUpdate) ExecX(ctx context.Context) {
-	if err := ru.Exec(ctx); err != nil {
+func (_u *RunUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ru *RunUpdate) defaults() {
-	if _, ok := ru.mutation.UpdatedAt(); !ok {
+func (_u *RunUpdate) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := run.UpdateDefaultUpdatedAt()
-		ru.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ru *RunUpdate) check() error {
-	if v, ok := ru.mutation.Trigger(); ok {
+func (_u *RunUpdate) check() error {
+	if v, ok := _u.mutation.Trigger(); ok {
 		if err := run.TriggerValidator(v); err != nil {
 			return &ValidationError{Name: "trigger", err: fmt.Errorf(`ent: validator failed for field "Run.trigger": %w`, err)}
 		}
 	}
-	if v, ok := ru.mutation.Status(); ok {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := run.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Run.status": %w`, err)}
 		}
 	}
-	if _, ok := ru.mutation.TaskID(); ru.mutation.TaskCleared() && !ok {
+	if _u.mutation.TaskCleared() && len(_u.mutation.TaskIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Run.task"`)
 	}
 	return nil
 }
 
-func (ru *RunUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := ru.check(); err != nil {
-		return n, err
+func (_u *RunUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(run.Table, run.Columns, sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt))
-	if ps := ru.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ru.mutation.Trigger(); ok {
+	if value, ok := _u.mutation.Trigger(); ok {
 		_spec.SetField(run.FieldTrigger, field.TypeEnum, value)
 	}
-	if value, ok := ru.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(run.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := ru.mutation.ExitCode(); ok {
+	if value, ok := _u.mutation.ExitCode(); ok {
 		_spec.SetField(run.FieldExitCode, field.TypeInt, value)
 	}
-	if value, ok := ru.mutation.AddedExitCode(); ok {
+	if value, ok := _u.mutation.AddedExitCode(); ok {
 		_spec.AddField(run.FieldExitCode, field.TypeInt, value)
 	}
-	if ru.mutation.ExitCodeCleared() {
+	if _u.mutation.ExitCodeCleared() {
 		_spec.ClearField(run.FieldExitCode, field.TypeInt)
 	}
-	if value, ok := ru.mutation.StartedAt(); ok {
+	if value, ok := _u.mutation.StartedAt(); ok {
 		_spec.SetField(run.FieldStartedAt, field.TypeTime, value)
 	}
-	if value, ok := ru.mutation.FinishedAt(); ok {
+	if value, ok := _u.mutation.FinishedAt(); ok {
 		_spec.SetField(run.FieldFinishedAt, field.TypeTime, value)
 	}
-	if ru.mutation.FinishedAtCleared() {
+	if _u.mutation.FinishedAtCleared() {
 		_spec.ClearField(run.FieldFinishedAt, field.TypeTime)
 	}
-	if value, ok := ru.mutation.DurationMs(); ok {
+	if value, ok := _u.mutation.DurationMs(); ok {
 		_spec.SetField(run.FieldDurationMs, field.TypeInt64, value)
 	}
-	if value, ok := ru.mutation.AddedDurationMs(); ok {
+	if value, ok := _u.mutation.AddedDurationMs(); ok {
 		_spec.AddField(run.FieldDurationMs, field.TypeInt64, value)
 	}
-	if ru.mutation.DurationMsCleared() {
+	if _u.mutation.DurationMsCleared() {
 		_spec.ClearField(run.FieldDurationMs, field.TypeInt64)
 	}
-	if value, ok := ru.mutation.ErrorSummary(); ok {
+	if value, ok := _u.mutation.ErrorSummary(); ok {
 		_spec.SetField(run.FieldErrorSummary, field.TypeString, value)
 	}
-	if ru.mutation.ErrorSummaryCleared() {
+	if _u.mutation.ErrorSummaryCleared() {
 		_spec.ClearField(run.FieldErrorSummary, field.TypeString)
 	}
-	if value, ok := ru.mutation.Stdout(); ok {
+	if value, ok := _u.mutation.Stdout(); ok {
 		_spec.SetField(run.FieldStdout, field.TypeString, value)
 	}
-	if ru.mutation.StdoutCleared() {
+	if _u.mutation.StdoutCleared() {
 		_spec.ClearField(run.FieldStdout, field.TypeString)
 	}
-	if value, ok := ru.mutation.Stderr(); ok {
+	if value, ok := _u.mutation.Stderr(); ok {
 		_spec.SetField(run.FieldStderr, field.TypeString, value)
 	}
-	if ru.mutation.StderrCleared() {
+	if _u.mutation.StderrCleared() {
 		_spec.ClearField(run.FieldStderr, field.TypeString)
 	}
-	if value, ok := ru.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(run.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if ru.mutation.TaskCleared() {
+	if _u.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -366,7 +366,7 @@ func (ru *RunUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ru.mutation.TaskIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -382,7 +382,7 @@ func (ru *RunUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if n, err = sqlgraph.UpdateNodes(ctx, ru.driver, _spec); err != nil {
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{run.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -390,8 +390,8 @@ func (ru *RunUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	ru.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // RunUpdateOne is the builder for updating a single Run entity.
@@ -403,231 +403,231 @@ type RunUpdateOne struct {
 }
 
 // SetTrigger sets the "trigger" field.
-func (ruo *RunUpdateOne) SetTrigger(r run.Trigger) *RunUpdateOne {
-	ruo.mutation.SetTrigger(r)
-	return ruo
+func (_u *RunUpdateOne) SetTrigger(v run.Trigger) *RunUpdateOne {
+	_u.mutation.SetTrigger(v)
+	return _u
 }
 
 // SetNillableTrigger sets the "trigger" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableTrigger(r *run.Trigger) *RunUpdateOne {
-	if r != nil {
-		ruo.SetTrigger(*r)
+func (_u *RunUpdateOne) SetNillableTrigger(v *run.Trigger) *RunUpdateOne {
+	if v != nil {
+		_u.SetTrigger(*v)
 	}
-	return ruo
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (ruo *RunUpdateOne) SetStatus(r run.Status) *RunUpdateOne {
-	ruo.mutation.SetStatus(r)
-	return ruo
+func (_u *RunUpdateOne) SetStatus(v run.Status) *RunUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableStatus(r *run.Status) *RunUpdateOne {
-	if r != nil {
-		ruo.SetStatus(*r)
+func (_u *RunUpdateOne) SetNillableStatus(v *run.Status) *RunUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return ruo
+	return _u
 }
 
 // SetExitCode sets the "exit_code" field.
-func (ruo *RunUpdateOne) SetExitCode(i int) *RunUpdateOne {
-	ruo.mutation.ResetExitCode()
-	ruo.mutation.SetExitCode(i)
-	return ruo
+func (_u *RunUpdateOne) SetExitCode(v int) *RunUpdateOne {
+	_u.mutation.ResetExitCode()
+	_u.mutation.SetExitCode(v)
+	return _u
 }
 
 // SetNillableExitCode sets the "exit_code" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableExitCode(i *int) *RunUpdateOne {
-	if i != nil {
-		ruo.SetExitCode(*i)
+func (_u *RunUpdateOne) SetNillableExitCode(v *int) *RunUpdateOne {
+	if v != nil {
+		_u.SetExitCode(*v)
 	}
-	return ruo
+	return _u
 }
 
-// AddExitCode adds i to the "exit_code" field.
-func (ruo *RunUpdateOne) AddExitCode(i int) *RunUpdateOne {
-	ruo.mutation.AddExitCode(i)
-	return ruo
+// AddExitCode adds value to the "exit_code" field.
+func (_u *RunUpdateOne) AddExitCode(v int) *RunUpdateOne {
+	_u.mutation.AddExitCode(v)
+	return _u
 }
 
 // ClearExitCode clears the value of the "exit_code" field.
-func (ruo *RunUpdateOne) ClearExitCode() *RunUpdateOne {
-	ruo.mutation.ClearExitCode()
-	return ruo
+func (_u *RunUpdateOne) ClearExitCode() *RunUpdateOne {
+	_u.mutation.ClearExitCode()
+	return _u
 }
 
 // SetStartedAt sets the "started_at" field.
-func (ruo *RunUpdateOne) SetStartedAt(t time.Time) *RunUpdateOne {
-	ruo.mutation.SetStartedAt(t)
-	return ruo
+func (_u *RunUpdateOne) SetStartedAt(v time.Time) *RunUpdateOne {
+	_u.mutation.SetStartedAt(v)
+	return _u
 }
 
 // SetNillableStartedAt sets the "started_at" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableStartedAt(t *time.Time) *RunUpdateOne {
-	if t != nil {
-		ruo.SetStartedAt(*t)
+func (_u *RunUpdateOne) SetNillableStartedAt(v *time.Time) *RunUpdateOne {
+	if v != nil {
+		_u.SetStartedAt(*v)
 	}
-	return ruo
+	return _u
 }
 
 // SetFinishedAt sets the "finished_at" field.
-func (ruo *RunUpdateOne) SetFinishedAt(t time.Time) *RunUpdateOne {
-	ruo.mutation.SetFinishedAt(t)
-	return ruo
+func (_u *RunUpdateOne) SetFinishedAt(v time.Time) *RunUpdateOne {
+	_u.mutation.SetFinishedAt(v)
+	return _u
 }
 
 // SetNillableFinishedAt sets the "finished_at" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableFinishedAt(t *time.Time) *RunUpdateOne {
-	if t != nil {
-		ruo.SetFinishedAt(*t)
+func (_u *RunUpdateOne) SetNillableFinishedAt(v *time.Time) *RunUpdateOne {
+	if v != nil {
+		_u.SetFinishedAt(*v)
 	}
-	return ruo
+	return _u
 }
 
 // ClearFinishedAt clears the value of the "finished_at" field.
-func (ruo *RunUpdateOne) ClearFinishedAt() *RunUpdateOne {
-	ruo.mutation.ClearFinishedAt()
-	return ruo
+func (_u *RunUpdateOne) ClearFinishedAt() *RunUpdateOne {
+	_u.mutation.ClearFinishedAt()
+	return _u
 }
 
 // SetDurationMs sets the "duration_ms" field.
-func (ruo *RunUpdateOne) SetDurationMs(i int64) *RunUpdateOne {
-	ruo.mutation.ResetDurationMs()
-	ruo.mutation.SetDurationMs(i)
-	return ruo
+func (_u *RunUpdateOne) SetDurationMs(v int64) *RunUpdateOne {
+	_u.mutation.ResetDurationMs()
+	_u.mutation.SetDurationMs(v)
+	return _u
 }
 
 // SetNillableDurationMs sets the "duration_ms" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableDurationMs(i *int64) *RunUpdateOne {
-	if i != nil {
-		ruo.SetDurationMs(*i)
+func (_u *RunUpdateOne) SetNillableDurationMs(v *int64) *RunUpdateOne {
+	if v != nil {
+		_u.SetDurationMs(*v)
 	}
-	return ruo
+	return _u
 }
 
-// AddDurationMs adds i to the "duration_ms" field.
-func (ruo *RunUpdateOne) AddDurationMs(i int64) *RunUpdateOne {
-	ruo.mutation.AddDurationMs(i)
-	return ruo
+// AddDurationMs adds value to the "duration_ms" field.
+func (_u *RunUpdateOne) AddDurationMs(v int64) *RunUpdateOne {
+	_u.mutation.AddDurationMs(v)
+	return _u
 }
 
 // ClearDurationMs clears the value of the "duration_ms" field.
-func (ruo *RunUpdateOne) ClearDurationMs() *RunUpdateOne {
-	ruo.mutation.ClearDurationMs()
-	return ruo
+func (_u *RunUpdateOne) ClearDurationMs() *RunUpdateOne {
+	_u.mutation.ClearDurationMs()
+	return _u
 }
 
 // SetErrorSummary sets the "error_summary" field.
-func (ruo *RunUpdateOne) SetErrorSummary(s string) *RunUpdateOne {
-	ruo.mutation.SetErrorSummary(s)
-	return ruo
+func (_u *RunUpdateOne) SetErrorSummary(v string) *RunUpdateOne {
+	_u.mutation.SetErrorSummary(v)
+	return _u
 }
 
 // SetNillableErrorSummary sets the "error_summary" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableErrorSummary(s *string) *RunUpdateOne {
-	if s != nil {
-		ruo.SetErrorSummary(*s)
+func (_u *RunUpdateOne) SetNillableErrorSummary(v *string) *RunUpdateOne {
+	if v != nil {
+		_u.SetErrorSummary(*v)
 	}
-	return ruo
+	return _u
 }
 
 // ClearErrorSummary clears the value of the "error_summary" field.
-func (ruo *RunUpdateOne) ClearErrorSummary() *RunUpdateOne {
-	ruo.mutation.ClearErrorSummary()
-	return ruo
+func (_u *RunUpdateOne) ClearErrorSummary() *RunUpdateOne {
+	_u.mutation.ClearErrorSummary()
+	return _u
 }
 
 // SetStdout sets the "stdout" field.
-func (ruo *RunUpdateOne) SetStdout(s string) *RunUpdateOne {
-	ruo.mutation.SetStdout(s)
-	return ruo
+func (_u *RunUpdateOne) SetStdout(v string) *RunUpdateOne {
+	_u.mutation.SetStdout(v)
+	return _u
 }
 
 // SetNillableStdout sets the "stdout" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableStdout(s *string) *RunUpdateOne {
-	if s != nil {
-		ruo.SetStdout(*s)
+func (_u *RunUpdateOne) SetNillableStdout(v *string) *RunUpdateOne {
+	if v != nil {
+		_u.SetStdout(*v)
 	}
-	return ruo
+	return _u
 }
 
 // ClearStdout clears the value of the "stdout" field.
-func (ruo *RunUpdateOne) ClearStdout() *RunUpdateOne {
-	ruo.mutation.ClearStdout()
-	return ruo
+func (_u *RunUpdateOne) ClearStdout() *RunUpdateOne {
+	_u.mutation.ClearStdout()
+	return _u
 }
 
 // SetStderr sets the "stderr" field.
-func (ruo *RunUpdateOne) SetStderr(s string) *RunUpdateOne {
-	ruo.mutation.SetStderr(s)
-	return ruo
+func (_u *RunUpdateOne) SetStderr(v string) *RunUpdateOne {
+	_u.mutation.SetStderr(v)
+	return _u
 }
 
 // SetNillableStderr sets the "stderr" field if the given value is not nil.
-func (ruo *RunUpdateOne) SetNillableStderr(s *string) *RunUpdateOne {
-	if s != nil {
-		ruo.SetStderr(*s)
+func (_u *RunUpdateOne) SetNillableStderr(v *string) *RunUpdateOne {
+	if v != nil {
+		_u.SetStderr(*v)
 	}
-	return ruo
+	return _u
 }
 
 // ClearStderr clears the value of the "stderr" field.
-func (ruo *RunUpdateOne) ClearStderr() *RunUpdateOne {
-	ruo.mutation.ClearStderr()
-	return ruo
+func (_u *RunUpdateOne) ClearStderr() *RunUpdateOne {
+	_u.mutation.ClearStderr()
+	return _u
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ruo *RunUpdateOne) SetUpdatedAt(t time.Time) *RunUpdateOne {
-	ruo.mutation.SetUpdatedAt(t)
-	return ruo
+func (_u *RunUpdateOne) SetUpdatedAt(v time.Time) *RunUpdateOne {
+	_u.mutation.SetUpdatedAt(v)
+	return _u
 }
 
 // SetTaskID sets the "task" edge to the Task entity by ID.
-func (ruo *RunUpdateOne) SetTaskID(id int) *RunUpdateOne {
-	ruo.mutation.SetTaskID(id)
-	return ruo
+func (_u *RunUpdateOne) SetTaskID(id int) *RunUpdateOne {
+	_u.mutation.SetTaskID(id)
+	return _u
 }
 
 // SetTask sets the "task" edge to the Task entity.
-func (ruo *RunUpdateOne) SetTask(t *Task) *RunUpdateOne {
-	return ruo.SetTaskID(t.ID)
+func (_u *RunUpdateOne) SetTask(v *Task) *RunUpdateOne {
+	return _u.SetTaskID(v.ID)
 }
 
 // Mutation returns the RunMutation object of the builder.
-func (ruo *RunUpdateOne) Mutation() *RunMutation {
-	return ruo.mutation
+func (_u *RunUpdateOne) Mutation() *RunMutation {
+	return _u.mutation
 }
 
 // ClearTask clears the "task" edge to the Task entity.
-func (ruo *RunUpdateOne) ClearTask() *RunUpdateOne {
-	ruo.mutation.ClearTask()
-	return ruo
+func (_u *RunUpdateOne) ClearTask() *RunUpdateOne {
+	_u.mutation.ClearTask()
+	return _u
 }
 
 // Where appends a list predicates to the RunUpdate builder.
-func (ruo *RunUpdateOne) Where(ps ...predicate.Run) *RunUpdateOne {
-	ruo.mutation.Where(ps...)
-	return ruo
+func (_u *RunUpdateOne) Where(ps ...predicate.Run) *RunUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (ruo *RunUpdateOne) Select(field string, fields ...string) *RunUpdateOne {
-	ruo.fields = append([]string{field}, fields...)
-	return ruo
+func (_u *RunUpdateOne) Select(field string, fields ...string) *RunUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Run entity.
-func (ruo *RunUpdateOne) Save(ctx context.Context) (*Run, error) {
-	ruo.defaults()
-	return withHooks(ctx, ruo.sqlSave, ruo.mutation, ruo.hooks)
+func (_u *RunUpdateOne) Save(ctx context.Context) (*Run, error) {
+	_u.defaults()
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ruo *RunUpdateOne) SaveX(ctx context.Context) *Run {
-	node, err := ruo.Save(ctx)
+func (_u *RunUpdateOne) SaveX(ctx context.Context) *Run {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -635,55 +635,55 @@ func (ruo *RunUpdateOne) SaveX(ctx context.Context) *Run {
 }
 
 // Exec executes the query on the entity.
-func (ruo *RunUpdateOne) Exec(ctx context.Context) error {
-	_, err := ruo.Save(ctx)
+func (_u *RunUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ruo *RunUpdateOne) ExecX(ctx context.Context) {
-	if err := ruo.Exec(ctx); err != nil {
+func (_u *RunUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ruo *RunUpdateOne) defaults() {
-	if _, ok := ruo.mutation.UpdatedAt(); !ok {
+func (_u *RunUpdateOne) defaults() {
+	if _, ok := _u.mutation.UpdatedAt(); !ok {
 		v := run.UpdateDefaultUpdatedAt()
-		ruo.mutation.SetUpdatedAt(v)
+		_u.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ruo *RunUpdateOne) check() error {
-	if v, ok := ruo.mutation.Trigger(); ok {
+func (_u *RunUpdateOne) check() error {
+	if v, ok := _u.mutation.Trigger(); ok {
 		if err := run.TriggerValidator(v); err != nil {
 			return &ValidationError{Name: "trigger", err: fmt.Errorf(`ent: validator failed for field "Run.trigger": %w`, err)}
 		}
 	}
-	if v, ok := ruo.mutation.Status(); ok {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := run.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Run.status": %w`, err)}
 		}
 	}
-	if _, ok := ruo.mutation.TaskID(); ruo.mutation.TaskCleared() && !ok {
+	if _u.mutation.TaskCleared() && len(_u.mutation.TaskIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Run.task"`)
 	}
 	return nil
 }
 
-func (ruo *RunUpdateOne) sqlSave(ctx context.Context) (_node *Run, err error) {
-	if err := ruo.check(); err != nil {
+func (_u *RunUpdateOne) sqlSave(ctx context.Context) (_node *Run, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(run.Table, run.Columns, sqlgraph.NewFieldSpec(run.FieldID, field.TypeInt))
-	id, ok := ruo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Run.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := ruo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, run.FieldID)
 		for _, f := range fields {
@@ -695,68 +695,68 @@ func (ruo *RunUpdateOne) sqlSave(ctx context.Context) (_node *Run, err error) {
 			}
 		}
 	}
-	if ps := ruo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := ruo.mutation.Trigger(); ok {
+	if value, ok := _u.mutation.Trigger(); ok {
 		_spec.SetField(run.FieldTrigger, field.TypeEnum, value)
 	}
-	if value, ok := ruo.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(run.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := ruo.mutation.ExitCode(); ok {
+	if value, ok := _u.mutation.ExitCode(); ok {
 		_spec.SetField(run.FieldExitCode, field.TypeInt, value)
 	}
-	if value, ok := ruo.mutation.AddedExitCode(); ok {
+	if value, ok := _u.mutation.AddedExitCode(); ok {
 		_spec.AddField(run.FieldExitCode, field.TypeInt, value)
 	}
-	if ruo.mutation.ExitCodeCleared() {
+	if _u.mutation.ExitCodeCleared() {
 		_spec.ClearField(run.FieldExitCode, field.TypeInt)
 	}
-	if value, ok := ruo.mutation.StartedAt(); ok {
+	if value, ok := _u.mutation.StartedAt(); ok {
 		_spec.SetField(run.FieldStartedAt, field.TypeTime, value)
 	}
-	if value, ok := ruo.mutation.FinishedAt(); ok {
+	if value, ok := _u.mutation.FinishedAt(); ok {
 		_spec.SetField(run.FieldFinishedAt, field.TypeTime, value)
 	}
-	if ruo.mutation.FinishedAtCleared() {
+	if _u.mutation.FinishedAtCleared() {
 		_spec.ClearField(run.FieldFinishedAt, field.TypeTime)
 	}
-	if value, ok := ruo.mutation.DurationMs(); ok {
+	if value, ok := _u.mutation.DurationMs(); ok {
 		_spec.SetField(run.FieldDurationMs, field.TypeInt64, value)
 	}
-	if value, ok := ruo.mutation.AddedDurationMs(); ok {
+	if value, ok := _u.mutation.AddedDurationMs(); ok {
 		_spec.AddField(run.FieldDurationMs, field.TypeInt64, value)
 	}
-	if ruo.mutation.DurationMsCleared() {
+	if _u.mutation.DurationMsCleared() {
 		_spec.ClearField(run.FieldDurationMs, field.TypeInt64)
 	}
-	if value, ok := ruo.mutation.ErrorSummary(); ok {
+	if value, ok := _u.mutation.ErrorSummary(); ok {
 		_spec.SetField(run.FieldErrorSummary, field.TypeString, value)
 	}
-	if ruo.mutation.ErrorSummaryCleared() {
+	if _u.mutation.ErrorSummaryCleared() {
 		_spec.ClearField(run.FieldErrorSummary, field.TypeString)
 	}
-	if value, ok := ruo.mutation.Stdout(); ok {
+	if value, ok := _u.mutation.Stdout(); ok {
 		_spec.SetField(run.FieldStdout, field.TypeString, value)
 	}
-	if ruo.mutation.StdoutCleared() {
+	if _u.mutation.StdoutCleared() {
 		_spec.ClearField(run.FieldStdout, field.TypeString)
 	}
-	if value, ok := ruo.mutation.Stderr(); ok {
+	if value, ok := _u.mutation.Stderr(); ok {
 		_spec.SetField(run.FieldStderr, field.TypeString, value)
 	}
-	if ruo.mutation.StderrCleared() {
+	if _u.mutation.StderrCleared() {
 		_spec.ClearField(run.FieldStderr, field.TypeString)
 	}
-	if value, ok := ruo.mutation.UpdatedAt(); ok {
+	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(run.FieldUpdatedAt, field.TypeTime, value)
 	}
-	if ruo.mutation.TaskCleared() {
+	if _u.mutation.TaskCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -769,7 +769,7 @@ func (ruo *RunUpdateOne) sqlSave(ctx context.Context) (_node *Run, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ruo.mutation.TaskIDs(); len(nodes) > 0 {
+	if nodes := _u.mutation.TaskIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
@@ -785,10 +785,10 @@ func (ruo *RunUpdateOne) sqlSave(ctx context.Context) (_node *Run, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Run{config: ruo.config}
+	_node = &Run{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, ruo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{run.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -796,6 +796,6 @@ func (ruo *RunUpdateOne) sqlSave(ctx context.Context) (_node *Run, err error) {
 		}
 		return nil, err
 	}
-	ruo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

@@ -283,8 +283,8 @@ func (c *AdminClient) Update() *AdminUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *AdminClient) UpdateOne(a *Admin) *AdminUpdateOne {
-	mutation := newAdminMutation(c.config, OpUpdateOne, withAdmin(a))
+func (c *AdminClient) UpdateOne(_m *Admin) *AdminUpdateOne {
+	mutation := newAdminMutation(c.config, OpUpdateOne, withAdmin(_m))
 	return &AdminUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -301,8 +301,8 @@ func (c *AdminClient) Delete() *AdminDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *AdminClient) DeleteOne(a *Admin) *AdminDeleteOne {
-	return c.DeleteOneID(a.ID)
+func (c *AdminClient) DeleteOne(_m *Admin) *AdminDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -337,16 +337,16 @@ func (c *AdminClient) GetX(ctx context.Context, id int) *Admin {
 }
 
 // QuerySessions queries the sessions edge of a Admin.
-func (c *AdminClient) QuerySessions(a *Admin) *SessionQuery {
+func (c *AdminClient) QuerySessions(_m *Admin) *SessionQuery {
 	query := (&SessionClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := a.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(admin.Table, admin.FieldID, id),
 			sqlgraph.To(session.Table, session.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, admin.SessionsTable, admin.SessionsColumn),
 		)
-		fromV = sqlgraph.Neighbors(a.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -432,8 +432,8 @@ func (c *RunClient) Update() *RunUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *RunClient) UpdateOne(r *Run) *RunUpdateOne {
-	mutation := newRunMutation(c.config, OpUpdateOne, withRun(r))
+func (c *RunClient) UpdateOne(_m *Run) *RunUpdateOne {
+	mutation := newRunMutation(c.config, OpUpdateOne, withRun(_m))
 	return &RunUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -450,8 +450,8 @@ func (c *RunClient) Delete() *RunDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *RunClient) DeleteOne(r *Run) *RunDeleteOne {
-	return c.DeleteOneID(r.ID)
+func (c *RunClient) DeleteOne(_m *Run) *RunDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -486,16 +486,16 @@ func (c *RunClient) GetX(ctx context.Context, id int) *Run {
 }
 
 // QueryTask queries the task edge of a Run.
-func (c *RunClient) QueryTask(r *Run) *TaskQuery {
+func (c *RunClient) QueryTask(_m *Run) *TaskQuery {
 	query := (&TaskClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := r.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(run.Table, run.FieldID, id),
 			sqlgraph.To(task.Table, task.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, run.TaskTable, run.TaskColumn),
 		)
-		fromV = sqlgraph.Neighbors(r.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -581,8 +581,8 @@ func (c *SessionClient) Update() *SessionUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *SessionClient) UpdateOne(s *Session) *SessionUpdateOne {
-	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(s))
+func (c *SessionClient) UpdateOne(_m *Session) *SessionUpdateOne {
+	mutation := newSessionMutation(c.config, OpUpdateOne, withSession(_m))
 	return &SessionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -599,8 +599,8 @@ func (c *SessionClient) Delete() *SessionDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *SessionClient) DeleteOne(s *Session) *SessionDeleteOne {
-	return c.DeleteOneID(s.ID)
+func (c *SessionClient) DeleteOne(_m *Session) *SessionDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -635,16 +635,16 @@ func (c *SessionClient) GetX(ctx context.Context, id int) *Session {
 }
 
 // QueryAdmin queries the admin edge of a Session.
-func (c *SessionClient) QueryAdmin(s *Session) *AdminQuery {
+func (c *SessionClient) QueryAdmin(_m *Session) *AdminQuery {
 	query := (&AdminClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(session.Table, session.FieldID, id),
 			sqlgraph.To(admin.Table, admin.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, session.AdminTable, session.AdminColumn),
 		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
@@ -730,8 +730,8 @@ func (c *TaskClient) Update() *TaskUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *TaskClient) UpdateOne(t *Task) *TaskUpdateOne {
-	mutation := newTaskMutation(c.config, OpUpdateOne, withTask(t))
+func (c *TaskClient) UpdateOne(_m *Task) *TaskUpdateOne {
+	mutation := newTaskMutation(c.config, OpUpdateOne, withTask(_m))
 	return &TaskUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -748,8 +748,8 @@ func (c *TaskClient) Delete() *TaskDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *TaskClient) DeleteOne(t *Task) *TaskDeleteOne {
-	return c.DeleteOneID(t.ID)
+func (c *TaskClient) DeleteOne(_m *Task) *TaskDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -784,16 +784,16 @@ func (c *TaskClient) GetX(ctx context.Context, id int) *Task {
 }
 
 // QueryRuns queries the runs edge of a Task.
-func (c *TaskClient) QueryRuns(t *Task) *RunQuery {
+func (c *TaskClient) QueryRuns(_m *Task) *RunQuery {
 	query := (&RunClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
+		id := _m.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(task.Table, task.FieldID, id),
 			sqlgraph.To(run.Table, run.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, task.RunsTable, task.RunsColumn),
 		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(_m.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query

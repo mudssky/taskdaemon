@@ -22,94 +22,94 @@ type AdminCreate struct {
 }
 
 // SetSingletonKey sets the "singleton_key" field.
-func (ac *AdminCreate) SetSingletonKey(s string) *AdminCreate {
-	ac.mutation.SetSingletonKey(s)
-	return ac
+func (_c *AdminCreate) SetSingletonKey(v string) *AdminCreate {
+	_c.mutation.SetSingletonKey(v)
+	return _c
 }
 
 // SetUsername sets the "username" field.
-func (ac *AdminCreate) SetUsername(s string) *AdminCreate {
-	ac.mutation.SetUsername(s)
-	return ac
+func (_c *AdminCreate) SetUsername(v string) *AdminCreate {
+	_c.mutation.SetUsername(v)
+	return _c
 }
 
 // SetPasswordHash sets the "password_hash" field.
-func (ac *AdminCreate) SetPasswordHash(s string) *AdminCreate {
-	ac.mutation.SetPasswordHash(s)
-	return ac
+func (_c *AdminCreate) SetPasswordHash(v string) *AdminCreate {
+	_c.mutation.SetPasswordHash(v)
+	return _c
 }
 
 // SetActive sets the "active" field.
-func (ac *AdminCreate) SetActive(b bool) *AdminCreate {
-	ac.mutation.SetActive(b)
-	return ac
+func (_c *AdminCreate) SetActive(v bool) *AdminCreate {
+	_c.mutation.SetActive(v)
+	return _c
 }
 
 // SetNillableActive sets the "active" field if the given value is not nil.
-func (ac *AdminCreate) SetNillableActive(b *bool) *AdminCreate {
-	if b != nil {
-		ac.SetActive(*b)
+func (_c *AdminCreate) SetNillableActive(v *bool) *AdminCreate {
+	if v != nil {
+		_c.SetActive(*v)
 	}
-	return ac
+	return _c
 }
 
 // SetCreatedAt sets the "created_at" field.
-func (ac *AdminCreate) SetCreatedAt(t time.Time) *AdminCreate {
-	ac.mutation.SetCreatedAt(t)
-	return ac
+func (_c *AdminCreate) SetCreatedAt(v time.Time) *AdminCreate {
+	_c.mutation.SetCreatedAt(v)
+	return _c
 }
 
 // SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
-func (ac *AdminCreate) SetNillableCreatedAt(t *time.Time) *AdminCreate {
-	if t != nil {
-		ac.SetCreatedAt(*t)
+func (_c *AdminCreate) SetNillableCreatedAt(v *time.Time) *AdminCreate {
+	if v != nil {
+		_c.SetCreatedAt(*v)
 	}
-	return ac
+	return _c
 }
 
 // SetUpdatedAt sets the "updated_at" field.
-func (ac *AdminCreate) SetUpdatedAt(t time.Time) *AdminCreate {
-	ac.mutation.SetUpdatedAt(t)
-	return ac
+func (_c *AdminCreate) SetUpdatedAt(v time.Time) *AdminCreate {
+	_c.mutation.SetUpdatedAt(v)
+	return _c
 }
 
 // SetNillableUpdatedAt sets the "updated_at" field if the given value is not nil.
-func (ac *AdminCreate) SetNillableUpdatedAt(t *time.Time) *AdminCreate {
-	if t != nil {
-		ac.SetUpdatedAt(*t)
+func (_c *AdminCreate) SetNillableUpdatedAt(v *time.Time) *AdminCreate {
+	if v != nil {
+		_c.SetUpdatedAt(*v)
 	}
-	return ac
+	return _c
 }
 
 // AddSessionIDs adds the "sessions" edge to the Session entity by IDs.
-func (ac *AdminCreate) AddSessionIDs(ids ...int) *AdminCreate {
-	ac.mutation.AddSessionIDs(ids...)
-	return ac
+func (_c *AdminCreate) AddSessionIDs(ids ...int) *AdminCreate {
+	_c.mutation.AddSessionIDs(ids...)
+	return _c
 }
 
 // AddSessions adds the "sessions" edges to the Session entity.
-func (ac *AdminCreate) AddSessions(s ...*Session) *AdminCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+func (_c *AdminCreate) AddSessions(v ...*Session) *AdminCreate {
+	ids := make([]int, len(v))
+	for i := range v {
+		ids[i] = v[i].ID
 	}
-	return ac.AddSessionIDs(ids...)
+	return _c.AddSessionIDs(ids...)
 }
 
 // Mutation returns the AdminMutation object of the builder.
-func (ac *AdminCreate) Mutation() *AdminMutation {
-	return ac.mutation
+func (_c *AdminCreate) Mutation() *AdminMutation {
+	return _c.mutation
 }
 
 // Save creates the Admin in the database.
-func (ac *AdminCreate) Save(ctx context.Context) (*Admin, error) {
-	ac.defaults()
-	return withHooks(ctx, ac.sqlSave, ac.mutation, ac.hooks)
+func (_c *AdminCreate) Save(ctx context.Context) (*Admin, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (ac *AdminCreate) SaveX(ctx context.Context) *Admin {
-	v, err := ac.Save(ctx)
+func (_c *AdminCreate) SaveX(ctx context.Context) *Admin {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -117,73 +117,73 @@ func (ac *AdminCreate) SaveX(ctx context.Context) *Admin {
 }
 
 // Exec executes the query.
-func (ac *AdminCreate) Exec(ctx context.Context) error {
-	_, err := ac.Save(ctx)
+func (_c *AdminCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ac *AdminCreate) ExecX(ctx context.Context) {
-	if err := ac.Exec(ctx); err != nil {
+func (_c *AdminCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (ac *AdminCreate) defaults() {
-	if _, ok := ac.mutation.Active(); !ok {
+func (_c *AdminCreate) defaults() {
+	if _, ok := _c.mutation.Active(); !ok {
 		v := admin.DefaultActive
-		ac.mutation.SetActive(v)
+		_c.mutation.SetActive(v)
 	}
-	if _, ok := ac.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := admin.DefaultCreatedAt()
-		ac.mutation.SetCreatedAt(v)
+		_c.mutation.SetCreatedAt(v)
 	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		v := admin.DefaultUpdatedAt()
-		ac.mutation.SetUpdatedAt(v)
+		_c.mutation.SetUpdatedAt(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (ac *AdminCreate) check() error {
-	if _, ok := ac.mutation.SingletonKey(); !ok {
+func (_c *AdminCreate) check() error {
+	if _, ok := _c.mutation.SingletonKey(); !ok {
 		return &ValidationError{Name: "singleton_key", err: errors.New(`ent: missing required field "Admin.singleton_key"`)}
 	}
-	if v, ok := ac.mutation.SingletonKey(); ok {
+	if v, ok := _c.mutation.SingletonKey(); ok {
 		if err := admin.SingletonKeyValidator(v); err != nil {
 			return &ValidationError{Name: "singleton_key", err: fmt.Errorf(`ent: validator failed for field "Admin.singleton_key": %w`, err)}
 		}
 	}
-	if _, ok := ac.mutation.Username(); !ok {
+	if _, ok := _c.mutation.Username(); !ok {
 		return &ValidationError{Name: "username", err: errors.New(`ent: missing required field "Admin.username"`)}
 	}
-	if v, ok := ac.mutation.Username(); ok {
+	if v, ok := _c.mutation.Username(); ok {
 		if err := admin.UsernameValidator(v); err != nil {
 			return &ValidationError{Name: "username", err: fmt.Errorf(`ent: validator failed for field "Admin.username": %w`, err)}
 		}
 	}
-	if _, ok := ac.mutation.PasswordHash(); !ok {
+	if _, ok := _c.mutation.PasswordHash(); !ok {
 		return &ValidationError{Name: "password_hash", err: errors.New(`ent: missing required field "Admin.password_hash"`)}
 	}
-	if _, ok := ac.mutation.Active(); !ok {
+	if _, ok := _c.mutation.Active(); !ok {
 		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "Admin.active"`)}
 	}
-	if _, ok := ac.mutation.CreatedAt(); !ok {
+	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Admin.created_at"`)}
 	}
-	if _, ok := ac.mutation.UpdatedAt(); !ok {
+	if _, ok := _c.mutation.UpdatedAt(); !ok {
 		return &ValidationError{Name: "updated_at", err: errors.New(`ent: missing required field "Admin.updated_at"`)}
 	}
 	return nil
 }
 
-func (ac *AdminCreate) sqlSave(ctx context.Context) (*Admin, error) {
-	if err := ac.check(); err != nil {
+func (_c *AdminCreate) sqlSave(ctx context.Context) (*Admin, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := ac.createSpec()
-	if err := sqlgraph.CreateNode(ctx, ac.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -191,41 +191,41 @@ func (ac *AdminCreate) sqlSave(ctx context.Context) (*Admin, error) {
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	ac.mutation.id = &_node.ID
-	ac.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (ac *AdminCreate) createSpec() (*Admin, *sqlgraph.CreateSpec) {
+func (_c *AdminCreate) createSpec() (*Admin, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Admin{config: ac.config}
+		_node = &Admin{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(admin.Table, sqlgraph.NewFieldSpec(admin.FieldID, field.TypeInt))
 	)
-	if value, ok := ac.mutation.SingletonKey(); ok {
+	if value, ok := _c.mutation.SingletonKey(); ok {
 		_spec.SetField(admin.FieldSingletonKey, field.TypeString, value)
 		_node.SingletonKey = value
 	}
-	if value, ok := ac.mutation.Username(); ok {
+	if value, ok := _c.mutation.Username(); ok {
 		_spec.SetField(admin.FieldUsername, field.TypeString, value)
 		_node.Username = value
 	}
-	if value, ok := ac.mutation.PasswordHash(); ok {
+	if value, ok := _c.mutation.PasswordHash(); ok {
 		_spec.SetField(admin.FieldPasswordHash, field.TypeString, value)
 		_node.PasswordHash = value
 	}
-	if value, ok := ac.mutation.Active(); ok {
+	if value, ok := _c.mutation.Active(); ok {
 		_spec.SetField(admin.FieldActive, field.TypeBool, value)
 		_node.Active = value
 	}
-	if value, ok := ac.mutation.CreatedAt(); ok {
+	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(admin.FieldCreatedAt, field.TypeTime, value)
 		_node.CreatedAt = value
 	}
-	if value, ok := ac.mutation.UpdatedAt(); ok {
+	if value, ok := _c.mutation.UpdatedAt(); ok {
 		_spec.SetField(admin.FieldUpdatedAt, field.TypeTime, value)
 		_node.UpdatedAt = value
 	}
-	if nodes := ac.mutation.SessionsIDs(); len(nodes) > 0 {
+	if nodes := _c.mutation.SessionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
@@ -252,16 +252,16 @@ type AdminCreateBulk struct {
 }
 
 // Save creates the Admin entities in the database.
-func (acb *AdminCreateBulk) Save(ctx context.Context) ([]*Admin, error) {
-	if acb.err != nil {
-		return nil, acb.err
+func (_c *AdminCreateBulk) Save(ctx context.Context) ([]*Admin, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(acb.builders))
-	nodes := make([]*Admin, len(acb.builders))
-	mutators := make([]Mutator, len(acb.builders))
-	for i := range acb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Admin, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := acb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AdminMutation)
@@ -275,11 +275,11 @@ func (acb *AdminCreateBulk) Save(ctx context.Context) ([]*Admin, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, acb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, acb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -303,7 +303,7 @@ func (acb *AdminCreateBulk) Save(ctx context.Context) ([]*Admin, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, acb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -311,8 +311,8 @@ func (acb *AdminCreateBulk) Save(ctx context.Context) ([]*Admin, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (acb *AdminCreateBulk) SaveX(ctx context.Context) []*Admin {
-	v, err := acb.Save(ctx)
+func (_c *AdminCreateBulk) SaveX(ctx context.Context) []*Admin {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -320,14 +320,14 @@ func (acb *AdminCreateBulk) SaveX(ctx context.Context) []*Admin {
 }
 
 // Exec executes the query.
-func (acb *AdminCreateBulk) Exec(ctx context.Context) error {
-	_, err := acb.Save(ctx)
+func (_c *AdminCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (acb *AdminCreateBulk) ExecX(ctx context.Context) {
-	if err := acb.Exec(ctx); err != nil {
+func (_c *AdminCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }

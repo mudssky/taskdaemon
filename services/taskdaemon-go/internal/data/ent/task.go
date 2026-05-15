@@ -88,7 +88,7 @@ func (*Task) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Task fields.
-func (t *Task) assignValues(columns []string, values []any) error {
+func (_m *Task) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -99,48 +99,48 @@ func (t *Task) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			t.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case task.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				t.Name = value.String
+				_m.Name = value.String
 			}
 		case task.FieldDescription:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field description", values[i])
 			} else if value.Valid {
-				t.Description = value.String
+				_m.Description = value.String
 			}
 		case task.FieldEnabled:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field enabled", values[i])
 			} else if value.Valid {
-				t.Enabled = value.Bool
+				_m.Enabled = value.Bool
 			}
 		case task.FieldCronExpression:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field cron_expression", values[i])
 			} else if value.Valid {
-				t.CronExpression = value.String
+				_m.CronExpression = value.String
 			}
 		case task.FieldTimezone:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field timezone", values[i])
 			} else if value.Valid {
-				t.Timezone = value.String
+				_m.Timezone = value.String
 			}
 		case task.FieldRunnerType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field runner_type", values[i])
 			} else if value.Valid {
-				t.RunnerType = task.RunnerType(value.String)
+				_m.RunnerType = task.RunnerType(value.String)
 			}
 		case task.FieldRunnerConfig:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field runner_config", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &t.RunnerConfig); err != nil {
+				if err := json.Unmarshal(*value, &_m.RunnerConfig); err != nil {
 					return fmt.Errorf("unmarshal field runner_config: %w", err)
 				}
 			}
@@ -148,28 +148,28 @@ func (t *Task) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field timeout_seconds", values[i])
 			} else if value.Valid {
-				t.TimeoutSeconds = int(value.Int64)
+				_m.TimeoutSeconds = int(value.Int64)
 			}
 		case task.FieldOverlapPolicy:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field overlap_policy", values[i])
 			} else if value.Valid {
-				t.OverlapPolicy = task.OverlapPolicy(value.String)
+				_m.OverlapPolicy = task.OverlapPolicy(value.String)
 			}
 		case task.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				t.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case task.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				t.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		default:
-			t.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -177,70 +177,70 @@ func (t *Task) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Task.
 // This includes values selected through modifiers, order, etc.
-func (t *Task) Value(name string) (ent.Value, error) {
-	return t.selectValues.Get(name)
+func (_m *Task) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryRuns queries the "runs" edge of the Task entity.
-func (t *Task) QueryRuns() *RunQuery {
-	return NewTaskClient(t.config).QueryRuns(t)
+func (_m *Task) QueryRuns() *RunQuery {
+	return NewTaskClient(_m.config).QueryRuns(_m)
 }
 
 // Update returns a builder for updating this Task.
 // Note that you need to call Task.Unwrap() before calling this method if this Task
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (t *Task) Update() *TaskUpdateOne {
-	return NewTaskClient(t.config).UpdateOne(t)
+func (_m *Task) Update() *TaskUpdateOne {
+	return NewTaskClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Task entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (t *Task) Unwrap() *Task {
-	_tx, ok := t.config.driver.(*txDriver)
+func (_m *Task) Unwrap() *Task {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Task is not a transactional entity")
 	}
-	t.config.driver = _tx.drv
-	return t
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (t *Task) String() string {
+func (_m *Task) String() string {
 	var builder strings.Builder
 	builder.WriteString("Task(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("name=")
-	builder.WriteString(t.Name)
+	builder.WriteString(_m.Name)
 	builder.WriteString(", ")
 	builder.WriteString("description=")
-	builder.WriteString(t.Description)
+	builder.WriteString(_m.Description)
 	builder.WriteString(", ")
 	builder.WriteString("enabled=")
-	builder.WriteString(fmt.Sprintf("%v", t.Enabled))
+	builder.WriteString(fmt.Sprintf("%v", _m.Enabled))
 	builder.WriteString(", ")
 	builder.WriteString("cron_expression=")
-	builder.WriteString(t.CronExpression)
+	builder.WriteString(_m.CronExpression)
 	builder.WriteString(", ")
 	builder.WriteString("timezone=")
-	builder.WriteString(t.Timezone)
+	builder.WriteString(_m.Timezone)
 	builder.WriteString(", ")
 	builder.WriteString("runner_type=")
-	builder.WriteString(fmt.Sprintf("%v", t.RunnerType))
+	builder.WriteString(fmt.Sprintf("%v", _m.RunnerType))
 	builder.WriteString(", ")
 	builder.WriteString("runner_config=")
-	builder.WriteString(fmt.Sprintf("%v", t.RunnerConfig))
+	builder.WriteString(fmt.Sprintf("%v", _m.RunnerConfig))
 	builder.WriteString(", ")
 	builder.WriteString("timeout_seconds=")
-	builder.WriteString(fmt.Sprintf("%v", t.TimeoutSeconds))
+	builder.WriteString(fmt.Sprintf("%v", _m.TimeoutSeconds))
 	builder.WriteString(", ")
 	builder.WriteString("overlap_policy=")
-	builder.WriteString(fmt.Sprintf("%v", t.OverlapPolicy))
+	builder.WriteString(fmt.Sprintf("%v", _m.OverlapPolicy))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(t.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(t.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

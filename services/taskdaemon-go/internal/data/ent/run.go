@@ -89,7 +89,7 @@ func (*Run) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Run fields.
-func (r *Run) assignValues(columns []string, values []any) error {
+func (_m *Run) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -100,84 +100,84 @@ func (r *Run) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			r.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case run.FieldTrigger:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field trigger", values[i])
 			} else if value.Valid {
-				r.Trigger = run.Trigger(value.String)
+				_m.Trigger = run.Trigger(value.String)
 			}
 		case run.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				r.Status = run.Status(value.String)
+				_m.Status = run.Status(value.String)
 			}
 		case run.FieldExitCode:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field exit_code", values[i])
 			} else if value.Valid {
-				r.ExitCode = new(int)
-				*r.ExitCode = int(value.Int64)
+				_m.ExitCode = new(int)
+				*_m.ExitCode = int(value.Int64)
 			}
 		case run.FieldStartedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field started_at", values[i])
 			} else if value.Valid {
-				r.StartedAt = value.Time
+				_m.StartedAt = value.Time
 			}
 		case run.FieldFinishedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field finished_at", values[i])
 			} else if value.Valid {
-				r.FinishedAt = new(time.Time)
-				*r.FinishedAt = value.Time
+				_m.FinishedAt = new(time.Time)
+				*_m.FinishedAt = value.Time
 			}
 		case run.FieldDurationMs:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field duration_ms", values[i])
 			} else if value.Valid {
-				r.DurationMs = value.Int64
+				_m.DurationMs = value.Int64
 			}
 		case run.FieldErrorSummary:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field error_summary", values[i])
 			} else if value.Valid {
-				r.ErrorSummary = value.String
+				_m.ErrorSummary = value.String
 			}
 		case run.FieldStdout:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field stdout", values[i])
 			} else if value.Valid {
-				r.Stdout = value.String
+				_m.Stdout = value.String
 			}
 		case run.FieldStderr:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field stderr", values[i])
 			} else if value.Valid {
-				r.Stderr = value.String
+				_m.Stderr = value.String
 			}
 		case run.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
 			} else if value.Valid {
-				r.CreatedAt = value.Time
+				_m.CreatedAt = value.Time
 			}
 		case run.FieldUpdatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
 			} else if value.Valid {
-				r.UpdatedAt = value.Time
+				_m.UpdatedAt = value.Time
 			}
 		case run.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field task_runs", value)
 			} else if value.Valid {
-				r.task_runs = new(int)
-				*r.task_runs = int(value.Int64)
+				_m.task_runs = new(int)
+				*_m.task_runs = int(value.Int64)
 			}
 		default:
-			r.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -185,74 +185,74 @@ func (r *Run) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Run.
 // This includes values selected through modifiers, order, etc.
-func (r *Run) Value(name string) (ent.Value, error) {
-	return r.selectValues.Get(name)
+func (_m *Run) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // QueryTask queries the "task" edge of the Run entity.
-func (r *Run) QueryTask() *TaskQuery {
-	return NewRunClient(r.config).QueryTask(r)
+func (_m *Run) QueryTask() *TaskQuery {
+	return NewRunClient(_m.config).QueryTask(_m)
 }
 
 // Update returns a builder for updating this Run.
 // Note that you need to call Run.Unwrap() before calling this method if this Run
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (r *Run) Update() *RunUpdateOne {
-	return NewRunClient(r.config).UpdateOne(r)
+func (_m *Run) Update() *RunUpdateOne {
+	return NewRunClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Run entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (r *Run) Unwrap() *Run {
-	_tx, ok := r.config.driver.(*txDriver)
+func (_m *Run) Unwrap() *Run {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Run is not a transactional entity")
 	}
-	r.config.driver = _tx.drv
-	return r
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (r *Run) String() string {
+func (_m *Run) String() string {
 	var builder strings.Builder
 	builder.WriteString("Run(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("trigger=")
-	builder.WriteString(fmt.Sprintf("%v", r.Trigger))
+	builder.WriteString(fmt.Sprintf("%v", _m.Trigger))
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", r.Status))
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
-	if v := r.ExitCode; v != nil {
+	if v := _m.ExitCode; v != nil {
 		builder.WriteString("exit_code=")
 		builder.WriteString(fmt.Sprintf("%v", *v))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("started_at=")
-	builder.WriteString(r.StartedAt.Format(time.ANSIC))
+	builder.WriteString(_m.StartedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
-	if v := r.FinishedAt; v != nil {
+	if v := _m.FinishedAt; v != nil {
 		builder.WriteString("finished_at=")
 		builder.WriteString(v.Format(time.ANSIC))
 	}
 	builder.WriteString(", ")
 	builder.WriteString("duration_ms=")
-	builder.WriteString(fmt.Sprintf("%v", r.DurationMs))
+	builder.WriteString(fmt.Sprintf("%v", _m.DurationMs))
 	builder.WriteString(", ")
 	builder.WriteString("error_summary=")
-	builder.WriteString(r.ErrorSummary)
+	builder.WriteString(_m.ErrorSummary)
 	builder.WriteString(", ")
 	builder.WriteString("stdout=")
-	builder.WriteString(r.Stdout)
+	builder.WriteString(_m.Stdout)
 	builder.WriteString(", ")
 	builder.WriteString("stderr=")
-	builder.WriteString(r.Stderr)
+	builder.WriteString(_m.Stderr)
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
-	builder.WriteString(r.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("updated_at=")
-	builder.WriteString(r.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(_m.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
