@@ -6,7 +6,7 @@
 
 ## Overview
 
-前端质量链路使用 Biome lint/format、`tsc --noEmit` typecheck、Vitest + Testing Library。测试重点是业务逻辑、组件交互、表单校验、API client 和通用函数；不测试纯页面结构、CSS 样式或静态配置文件。
+前端质量链路使用 Biome lint/format、`tsc --noEmit` typecheck、Vitest + Testing Library。`@biomejs/biome`、`typescript`、`vitest`、`@testing-library/jest-dom`、`@testing-library/react`、`@testing-library/user-event` 和 `jsdom` 是 workspace 共享开发/测试工具，统一声明在根目录 `devDependencies`；子包只声明应用运行依赖和必要的本地类型依赖。测试重点是业务逻辑、组件交互、表单校验、API client 和通用函数；不测试纯页面结构、CSS 样式或静态配置文件。
 
 当前前端工程位于 `apps/web`，相关约定来自父任务、基础 UI 子任务 PRD 和 frontend directory structure spec。
 
