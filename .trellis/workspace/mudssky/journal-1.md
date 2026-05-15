@@ -280,3 +280,39 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 9: 基础 Web Desktop 管理 UI
+
+**Date**: 2026-05-15
+**Task**: 基础 Web Desktop 管理 UI
+**Branch**: `master`
+
+### Summary
+
+实现基础管理台：补齐任务列表、编辑、启停 API；前端接入登录、任务 CRUD、触发、取消、执行历史、cron 风险确认和业务测试；同步前端嵌入资源与 Trellis spec。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `9ae2585` | (see git log) |
+| `2a291e1` | (see git log) |
+| `48f1338` | (see git log) |
+| `1faca99` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
