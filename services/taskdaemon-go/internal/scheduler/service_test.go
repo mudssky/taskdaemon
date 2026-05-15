@@ -123,6 +123,112 @@ func TestCreateTaskPersistsDefaultTimeoutInRunnerConfig(t *testing.T) {
 	require.Equal(t, float64(3600), taskRecord.RunnerConfig["timeoutSeconds"])
 }
 
+// TestListTasksReturnsNewestFirst 验证任务列表按 ID 倒序返回。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestListTasksReturnsNewestFirst(t *testing.T) {
+	ctx := context.Background()
+	store := openTestStore(t)
+	service := NewService(store, Options{})
+	first := createShellTask(t, ctx, service, runner.Config{
+		Type:    runner.TypeShell,
+		Inline:  shellPrintCommand("first"),
+		Timeout: time.Second,
+	})
+	second := createShellTask(t, ctx, service, runner.Config{
+		Type:    runner.TypeShell,
+		Inline:  shellPrintCommand("second"),
+		Timeout: time.Second,
+	})
+
+	tasks, err := service.ListTasks(ctx, 100)
+
+	require.NoError(t, err)
+	require.Len(t, tasks, 2)
+	require.Equal(t, second, tasks[0].ID)
+	require.Equal(t, first, tasks[1].ID)
+}
+
+// TestUpdateTaskPersistsStructuredRunner 验证编辑任务会更新 cron、启停状态和 runner 配置。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestUpdateTaskPersistsStructuredRunner(t *testing.T) {
+	ctx := context.Background()
+	store := openTestStore(t)
+	service := NewService(store, Options{})
+	taskID := createShellTask(t, ctx, service, runner.Config{
+		Type:    runner.TypeShell,
+		Inline:  shellPrintCommand("old"),
+		Timeout: time.Second,
+	})
+	enabled := false
+
+	updated, err := service.UpdateTask(ctx, taskID, CreateTaskInput{
+		Name:                "backup-new",
+		Description:         "nightly backup",
+		Enabled:             &enabled,
+		CronExpression:      "15 1 * * *",
+		Timezone:            "Asia/Hong_Kong",
+		ConfirmCronWarnings: true,
+		Runner: runner.Config{
+			Type:       runner.TypePython,
+			ScriptPath: "jobs/backup.py",
+			Args:       []string{"--full"},
+			Timeout:    2 * time.Minute,
+		},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, taskID, updated.ID)
+	taskRecord, err := store.Client().Task.Get(ctx, taskID)
+	require.NoError(t, err)
+	require.Equal(t, "backup-new", taskRecord.Name)
+	require.Equal(t, "nightly backup", taskRecord.Description)
+	require.False(t, taskRecord.Enabled)
+	require.Equal(t, "python", taskRecord.RunnerType.String())
+	require.Equal(t, "jobs/backup.py", taskRecord.RunnerConfig["scriptPath"])
+	require.Equal(t, 120, taskRecord.TimeoutSeconds)
+}
+
+// TestSetTaskEnabledUpdatesRegisteredCronJobs 验证启停任务会同步进程内 cron 注册。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestSetTaskEnabledUpdatesRegisteredCronJobs(t *testing.T) {
+	ctx := context.Background()
+	store := openTestStore(t)
+	service := NewService(store, Options{})
+	taskID := createShellTask(t, ctx, service, runner.Config{
+		Type:    runner.TypeShell,
+		Inline:  shellPrintCommand("ok"),
+		Timeout: time.Second,
+	})
+	require.NoError(t, service.RegisterEnabledTasks(ctx))
+	require.Equal(t, []int{taskID}, service.RegisteredTaskIDs())
+
+	disabled, err := service.SetTaskEnabled(ctx, taskID, false)
+	require.NoError(t, err)
+	require.False(t, disabled.Enabled)
+	require.Empty(t, service.RegisteredTaskIDs())
+
+	enabled, err := service.SetTaskEnabled(ctx, taskID, true)
+	require.NoError(t, err)
+	require.True(t, enabled.Enabled)
+	require.Equal(t, []int{taskID}, service.RegisteredTaskIDs())
+	require.NoError(t, service.Shutdown())
+}
+
 // TestTriggerTaskRecordsSuccessfulRun 验证手动触发会执行 runner 并写入 success 历史。
 //
 // 参数:

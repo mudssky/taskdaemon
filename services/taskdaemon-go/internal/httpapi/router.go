@@ -38,9 +38,13 @@ type AuthService interface {
 // TaskService 定义 HTTP handler 依赖的任务调度能力。
 type TaskService interface {
 	CreateTask(context.Context, scheduler.CreateTaskInput) (*ent.Task, error)
+	ListTasks(context.Context, int) ([]*ent.Task, error)
+	UpdateTask(context.Context, int, scheduler.CreateTaskInput) (*ent.Task, error)
+	SetTaskEnabled(context.Context, int, bool) (*ent.Task, error)
 	TriggerTask(context.Context, int) (*ent.Run, error)
 	CancelTask(context.Context, int) error
 	ListTaskRuns(context.Context, int, int) ([]*ent.Run, error)
+	IsTaskRunning(int) bool
 }
 
 // NewRouter 创建 taskdaemon HTTP API router。
@@ -84,6 +88,23 @@ func registerTaskRoutes(router *gin.Engine, authService AuthService, taskService
 	group := router.Group("/api/tasks")
 	group.Use(requireSession(authService))
 
+	group.GET("", func(ctx *gin.Context) {
+		if taskService == nil {
+			writeAPIError(ctx, http.StatusServiceUnavailable, "task_service_unavailable", "Task service is unavailable", nil)
+			return
+		}
+		tasks, err := taskService.ListTasks(ctx.Request.Context(), 100)
+		if err != nil {
+			writeAPIError(ctx, http.StatusInternalServerError, "task_list_failed", "Task list query failed", nil)
+			return
+		}
+		responses := make([]taskResponse, 0, len(tasks))
+		for _, taskRecord := range tasks {
+			responses = append(responses, taskResponseFromEnt(taskRecord, taskService.IsTaskRunning(taskRecord.ID)))
+		}
+		ctx.JSON(http.StatusOK, gin.H{"tasks": responses})
+	})
+
 	group.POST("", func(ctx *gin.Context) {
 		if taskService == nil {
 			writeAPIError(ctx, http.StatusServiceUnavailable, "task_service_unavailable", "Task service is unavailable", nil)
@@ -94,29 +115,56 @@ func registerTaskRoutes(router *gin.Engine, authService AuthService, taskService
 			writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Invalid request body", gin.H{"field": "body"})
 			return
 		}
-		taskRecord, err := taskService.CreateTask(ctx.Request.Context(), scheduler.CreateTaskInput{
-			Name:                req.Name,
-			Description:         req.Description,
-			Enabled:             req.Enabled,
-			CronExpression:      req.CronExpression,
-			Timezone:            req.Timezone,
-			ConfirmCronWarnings: req.ConfirmCronWarnings,
-			Runner: runner.Config{
-				Type:             runner.Type(req.Runner.Type),
-				Inline:           req.Runner.Inline,
-				ScriptPath:       req.Runner.ScriptPath,
-				Args:             req.Runner.Args,
-				WorkDir:          req.Runner.WorkDir,
-				Env:              req.Runner.Env,
-				Timeout:          time.Duration(req.Runner.TimeoutSeconds) * time.Second,
-				OutputLimitBytes: req.Runner.OutputLimitBytes,
-			},
-		})
+		taskRecord, err := taskService.CreateTask(ctx.Request.Context(), taskInputFromRequest(req))
 		if err != nil {
 			writeAPIError(ctx, http.StatusBadRequest, "task_invalid", "Task definition is invalid", gin.H{"error": err.Error()})
 			return
 		}
-		ctx.JSON(http.StatusCreated, taskResponseFromEnt(taskRecord))
+		ctx.JSON(http.StatusCreated, taskResponseFromEnt(taskRecord, taskService.IsTaskRunning(taskRecord.ID)))
+	})
+
+	group.PUT("/:id", func(ctx *gin.Context) {
+		if taskService == nil {
+			writeAPIError(ctx, http.StatusServiceUnavailable, "task_service_unavailable", "Task service is unavailable", nil)
+			return
+		}
+		taskID, ok := parseTaskID(ctx)
+		if !ok {
+			return
+		}
+		var req createTaskRequest
+		if err := ctx.ShouldBindJSON(&req); err != nil {
+			writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Invalid request body", gin.H{"field": "body"})
+			return
+		}
+		taskRecord, err := taskService.UpdateTask(ctx.Request.Context(), taskID, taskInputFromRequest(req))
+		if err != nil {
+			writeAPIError(ctx, http.StatusBadRequest, "task_invalid", "Task definition is invalid", gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, taskResponseFromEnt(taskRecord, taskService.IsTaskRunning(taskRecord.ID)))
+	})
+
+	group.PATCH("/:id/enabled", func(ctx *gin.Context) {
+		if taskService == nil {
+			writeAPIError(ctx, http.StatusServiceUnavailable, "task_service_unavailable", "Task service is unavailable", nil)
+			return
+		}
+		taskID, ok := parseTaskID(ctx)
+		if !ok {
+			return
+		}
+		var req setTaskEnabledRequest
+		if err := ctx.ShouldBindJSON(&req); err != nil || req.Enabled == nil {
+			writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Invalid request body", gin.H{"field": "enabled"})
+			return
+		}
+		taskRecord, err := taskService.SetTaskEnabled(ctx.Request.Context(), taskID, *req.Enabled)
+		if err != nil {
+			writeAPIError(ctx, http.StatusBadRequest, "task_invalid", "Task enabled state is invalid", gin.H{"error": err.Error()})
+			return
+		}
+		ctx.JSON(http.StatusOK, taskResponseFromEnt(taskRecord, taskService.IsTaskRunning(taskRecord.ID)))
 	})
 
 	group.POST("/:id/trigger", func(ctx *gin.Context) {
@@ -178,6 +226,34 @@ func registerTaskRoutes(router *gin.Engine, authService AuthService, taskService
 	})
 }
 
+// taskInputFromRequest 将 HTTP 创建/更新请求转换为调度服务输入。
+//
+// 参数:
+//   - req: HTTP 创建/更新任务请求。
+//
+// 返回值:
+//   - scheduler.CreateTaskInput: 调度服务输入。
+func taskInputFromRequest(req createTaskRequest) scheduler.CreateTaskInput {
+	return scheduler.CreateTaskInput{
+		Name:                req.Name,
+		Description:         req.Description,
+		Enabled:             req.Enabled,
+		CronExpression:      req.CronExpression,
+		Timezone:            req.Timezone,
+		ConfirmCronWarnings: req.ConfirmCronWarnings,
+		Runner: runner.Config{
+			Type:             runner.Type(req.Runner.Type),
+			Inline:           req.Runner.Inline,
+			ScriptPath:       req.Runner.ScriptPath,
+			Args:             req.Runner.Args,
+			WorkDir:          req.Runner.WorkDir,
+			Env:              req.Runner.Env,
+			Timeout:          time.Duration(req.Runner.TimeoutSeconds) * time.Second,
+			OutputLimitBytes: req.Runner.OutputLimitBytes,
+		},
+	}
+}
+
 // requireSession 校验管理员 session。
 //
 // 参数:
@@ -233,18 +309,28 @@ func parseTaskID(ctx *gin.Context) (int, bool) {
 //
 // 参数:
 //   - taskRecord: 任务 Ent 实体。
+//   - running: 当前进程内是否正在执行该任务。
 //
 // 返回值:
 //   - taskResponse: API 响应 DTO。
-func taskResponseFromEnt(taskRecord *ent.Task) taskResponse {
+func taskResponseFromEnt(taskRecord *ent.Task, running bool) taskResponse {
 	if taskRecord == nil {
 		return taskResponse{}
 	}
 	return taskResponse{
 		ID:             taskRecord.ID,
 		Name:           taskRecord.Name,
+		Description:    taskRecord.Description,
+		Enabled:        taskRecord.Enabled,
 		CronExpression: taskRecord.CronExpression,
 		Timezone:       taskRecord.Timezone,
+		RunnerType:     string(taskRecord.RunnerType),
+		RunnerConfig:   taskRecord.RunnerConfig,
+		TimeoutSeconds: taskRecord.TimeoutSeconds,
+		OverlapPolicy:  string(taskRecord.OverlapPolicy),
+		Running:        running,
+		CreatedAt:      taskRecord.CreatedAt,
+		UpdatedAt:      taskRecord.UpdatedAt,
 	}
 }
 
@@ -266,8 +352,11 @@ func runResponseFromEnt(runRecord *ent.Run) runResponse {
 	}
 	return runResponse{
 		ID:           runRecord.ID,
+		Trigger:      string(runRecord.Trigger),
 		Status:       runRecord.Status,
 		ExitCode:     exitCode,
+		StartedAt:    runRecord.StartedAt,
+		FinishedAt:   runRecord.FinishedAt,
 		DurationMs:   runRecord.DurationMs,
 		ErrorSummary: runRecord.ErrorSummary,
 		Stdout:       runRecord.Stdout,
@@ -465,17 +554,33 @@ type createRunnerRequest struct {
 	OutputLimitBytes int               `json:"outputLimitBytes"`
 }
 
+type setTaskEnabledRequest struct {
+	Enabled *bool `json:"enabled" binding:"required"`
+}
+
 type taskResponse struct {
-	ID             int    `json:"id"`
-	Name           string `json:"name"`
-	CronExpression string `json:"cronExpression"`
-	Timezone       string `json:"timezone"`
+	ID             int            `json:"id"`
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
+	Enabled        bool           `json:"enabled"`
+	CronExpression string         `json:"cronExpression"`
+	Timezone       string         `json:"timezone"`
+	RunnerType     string         `json:"runnerType"`
+	RunnerConfig   map[string]any `json:"runnerConfig"`
+	TimeoutSeconds int            `json:"timeoutSeconds"`
+	OverlapPolicy  string         `json:"overlapPolicy"`
+	Running        bool           `json:"running"`
+	CreatedAt      time.Time      `json:"createdAt"`
+	UpdatedAt      time.Time      `json:"updatedAt"`
 }
 
 type runResponse struct {
 	ID           int           `json:"id"`
+	Trigger      string        `json:"trigger"`
 	Status       entrun.Status `json:"status"`
 	ExitCode     *int          `json:"exitCode"`
+	StartedAt    time.Time     `json:"startedAt"`
+	FinishedAt   *time.Time    `json:"finishedAt"`
 	DurationMs   int64         `json:"durationMs"`
 	ErrorSummary string        `json:"errorSummary"`
 	Stdout       string        `json:"stdout"`
