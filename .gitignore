@@ -61,6 +61,8 @@ build/bin/
 build/darwin/
 build/linux/
 build/windows/
+!services/taskdaemon-go/build/
+!services/taskdaemon-go/build/config.yml
 
 # Generated frontend caches
 *.tsbuildinfo

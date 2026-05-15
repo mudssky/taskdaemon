@@ -1,6 +1,8 @@
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
 
+const wailsVitePort = Number.parseInt(process.env.WAILS_VITE_PORT ?? "", 10);
+
 export default defineConfig({
   plugins: [react()],
   test: {
@@ -10,7 +12,8 @@ export default defineConfig({
   },
   server: {
     host: "127.0.0.1",
-    port: 5173,
+    port: Number.isNaN(wailsVitePort) ? 5173 : wailsVitePort,
+    strictPort: !Number.isNaN(wailsVitePort),
     proxy: {
       "/api": "http://127.0.0.1:8080",
     },

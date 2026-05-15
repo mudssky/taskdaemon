@@ -32,6 +32,8 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 │       │   └── desktop/             # Wails 绑定、桌面生命周期与原生能力
 │       ├── web/
 │       │   └── embedded/            # Go embed 包，dist/ 由构建脚本同步
+│       ├── build/
+│       │   └── config.yml           # Wails v3 开发模式配置
 │       ├── go.mod
 │       ├── package.json             # service-local scripts，不管理 Go 依赖
 │       └── wails.json
@@ -74,7 +76,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 
 * `taskdaemon serve` 启动 HTTP API，不初始化 Wails Desktop。
 * `taskdaemon desktop` 启动 Wails v3 runtime，并加载 `services/taskdaemon-go/web/embedded` 中的同一套前端构建产物。
-* `pnpm dev:desktop` 通过 `go run github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-alpha.91 dev` 启动 Wails v3 开发模式；前端走 Vite HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
+* `pnpm dev:desktop` 通过 `go tool wails3 dev -config ./build/config.yml` 启动 Wails v3 开发模式；前端走 Vite HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
 * `taskdaemon db migrate` 是 CLI-only 入口，不初始化 Desktop。
 * `--config <path>` 是根级 persistent flag，所有子命令都应加载同一份配置。
 * 未显式传入 `--config` 时，`internal/config` 只在开发工作区里自动查找项目内配置文件，按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 的顺序匹配；非工作区环境不会自动读取当前目录同名文件，找不到时回退到 `os.UserConfigDir()/taskdaemon/config.yaml`。
@@ -94,7 +96,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * SQLite 当前使用 `modernc.org/sqlite v1.50.1`，对应 database/sql driver 名为 `sqlite`。
 * PostgreSQL 集成测试当前使用 `github.com/testcontainers/testcontainers-go v0.42.0` 和 `modules/postgres v0.42.0`。
 * PostgreSQL runtime driver 当前使用 `github.com/lib/pq v1.12.3`，配置方言字符串保持为 `postgres`。
-* Wails 使用 `github.com/wailsapp/wails/v3 v3.0.0-alpha.91`。Desktop 入口通过 `application.New`、`application.AssetFileServerFS(embedded.Assets)`、`desktopApp.Window.NewWithOptions(...)` 与 `application.NewService` 加载前端资源和绑定服务；不要恢复旧的 `NewWebviewWindowWithOptions` 调用。
+* Wails 使用 `github.com/wailsapp/wails/v3 v3.0.0-alpha.91`。Wails CLI 通过 Go tool 依赖管理，脚本使用 `go tool wails3`，不要在 `package.json` 中重复硬编码 `@version`。Desktop 入口通过 `application.New`、`application.AssetFileServerFS(embedded.Assets)`、`desktopApp.Window.NewWithOptions(...)` 与 `application.NewService` 加载前端资源和绑定服务；不要恢复旧的 `NewWebviewWindowWithOptions` 调用。
 
 ---
 

@@ -1,0 +1,25 @@
+version: "3"
+
+dev_mode:
+  root_path: .
+  log_level: warn
+  debounce: 1000
+  ignore:
+    dir:
+      - .git
+      - bin
+      - build
+      - web/embedded/dist
+    file:
+      - .DS_Store
+      - .gitignore
+      - .gitkeep
+      - "*_test.go"
+    watched_extension:
+      - "*.go"
+    git: true
+  executes:
+    - cmd: pnpm --dir ../../apps/web dev
+      type: background
+    - cmd: go run ./cmd/taskdaemon desktop
+      type: primary

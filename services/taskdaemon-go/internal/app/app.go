@@ -62,6 +62,10 @@ func (app *App) Serve(ctx context.Context) error {
 		}
 	}()
 
+	if err := app.migrateStore(ctx, store); err != nil {
+		return err
+	}
+
 	taskService := scheduler.NewService(store, scheduler.Options{
 		Runner: runner.NewExecutor(),
 	})
@@ -198,9 +202,24 @@ func (app *App) MigrateSchema(ctx context.Context) error {
 		}
 	}()
 
+	if err := app.migrateStore(ctx, store); err != nil {
+		return err
+	}
+	return nil
+}
+
+// migrateStore 对已打开的数据层执行 schema migration。
+//
+// 参数:
+//   - ctx: 控制 migration 生命周期的 context。
+//   - store: 已打开的数据层连接。
+//
+// 返回值:
+//   - error: migration 失败时返回带上下文的错误。
+func (app *App) migrateStore(ctx context.Context, store *data.Store) error {
 	app.logger.Info("schema migration started", "driver", app.cfg.Database.Driver)
 	if err := store.Migrate(ctx); err != nil {
-		return err
+		return fmt.Errorf("migrate schema: %w", err)
 	}
 	app.logger.Info("schema migration completed", "driver", app.cfg.Database.Driver)
 	return nil

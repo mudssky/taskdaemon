@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "go run ./cmd/taskdaemon serve",
-    "dev:desktop": "go run github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0-alpha.91 dev",
+    "dev:desktop": "go tool wails3 dev -config ./build/config.yml",
     "desktop": "go run ./cmd/taskdaemon desktop",
     "migrate": "go run ./cmd/taskdaemon db migrate",
     "build": "go build -trimpath -o ../../build/bin/taskdaemon ./cmd/taskdaemon",

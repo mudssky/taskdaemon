@@ -42,12 +42,11 @@ scripts/                          # 本地开发与构建脚本
 默认配置路径为系统用户配置目录下的 `taskdaemon/config.yaml`，可通过 `--config <path>` 覆盖。配置覆盖顺序为：
 
 1. 默认值
-2. 开发工作区启动目录中的项目配置文件（按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 顺序查找）
-3. 系统用户配置目录下的 `taskdaemon/config.yaml`
-4. `TASKDAEMON_` 环境变量
-5. CLI flag 或调用方 overrides
+2. 配置文件：开发工作区启动目录中的项目配置文件，或系统用户配置目录下的 `taskdaemon/config.yaml`
+3. `TASKDAEMON_` 环境变量
+4. CLI flag 或调用方 overrides
 
-如果显式传入 `--config <path>`，则只读取该文件，不再自动叠加项目内配置文件。发布环境默认只依赖系统用户配置目录。
+项目配置文件按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 顺序查找，仅用于开发工作区。项目内未找到时才回退到用户配置目录；如果显式传入 `--config <path>`，则只读取该文件，不再自动叠加项目内配置文件。发布环境默认只依赖系统用户配置目录。
 
 配置示例位于 `services/taskdaemon-go/taskdaemon.example.yaml`。开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml` 后在 Go service 目录启动；发布部署时建议复制到用户配置目录，或通过 `--config` 显式指定。
 
@@ -55,7 +54,11 @@ Swagger route 默认关闭，打开 `server.swagger.enabled` 后注册 `/swagger
 
 ## 前端嵌入
 
-前端开发期在 `apps/web` 独立运行。Desktop 壳使用 Wails v3，`services/taskdaemon-go/wails.json` 采用 v3 的嵌套 `frontend` 配置并指向 `../../apps/web`。开发桌面端时使用 `pnpm dev:desktop` 进入 Wails dev 模式：前端由 Vite 提供 HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。发布前先执行 `pnpm build:web` 生成 `apps/web/dist`，再执行 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`，由 Go `embed` 边界打入二进制。`services/taskdaemon-go/web/embedded/dist` 会提交到仓库，保证干净 checkout 也能通过 Go 编译。
+前端开发期在 `apps/web` 独立运行。普通 Web 开发使用 `pnpm dev:web`，Vite 默认监听 `127.0.0.1:5173`。Desktop 壳使用 Wails v3，开发桌面端时使用 `pnpm dev:desktop` 进入 Wails dev 模式：Wails 读取 `services/taskdaemon-go/build/config.yml`，后台启动 Vite，前端由 Vite 提供 HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
+
+`services/taskdaemon-go/package.json` 通过 `go tool wails3` 调用 Wails CLI，实际 Wails 版本由 `services/taskdaemon-go/go.mod` 的 `github.com/wailsapp/wails/v3` 与 `tool github.com/wailsapp/wails/v3/cmd/wails3` 管理。升级 Wails 时在 Go module 内更新依赖即可，脚本不需要同步改 `@version`。
+
+发布前先执行 `pnpm build:web` 生成 `apps/web/dist`，再执行 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`，由 Go `embed` 边界打入二进制。`services/taskdaemon-go/web/embedded/dist` 会提交到仓库，保证干净 checkout 也能通过 Go 编译。
 
 ## 提交前检查
 
