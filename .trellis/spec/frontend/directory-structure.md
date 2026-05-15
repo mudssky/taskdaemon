@@ -76,7 +76,71 @@ services/
 
 当前前端只有 app shell 骨架。第一批业务实现时可按以下垂直切片落地：
 
-* `features/tasks`：任务 CRUD 表单、任务列表、启停、手动触发。
-* `features/runs`：执行历史表格、状态 badge、stdout/stderr 截断显示。
-* `features/scheduler`：cron 5/6 字段校验、高频/秒级软警告、确认提交状态。
-* `features/auth`：单管理员登录、session 查询、受保护页面入口。
+* `features/tasks`：任务 CRUD 表单、任务列表、启停、手动触发；`tasks.queries.ts` 集中维护 TanStack Query key、查询和 mutation 失效逻辑。
+* `features/runs`：执行历史表格、状态 badge、stdout/stderr 截断显示；历史查询复用任务 feature 的 `tasksKeys.runs(taskId)`。
+* `features/scheduler`：cron 5/6 字段校验、高频/秒级软警告、确认提交状态；`validateCronExpression` 只做前端快速反馈，后端仍是最终校验来源。
+* `features/auth`：单管理员登录、session 查询、受保护页面入口；登录态使用 `GET /api/auth/me` 作为 app shell 的基础 query。
+* `lib/api`：手写轻量 API client 和 DTO 类型。API 错误必须映射为带 `status`、`code`、`details` 的 `ApiClientError`，组件不要解析后端 `message` 做稳定分支。
+
+## Scenario: Basic Management UI
+
+### 1. Scope / Trigger
+
+* Trigger: 第一版 Web/Desktop 共用管理台落地，前端需要真实调用任务列表、创建、编辑、启停、触发、取消和执行历史 API。
+* Scope: `apps/web/src/lib/api` 维护 HTTP 契约；`features/tasks` 维护表单、列表和 mutation；`features/runs` 维护历史展示；`features/scheduler` 维护 cron 前端反馈。
+
+### 2. Signatures
+
+* `apiClient.listTasks(): Promise<{ tasks: Task[] }>`
+* `apiClient.createTask(payload: TaskPayload): Promise<Task>`
+* `apiClient.updateTask(taskId: number, payload: TaskPayload): Promise<Task>`
+* `apiClient.setTaskEnabled(taskId: number, enabled: boolean): Promise<Task>`
+* `apiClient.triggerTask(taskId: number): Promise<TaskRun>`
+* `apiClient.cancelTask(taskId: number): Promise<void>`
+* `apiClient.listTaskRuns(taskId: number): Promise<{ runs: TaskRun[] }>`
+* `validateCronExpression(expression: string, timezone: string): CronValidation`
+* `toTaskPayload(values: TaskFormValues): TaskPayload`
+
+### 3. Contracts
+
+* `Task.runnerType` 使用集中 union：`shell | bash | pwsh | python | node | typescript`。
+* `Task.running` 来自 daemon 进程内状态，只用于 UI 控制按钮和轮询判断，不写回表单。
+* `TaskPayload.runner` 必须包含结构化字段：`type`、`inline` 或 `scriptPath`、`args`、`workDir`、`env`、`timeoutSeconds`、`outputLimitBytes`。
+* cron 软警告包括 `second_level_cron` 和 `high_frequency_cron`；保存时必须把 `confirmCronWarnings=true` 传给后端。
+* 任务列表和执行历史用表格展示；移动端只允许表格容器横向滚动，不能造成页面级横向滚动。
+
+### 4. Validation & Error Matrix
+
+* cron 字段数不是 5/6 -> 前端表单硬错误。
+* timezone 为空或不符合 `Local` / `Area/City` 形态 -> 前端表单硬错误。
+* 秒级或高频 cron 未确认 -> 前端阻止提交并显示确认控件。
+* runner 既没有 inline 也没有 scriptPath -> 前端表单硬错误。
+* API 返回非 2xx -> `ApiClientError(status, code, message, details)`；UI 按稳定 `code` 或泛化失败态展示，不依赖 message。
+
+### 5. Good/Base/Bad Cases
+
+* Good: 用户保存 TypeScript 脚本任务时，表单提交 `{ runner: { type: "typescript", scriptPath: "jobs/a.ts", timeoutSeconds: 3600 } }`，后端 runner 默认通过 `tsx` 执行。
+* Base: `GET /api/tasks` 失败时显示可恢复错误态，成功后根据 `running` 短轮询列表和历史。
+* Bad: 组件直接拼接 fetch payload 或在多个组件中重复写 runner 类型字符串。
+
+### 6. Tests Required
+
+* cron helper 覆盖 5/6 字段、非法字段数、timezone、秒级/高频 warning。
+* task schema 覆盖 runner payload 映射、默认 timeout、TypeScript runner、env/args 映射和高频确认。
+* API client 覆盖稳定错误码映射、trigger/cancel 关键动作。
+* 组件交互覆盖创建/编辑任务、启停、触发、取消和历史查看中的关键业务分支；不测试纯 CSS。
+
+### 7. Wrong vs Correct
+
+#### Wrong
+
+```tsx
+fetch(`/api/tasks/${task.id}/trigger`, { method: "POST" });
+```
+
+#### Correct
+
+```tsx
+const triggerTask = useTriggerTaskMutation();
+triggerTask.mutate(task.id);
+```

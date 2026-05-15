@@ -41,13 +41,20 @@ Backend code should keep business behavior testable at package boundaries and av
 * `scheduler.ValidateCron(input scheduler.CronValidationInput) (scheduler.CronValidationResult, error)`
 * `scheduler.NewService(store *data.Store, opts scheduler.Options) *scheduler.Service`
 * `(*scheduler.Service).CreateTask(ctx context.Context, input scheduler.CreateTaskInput) (*ent.Task, error)`
+* `(*scheduler.Service).ListTasks(ctx context.Context, limit int) ([]*ent.Task, error)`
+* `(*scheduler.Service).UpdateTask(ctx context.Context, taskID int, input scheduler.CreateTaskInput) (*ent.Task, error)`
+* `(*scheduler.Service).SetTaskEnabled(ctx context.Context, taskID int, enabled bool) (*ent.Task, error)`
 * `(*scheduler.Service).TriggerTask(ctx context.Context, taskID int) (*ent.Run, error)`
 * `(*scheduler.Service).CancelTask(ctx context.Context, taskID int) error`
 * `(*scheduler.Service).ListTaskRuns(ctx context.Context, taskID int, limit int) ([]*ent.Run, error)`
+* `(*scheduler.Service).IsTaskRunning(taskID int) bool`
 * `runner.Validate(cfg runner.Config) error`
 * `runner.BuildCommand(cfg runner.Config) (runner.Command, error)`
 * `runner.NewExecutor().Execute(ctx context.Context, cfg runner.Config) (runner.Result, error)`
+* `GET /api/tasks`
 * `POST /api/tasks`
+* `PUT /api/tasks/{id}`
+* `PATCH /api/tasks/{id}/enabled`
 * `POST /api/tasks/{id}/trigger`
 * `POST /api/tasks/{id}/cancel`
 * `GET /api/tasks/{id}/runs`
@@ -61,6 +68,10 @@ Backend code should keep business behavior testable at package boundaries and av
 * Runner types are only `shell`, `bash`, `pwsh`, `python`, `node`, and `typescript`; TypeScript uses `tsx`.
 * Runner config stores structured fields: `inline`, `scriptPath`, `args`, `workDir`, `env`, `timeoutSeconds`, and `outputLimitBytes`.
 * Timeout defaults to 3600 seconds and must be persisted consistently in both `Task.timeout_seconds` and runner JSON.
+* Task list/update/enable APIs are authenticated and return task DTOs with `id`, `name`, `description`, `enabled`, `cronExpression`, `timezone`, `runnerType`, `runnerConfig`, `timeoutSeconds`, `overlapPolicy`, `running`, `createdAt`, and `updatedAt`.
+* `running` is a process-local scheduler view from `IsTaskRunning`; it is not persisted and must not be treated as database state.
+* `UpdateTask` is a full replacement of editable task definition fields and must re-run the same cron/runner validation as `CreateTask`.
+* `SetTaskEnabled` must synchronize the in-process cron scheduler when a scheduler exists: disabled tasks remove registered jobs, enabled tasks register a validated cron job.
 * Execution history must store trigger, status, exit code, started/finished time, duration, error summary, and truncated stdout/stderr.
 * `GET /api/tasks/{id}/runs` returns newest runs first and caps unbounded limits.
 * CLI task trigger/cancel must send `taskdaemon_session=<token>` to daemon HTTP API. Token source may be `--session-token` or `TASKDAEMON_SESSION_TOKEN`.
@@ -73,6 +84,9 @@ Backend code should keep business behavior testable at package boundaries and av
 * Seconds/high-frequency cron without confirmation -> `scheduler.ErrCronWarningsNeedConfirmation`.
 * Unsupported runner type -> `runner.ErrUnsupportedType`.
 * Missing `inline` and `scriptPath` -> `runner.ErrMissingCommand`.
+* Task list failure -> API maps to `500 task_list_failed`.
+* Task create/update validation failure -> API maps to `400 task_invalid` with safe validation details.
+* Invalid task enabled request body -> API maps to `400 bad_request`.
 * Timeout from runner execution -> run status `timeout`.
 * Context cancellation from API/daemon shutdown/user cancel -> run status `cancelled`.
 * Overlap trigger -> write `skipped` run before returning `scheduler.ErrTaskAlreadyRunning` to gocron.
@@ -82,14 +96,18 @@ Backend code should keep business behavior testable at package boundaries and av
 ### 5. Good/Base/Bad Cases
 
 * Good: A logged-in CLI calls `POST /api/tasks/7/cancel`; the daemon process cancels the shared running context and the runner writes `cancelled`.
+* Good: A logged-in Web UI edits a task through `PUT /api/tasks/7`; scheduler validates the full definition, updates Ent fields, removes any previous cron job, and registers the new one when enabled.
 * Base: A manual trigger writes a `running` row before process start and finalizes it to `success`, `failed`, `timeout`, or `cancelled`.
+* Base: `GET /api/tasks` returns at most the service default limit and includes process-local `running` flags for UI controls.
 * Bad: CLI opens the database and starts its own scheduler service for trigger/cancel; this can overlap with daemon jobs and cannot cancel daemon-owned processes.
+* Bad: UI infers running state by scanning the latest run row instead of using the `running` field returned by the daemon service.
 
 ### 6. Tests Required
 
 * Scheduler tests assert cron 5/6 parsing, soft warning confirmation, structured runner persistence, skip-overlap, timeout, cancel, default timeout persistence, and newest-first run history.
+* Scheduler tests assert newest-first task listing, full task update persistence, and dynamic cron job add/remove when enabling or disabling tasks.
 * Runner tests assert command construction, `tsx` TypeScript default, context cancellation, timeout, nonzero exit mapping, and stdout/stderr truncation.
-* HTTP tests assert task routes require session auth, map DTOs into service inputs, map `ErrTaskNotRunning` to `task_not_running`, and serialize run history.
+* HTTP tests assert task routes require session auth, map create/update/enable DTOs into service inputs, map `ErrTaskNotRunning` to `task_not_running`, expose task list running state, and serialize run history.
 * CLI/app tests assert task trigger/cancel parse positive IDs, carry session token from flag/env, and call daemon API with the `taskdaemon_session` cookie.
 
 ### 7. Wrong vs Correct
