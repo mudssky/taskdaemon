@@ -209,3 +209,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 7: 完成调度核心与 runner
+
+**Date**: 2026-05-15
+**Task**: 完成调度核心与 runner
+**Branch**: `master`
+
+### Summary
+
+实现 scheduler-runner-core：gocron 任务注册、结构化 runner、手动触发、取消、timeout、skip-overlap、执行历史 API/CLI，并同步后端实现规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `66def52` | (see git log) |
+| `c58df61` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
