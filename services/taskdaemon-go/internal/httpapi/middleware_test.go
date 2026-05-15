@@ -3,6 +3,7 @@ package httpapi
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -12,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"taskdaemon/internal/auth"
+	"taskdaemon/internal/config"
 )
 
 // TestTraceIDIsReusedInHeaderBodyAndLog 验证 trace id 会复用请求头并进入响应和日志。
@@ -123,7 +125,7 @@ func TestRecoveryMiddlewareUsesAPIEnvelope(t *testing.T) {
 	router := gin.New()
 	router.Use(traceIDMiddleware())
 	router.Use(responseOptionsMiddleware(true))
-	router.Use(requestLoggerMiddleware(logger))
+	router.Use(requestLoggerMiddleware(logger, config.LoggingHTTPConfig{}))
 	router.Use(recoveryMiddleware())
 	router.GET("/panic", func(*gin.Context) {
 		panic("secret panic value")
@@ -148,4 +150,120 @@ func TestRecoveryMiddlewareUsesAPIEnvelope(t *testing.T) {
 	if strings.Contains(text, "secret panic value") || strings.Contains(rec.Body.String(), "secret panic value") {
 		t.Fatalf("panic value leaked: log=%q body=%q", text, rec.Body.String())
 	}
+}
+
+// TestRequestLoggerDoesNotLogBodiesByDefault 验证默认请求日志不会记录请求体或响应体。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestRequestLoggerDoesNotLogBodiesByDefault(t *testing.T) {
+	var logs bytes.Buffer
+	router := bodyLoggingTestRouter(t, &logs, config.LoggingHTTPConfig{})
+	req := httptest.NewRequest(http.MethodPost, "/echo", strings.NewReader(`{"password":"secret","name":"admin"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	text := logs.String()
+	if strings.Contains(text, "request_body") || strings.Contains(text, "response_body") || strings.Contains(text, "secret") {
+		t.Fatalf("body fields should not be logged by default: %q", text)
+	}
+}
+
+// TestRequestLoggerCanLogRedactedBodies 验证开启后请求体与响应体会脱敏后进入日志。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestRequestLoggerCanLogRedactedBodies(t *testing.T) {
+	var logs bytes.Buffer
+	router := bodyLoggingTestRouter(t, &logs, config.LoggingHTTPConfig{
+		IncludeRequestBody:  true,
+		IncludeResponseBody: true,
+		MaxBodyBytes:        1024,
+		RedactFields:        []string{"password", "token"},
+	})
+	req := httptest.NewRequest(http.MethodPost, "/echo", strings.NewReader(`{"username":"admin","password":"secret","nested":{"token":"abc"}}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	text := logs.String()
+	if !strings.Contains(text, "request_body=") || !strings.Contains(text, "response_body=") {
+		t.Fatalf("body fields missing: %q", text)
+	}
+	if !strings.Contains(text, redactedLogValue) {
+		t.Fatalf("redacted marker missing: %q", text)
+	}
+	if strings.Contains(text, "secret") || strings.Contains(text, "abc") {
+		t.Fatalf("sensitive values leaked: %q", text)
+	}
+	if !strings.Contains(rec.Body.String(), "secret") {
+		t.Fatalf("handler should still receive original request body, response=%q", rec.Body.String())
+	}
+}
+
+// TestRequestLoggerMarksTruncatedBodies 验证 body 超过限制时记录截断标记，且 handler 仍收到完整请求。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestRequestLoggerMarksTruncatedBodies(t *testing.T) {
+	var logs bytes.Buffer
+	router := bodyLoggingTestRouter(t, &logs, config.LoggingHTTPConfig{
+		IncludeRequestBody:  true,
+		IncludeResponseBody: true,
+		MaxBodyBytes:        8,
+	})
+	req := httptest.NewRequest(http.MethodPost, "/echo", strings.NewReader(`{"message":"hello world"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	text := logs.String()
+	if !strings.Contains(text, "request_body_truncated=true") || !strings.Contains(text, "response_body_truncated=true") {
+		t.Fatalf("truncated markers missing: %q", text)
+	}
+	if !strings.Contains(rec.Body.String(), "hello world") {
+		t.Fatalf("handler should receive full request body, response=%q", rec.Body.String())
+	}
+}
+
+// bodyLoggingTestRouter 创建用于验证 body 日志的 router。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//   - logs: 日志输出缓冲区。
+//   - cfg: HTTP 日志配置。
+//
+// 返回值:
+//   - http.Handler: 测试 router。
+func bodyLoggingTestRouter(t *testing.T, logs *bytes.Buffer, cfg config.LoggingHTTPConfig) http.Handler {
+	t.Helper()
+	logger := slog.New(slog.NewTextHandler(logs, nil))
+	router := gin.New()
+	router.Use(traceIDMiddleware())
+	router.Use(responseOptionsMiddleware(true))
+	router.Use(requestLoggerMiddleware(logger, cfg))
+	router.POST("/echo", func(ctx *gin.Context) {
+		body, err := io.ReadAll(ctx.Request.Body)
+		if err != nil {
+			t.Fatalf("read request body: %v", err)
+		}
+		ctx.Data(http.StatusOK, "application/json", body)
+	})
+	return router
 }

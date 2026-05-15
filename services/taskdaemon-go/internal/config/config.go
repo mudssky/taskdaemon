@@ -20,6 +20,13 @@ var projectConfigFilenames = []string{
 	"config.yml",
 }
 
+var projectLocalConfigFilenames = []string{
+	"taskdaemon.local.yaml",
+	"taskdaemon.local.yml",
+	"config.local.yaml",
+	"config.local.yml",
+}
+
 // Config 保存 taskdaemon 启动阶段需要的基础配置。
 type Config struct {
 	Server        ServerConfig
@@ -52,6 +59,7 @@ type LoggingConfig struct {
 	Output  string
 	Console LoggingConsoleConfig
 	File    LoggingFileConfig
+	HTTP    LoggingHTTPConfig
 }
 
 // LoggingConsoleConfig 保存控制台日志配置。
@@ -67,6 +75,14 @@ type LoggingFileConfig struct {
 	MaxBackups int
 	MaxAgeDays int
 	Compress   bool
+}
+
+// LoggingHTTPConfig 保存 HTTP 请求日志的可选 body 采集配置。
+type LoggingHTTPConfig struct {
+	IncludeRequestBody  bool
+	IncludeResponseBody bool
+	MaxBodyBytes        int
+	RedactFields        []string
 }
 
 // ObservabilityConfig 保存可观测性相关配置。
@@ -120,6 +136,23 @@ func Default() Config {
 				MaxAgeDays: 30,
 				Compress:   true,
 			},
+			HTTP: LoggingHTTPConfig{
+				IncludeRequestBody:  false,
+				IncludeResponseBody: false,
+				MaxBodyBytes:        4096,
+				RedactFields: []string{
+					"password",
+					"token",
+					"access_token",
+					"refresh_token",
+					"session",
+					"session_token",
+					"cookie",
+					"authorization",
+					"csrf",
+					"csrf_token",
+				},
+			},
 		},
 		Observability: ObservabilityConfig{
 			TraceID: TraceIDConfig{
@@ -172,6 +205,7 @@ func ProjectPath() (string, bool, error) {
 // Load 按 defaults < file < env < overrides 的顺序加载配置。
 //
 // 未显式指定 ConfigPath 时，仅在开发工作区里自动查找当前目录的项目配置文件；
+// 若存在项目本地配置，则按 defaults < file < local < env < overrides 叠加；
 // 发布版不会读取当前目录里的同名配置文件，避免误吃部署目录下的临时文件。
 //
 // 参数:
@@ -187,6 +221,7 @@ func Load(opts LoadOptions) (Config, error) {
 	}
 
 	configPath := opts.ConfigPath
+	localConfigPath := ""
 	if configPath == "" {
 		discoveredPath, found, err := ProjectPath()
 		if err != nil {
@@ -201,11 +236,23 @@ func Load(opts LoadOptions) (Config, error) {
 			}
 			configPath = defaultPath
 		}
+		discoveredLocalPath, localFound, err := ProjectLocalPath()
+		if err != nil {
+			return Config{}, err
+		}
+		if localFound {
+			localConfigPath = discoveredLocalPath
+		}
 		opts.Optional = true
 	}
 
 	if err := loadFile(k, configPath, opts.Optional); err != nil {
 		return Config{}, err
+	}
+	if localConfigPath != "" {
+		if err := loadFile(k, localConfigPath, true); err != nil {
+			return Config{}, err
+		}
 	}
 
 	if err := k.Load(confmap.Provider(envMap("TASKDAEMON_"), "."), nil); err != nil {
@@ -244,6 +291,12 @@ func Load(opts LoadOptions) (Config, error) {
 				MaxAgeDays: k.Int("logging.file.maxAgeDays"),
 				Compress:   k.Bool("logging.file.compress"),
 			},
+			HTTP: LoggingHTTPConfig{
+				IncludeRequestBody:  k.Bool("logging.http.includeRequestBody"),
+				IncludeResponseBody: k.Bool("logging.http.includeResponseBody"),
+				MaxBodyBytes:        k.Int("logging.http.maxBodyBytes"),
+				RedactFields:        stringSliceValue(k.Get("logging.http.redactFields")),
+			},
 		},
 		Observability: ObservabilityConfig{
 			TraceID: TraceIDConfig{
@@ -251,6 +304,30 @@ func Load(opts LoadOptions) (Config, error) {
 			},
 		},
 	}, nil
+}
+
+// ProjectLocalPath 返回开发工作区当前工作目录下第一个存在的项目本地配置文件路径。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - string: 项目本地配置文件路径；未找到时为空。
+//   - bool: true 表示找到了项目本地配置文件。
+//   - error: 读取当前工作目录或检查文件状态失败时返回错误。
+func ProjectLocalPath() (string, bool, error) {
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return "", false, fmt.Errorf("resolve working directory: %w", err)
+	}
+	enabled, err := projectConfigSearchEnabled(workingDir)
+	if err != nil {
+		return "", false, err
+	}
+	if !enabled {
+		return "", false, nil
+	}
+	return projectLocalPathInDir(workingDir)
 }
 
 // Address 返回 HTTP server 使用的 host:port 地址。
@@ -282,6 +359,32 @@ func projectPathInDir(dir string) (string, bool, error) {
 				continue
 			}
 			return "", false, fmt.Errorf("stat project config file %s: %w", candidate, err)
+		}
+		if !info.IsDir() {
+			return candidate, true, nil
+		}
+	}
+	return "", false, nil
+}
+
+// projectLocalPathInDir 返回指定目录中的第一个项目本地配置文件路径。
+//
+// 参数:
+//   - dir: 待搜索的目录。
+//
+// 返回值:
+//   - string: 项目本地配置文件路径；未找到时为空。
+//   - bool: true 表示找到了项目本地配置文件。
+//   - error: 检查文件状态失败时返回错误。
+func projectLocalPathInDir(dir string) (string, bool, error) {
+	for _, filename := range projectLocalConfigFilenames {
+		candidate := filepath.Join(dir, filename)
+		info, err := os.Stat(candidate)
+		if err != nil {
+			if errors.Is(err, os.ErrNotExist) {
+				continue
+			}
+			return "", false, fmt.Errorf("stat project local config file %s: %w", candidate, err)
 		}
 		if !info.IsDir() {
 			return candidate, true, nil
@@ -352,6 +455,10 @@ func defaultMap() map[string]any {
 		"logging.file.maxBackups":                 defaults.Logging.File.MaxBackups,
 		"logging.file.maxAgeDays":                 defaults.Logging.File.MaxAgeDays,
 		"logging.file.compress":                   defaults.Logging.File.Compress,
+		"logging.http.includeRequestBody":         defaults.Logging.HTTP.IncludeRequestBody,
+		"logging.http.includeResponseBody":        defaults.Logging.HTTP.IncludeResponseBody,
+		"logging.http.maxBodyBytes":               defaults.Logging.HTTP.MaxBodyBytes,
+		"logging.http.redactFields":               defaults.Logging.HTTP.RedactFields,
 		"observability.traceId.includeInResponse": defaults.Observability.TraceID.IncludeInResponse,
 	}
 }
@@ -405,6 +512,10 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "LOGGING_FILE_MAX_SIZE_MB", "logging.file.maxSizeMB")
 	applyEnvAlias(values, prefix, "LOGGING_FILE_MAX_BACKUPS", "logging.file.maxBackups")
 	applyEnvAlias(values, prefix, "LOGGING_FILE_MAX_AGE_DAYS", "logging.file.maxAgeDays")
+	applyEnvAlias(values, prefix, "LOGGING_HTTP_INCLUDE_REQUEST_BODY", "logging.http.includeRequestBody")
+	applyEnvAlias(values, prefix, "LOGGING_HTTP_INCLUDE_RESPONSE_BODY", "logging.http.includeResponseBody")
+	applyEnvAlias(values, prefix, "LOGGING_HTTP_MAX_BODY_BYTES", "logging.http.maxBodyBytes")
+	applyEnvAlias(values, prefix, "LOGGING_HTTP_REDACT_FIELDS", "logging.http.redactFields")
 	applyEnvAlias(values, prefix, "OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE", "observability.traceId.includeInResponse")
 	return values
 }
@@ -454,6 +565,53 @@ func flattenMap(values map[string]any) map[string]any {
 		walk(key, value)
 	}
 	return flattened
+}
+
+// stringSliceValue 将配置值转换为字符串切片。
+//
+// 参数:
+//   - value: koanf 读取到的配置值。
+//
+// 返回值:
+//   - []string: 去空白后的字符串切片。
+func stringSliceValue(value any) []string {
+	switch typed := value.(type) {
+	case []string:
+		return cleanStringSlice(typed)
+	case []any:
+		values := make([]string, 0, len(typed))
+		for _, item := range typed {
+			if text, ok := item.(string); ok {
+				values = append(values, text)
+			}
+		}
+		return cleanStringSlice(values)
+	case string:
+		if typed == "" {
+			return nil
+		}
+		return cleanStringSlice(strings.Split(typed, ","))
+	default:
+		return nil
+	}
+}
+
+// cleanStringSlice 去除字符串切片中的空白项。
+//
+// 参数:
+//   - values: 待清理的字符串切片。
+//
+// 返回值:
+//   - []string: 清理后的字符串切片。
+func cleanStringSlice(values []string) []string {
+	cleaned := make([]string, 0, len(values))
+	for _, value := range values {
+		value = strings.TrimSpace(value)
+		if value != "" {
+			cleaned = append(cleaned, value)
+		}
+	}
+	return cleaned
 }
 
 // parseScalar 将环境变量字符串转换为基础标量类型。

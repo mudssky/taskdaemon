@@ -89,6 +89,7 @@ func (app *App) Serve(ctx context.Context) error {
 			Tasks:                  taskService,
 			Logger:                 app.logger,
 			IncludeTraceInResponse: &app.cfg.Observability.TraceID.IncludeInResponse,
+			HTTPLog:                app.cfg.Logging.HTTP,
 		}),
 	}
 

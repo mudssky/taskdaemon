@@ -101,6 +101,18 @@ observability:
 	if cfg.Logging.File.MaxSizeMB != 20 {
 		t.Fatalf("logging file max size = %d, want env alias override", cfg.Logging.File.MaxSizeMB)
 	}
+	if cfg.Logging.HTTP.IncludeRequestBody {
+		t.Fatal("request body logging should be disabled by default")
+	}
+	if cfg.Logging.HTTP.IncludeResponseBody {
+		t.Fatal("response body logging should be disabled by default")
+	}
+	if cfg.Logging.HTTP.MaxBodyBytes != 4096 {
+		t.Fatalf("http max body bytes = %d, want default 4096", cfg.Logging.HTTP.MaxBodyBytes)
+	}
+	if len(cfg.Logging.HTTP.RedactFields) == 0 {
+		t.Fatal("http redact fields should have safe defaults")
+	}
 	if !cfg.Observability.TraceID.IncludeInResponse {
 		t.Fatal("trace id response flag should be overridden by env alias")
 	}
@@ -183,6 +195,87 @@ database:
 	}
 	if cfg.Database.DSN != "postgres://project" {
 		t.Fatalf("database dsn = %s, want project config", cfg.Database.DSN)
+	}
+}
+
+// TestLoadMergesProjectLocalConfigBeforeEnv 验证开发工作区会在基础项目配置后叠加本地配置，且环境变量仍优先。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestLoadMergesProjectLocalConfigBeforeEnv(t *testing.T) {
+	projectDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(projectDir, "pnpm-workspace.yaml"), []byte("packages:\n  - apps/*\n"), 0o600); err != nil {
+		t.Fatalf("write workspace marker: %v", err)
+	}
+	baseConfig := []byte(`
+server:
+  port: 9191
+logging:
+  level: info
+  http:
+    includeRequestBody: false
+    maxBodyBytes: 128
+`)
+	if err := os.WriteFile(filepath.Join(projectDir, "taskdaemon.yaml"), baseConfig, 0o600); err != nil {
+		t.Fatalf("write project config: %v", err)
+	}
+	localConfig := []byte(`
+server:
+  port: 9292
+logging:
+  level: debug
+  http:
+    includeRequestBody: true
+    includeResponseBody: true
+    maxBodyBytes: 256
+    redactFields:
+      - password
+      - apiKey
+`)
+	if err := os.WriteFile(filepath.Join(projectDir, "taskdaemon.local.yaml"), localConfig, 0o600); err != nil {
+		t.Fatalf("write local config: %v", err)
+	}
+	t.Setenv("TASKDAEMON_SERVER_PORT", "9393")
+	t.Setenv("TASKDAEMON_LOGGING_HTTP_MAX_BODY_BYTES", "512")
+
+	oldWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(oldWD); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	cfg, err := Load(LoadOptions{Optional: true})
+	if err != nil {
+		t.Fatalf("load project config: %v", err)
+	}
+
+	if cfg.Server.Port != 9393 {
+		t.Fatalf("server port = %d, want env override", cfg.Server.Port)
+	}
+	if cfg.Logging.Level != "debug" {
+		t.Fatalf("logging level = %s, want local config", cfg.Logging.Level)
+	}
+	if !cfg.Logging.HTTP.IncludeRequestBody {
+		t.Fatal("request body logging should be enabled from local config")
+	}
+	if !cfg.Logging.HTTP.IncludeResponseBody {
+		t.Fatal("response body logging should be enabled from local config")
+	}
+	if cfg.Logging.HTTP.MaxBodyBytes != 512 {
+		t.Fatalf("http max body bytes = %d, want env override", cfg.Logging.HTTP.MaxBodyBytes)
+	}
+	if len(cfg.Logging.HTTP.RedactFields) != 2 || cfg.Logging.HTTP.RedactFields[1] != "apiKey" {
+		t.Fatalf("redact fields = %#v, want local config list", cfg.Logging.HTTP.RedactFields)
 	}
 }
 
@@ -278,6 +371,47 @@ func TestProjectPathFindsFirstProjectConfig(t *testing.T) {
 	}
 }
 
+// TestProjectLocalPathFindsFirstLocalConfig 验证项目本地配置文件会按约定顺序发现。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestProjectLocalPathFindsFirstLocalConfig(t *testing.T) {
+	projectDir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(projectDir, "pnpm-workspace.yaml"), []byte("packages:\n  - apps/*\n"), 0o600); err != nil {
+		t.Fatalf("write workspace marker: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(projectDir, "config.local.yml"), []byte("server:\n  port: 9393\n"), 0o600); err != nil {
+		t.Fatalf("write local config: %v", err)
+	}
+
+	oldWD, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("get working directory: %v", err)
+	}
+	if err := os.Chdir(projectDir); err != nil {
+		t.Fatalf("change working directory: %v", err)
+	}
+	t.Cleanup(func() {
+		if err := os.Chdir(oldWD); err != nil {
+			t.Fatalf("restore working directory: %v", err)
+		}
+	})
+
+	path, found, err := ProjectLocalPath()
+	if err != nil {
+		t.Fatalf("project local path: %v", err)
+	}
+	if !found {
+		t.Fatal("project local config should be found")
+	}
+	if path != filepath.Join(projectDir, "config.local.yml") {
+		t.Fatalf("project local path = %s, want config.local.yml", path)
+	}
+}
+
 // TestProjectPathReturnsMissingWhenNoProjectConfig 验证当前目录没有项目内配置时返回未找到。
 //
 // 参数:
@@ -327,6 +461,15 @@ database:
 `)
 	if err := os.WriteFile(filepath.Join(projectDir, "taskdaemon.yaml"), projectConfig, 0o600); err != nil {
 		t.Fatalf("write project config: %v", err)
+	}
+	localConfig := []byte(`
+server:
+  port: 9393
+database:
+  dsn: postgres://local
+`)
+	if err := os.WriteFile(filepath.Join(projectDir, "taskdaemon.local.yaml"), localConfig, 0o600); err != nil {
+		t.Fatalf("write local config: %v", err)
 	}
 
 	explicitConfig := filepath.Join(t.TempDir(), "custom.yaml")

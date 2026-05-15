@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"taskdaemon/internal/auth"
+	"taskdaemon/internal/config"
 	"taskdaemon/internal/data/ent"
 	"taskdaemon/internal/scheduler"
 )
@@ -27,6 +28,7 @@ type Options struct {
 	Tasks                  TaskService
 	Logger                 *slog.Logger
 	IncludeTraceInResponse *bool
+	HTTPLog                config.LoggingHTTPConfig
 }
 
 // AuthService 定义 HTTP handler 依赖的认证服务能力。
@@ -64,7 +66,7 @@ func NewRouter(opts Options) http.Handler {
 	logger := loggerOrDefault(opts.Logger)
 	router.Use(traceIDMiddleware())
 	router.Use(responseOptionsMiddleware(includeTraceInResponseOption(opts.IncludeTraceInResponse)))
-	router.Use(requestLoggerMiddleware(logger))
+	router.Use(requestLoggerMiddleware(logger, opts.HTTPLog))
 	router.Use(recoveryMiddleware())
 
 	router.GET("/api/health", func(ctx *gin.Context) {

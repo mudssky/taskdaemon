@@ -12,6 +12,8 @@ Thumbs.db
 .env.*
 !.env.example
 *.local
+*.local.yaml
+*.local.yml
 
 # Logs / temp
 *.log

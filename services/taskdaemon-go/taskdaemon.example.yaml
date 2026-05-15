@@ -5,6 +5,8 @@
 #   %APPDATA%\taskdaemon\config.yaml
 #
 # 开发期如果需要项目内配置，可复制为 services/taskdaemon-go/taskdaemon.yaml。
+# 本机专属覆盖可放到同目录 taskdaemon.local.yaml，不要提交到仓库；
+# 未显式传 --config 时加载顺序为 defaults < taskdaemon.yaml < taskdaemon.local.yaml < env。
 # 发布部署时建议只使用用户配置目录或显式 --config。
 
 server:
@@ -42,6 +44,24 @@ logging:
     maxBackups: 7
     maxAgeDays: 30
     compress: true
+  http:
+    # 请求/响应 body 日志默认关闭；本地排障时可在 taskdaemon.local.yaml 中开启。
+    includeRequestBody: false
+    includeResponseBody: false
+    # body 只记录前 N 字节，超出时日志会带 *_truncated=true。
+    maxBodyBytes: 4096
+    # JSON body 中这些字段会递归脱敏；非 JSON body 会做保守文本脱敏。
+    redactFields:
+      - password
+      - token
+      - access_token
+      - refresh_token
+      - session
+      - session_token
+      - cookie
+      - authorization
+      - csrf
+      - csrf_token
 
 observability:
   traceId:
@@ -63,4 +83,8 @@ observability:
 # TASKDAEMON_LOGGING_FILE_MAX_BACKUPS=7
 # TASKDAEMON_LOGGING_FILE_MAX_AGE_DAYS=30
 # TASKDAEMON_LOGGING_FILE_COMPRESS=true
+# TASKDAEMON_LOGGING_HTTP_INCLUDE_REQUEST_BODY=false
+# TASKDAEMON_LOGGING_HTTP_INCLUDE_RESPONSE_BODY=false
+# TASKDAEMON_LOGGING_HTTP_MAX_BODY_BYTES=4096
+# TASKDAEMON_LOGGING_HTTP_REDACT_FIELDS=password,token,cookie,authorization
 # TASKDAEMON_OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE=true
