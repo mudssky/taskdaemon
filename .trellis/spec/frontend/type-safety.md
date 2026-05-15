@@ -17,6 +17,7 @@
 * 表单值类型由 Zod schema 推导，使用 `z.infer<typeof schema>`。
 * UI 专用 view model 与 API DTO 分开，例如执行状态展示字段、格式化后的耗时文本。
 * 共享常量使用 `as const` 或枚举对象，并从常量推导 union type。
+* Vite 环境与静态资源类型声明放在 `src/vite-env.d.ts`。升级 TypeScript 或 Vite 后，先运行 `pnpm typecheck` 验证 CSS、图片等 side-effect import 仍有声明覆盖。
 
 ---
 

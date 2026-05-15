@@ -35,6 +35,7 @@ apps/
     ├── package.json
     ├── vite.config.ts
     ├── tsconfig.json
+    ├── src/vite-env.d.ts       # Vite 客户端与 CSS side-effect import 类型声明
     └── biome.json
 packages/
 ├── api-client/              # 未来 OpenAPI/TS client
@@ -57,6 +58,7 @@ services/
 * `apps/web/src/lib` 中的通用工具必须有明确复用场景；只被单个 feature 使用的逻辑留在 feature 内。
 * `apps/web/dist` 是 Vite 构建输出，受 `.gitignore` 管理；发布前用 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`，该目录由 Go embed 编译进二进制并需要提交，保证干净 checkout 也能通过 Go 编译。
 * `services/taskdaemon-go/wails.json` 使用 Wails v3 嵌套配置：`frontend.dir = ../../apps/web`、`frontend.devServerUrl = http://127.0.0.1:5173`；不要恢复成 Wails 默认 `frontend/` 目录，也不要退回 v2 的 `frontend:*` 扁平键。
+* TypeScript 6 会检查 CSS side-effect import 的类型声明；`apps/web/src/vite-env.d.ts` 必须保留 `/// <reference types="vite/client" />`，否则 `import "./styles.css"` 会在 `tsc --noEmit` 下失败。
 
 ---
 
