@@ -67,7 +67,7 @@ func TestListTasksCallsTaskService(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestCreateTaskRequiresSession(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{authErr: auth.ErrInvalidSession}, Tasks: fakeTaskService{}})
+	router := NewRouter(Options{Auth: &fakeAuthService{authErr: auth.ErrInvalidSession}, Tasks: fakeTaskService{}})
 	req := httptest.NewRequest(http.MethodPost, "/api/tasks", bytes.NewBufferString(`{}`))
 	rec := httptest.NewRecorder()
 
@@ -262,9 +262,9 @@ func TestListTaskRunsCallsTaskService(t *testing.T) {
 //   - 无。
 //
 // 返回值:
-//   - fakeAuthService: 会认证通过的认证服务替身。
-func loggedInAuthService() fakeAuthService {
-	return fakeAuthService{
+//   - *fakeAuthService: 会认证通过的认证服务替身。
+func loggedInAuthService() *fakeAuthService {
+	return &fakeAuthService{
 		login: auth.LoginResult{Principal: auth.Principal{AdminID: 1, Username: "admin"}},
 	}
 }

@@ -76,6 +76,25 @@ taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，
 
 `POST /api/auth/logout` 对缺失或空 session cookie 保持幂等，返回 204 并写入过期 Cookie；删除 session 时发生系统错误才返回 `500 internal_error`。
 
+`POST /api/auth/init` 与 `POST /api/auth/login` 的请求体契约为：
+
+```json
+{
+  "username": "admin",
+  "password": "secret"
+}
+```
+
+字段校验必须区分 JSON 解析错误和凭证字段缺失：
+
+| Condition | HTTP | API code | details.field |
+|---|---:|---|---|
+| body 为空、JSON 语法错误或类型无法绑定 | 400 | `bad_request` | `body` |
+| `username` 缺失或 trim 后为空 | 400 | `bad_request` | `username` |
+| `password` 缺失或为空字符串 | 400 | `bad_request` | `password` |
+
+handler 可以 trim `username` 后再传给认证服务，但不能 trim 或记录 `password`。缺字段错误不应使用 `binding:"required"` 的默认绑定错误折叠成 `field=body`，否则前端和手工调用者无法定位实际缺失字段。
+
 未认证响应固定为：
 
 ```json

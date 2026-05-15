@@ -22,7 +22,7 @@ import (
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestAuthMeRequiresSession(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{authErr: auth.ErrInvalidSession}})
+	router := NewRouter(Options{Auth: &fakeAuthService{authErr: auth.ErrInvalidSession}})
 	req := httptest.NewRequest(http.MethodGet, "/api/auth/me", nil)
 	rec := httptest.NewRecorder()
 
@@ -40,7 +40,7 @@ func TestAuthMeRequiresSession(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestLoginSetsSessionCookie(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{
+	router := NewRouter(Options{Auth: &fakeAuthService{
 		login: auth.LoginResult{
 			Principal:    auth.Principal{AdminID: 7, Username: "admin"},
 			SessionToken: "session-token",
@@ -73,26 +73,86 @@ func TestLoginSetsSessionCookie(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestInitializeAdminCreatesSession(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{
+	service := &fakeAuthService{
 		initLogin: auth.LoginResult{
 			Principal:    auth.Principal{AdminID: 7, Username: "admin"},
 			SessionToken: "session-token",
 			CSRFToken:    "csrf-token",
 		},
-	}})
-	body := bytes.NewBufferString(`{"username":"admin","password":"secret"}`)
+	}
+	router := NewRouter(Options{Auth: service})
+	body := bytes.NewBufferString(`{"username":" admin ","password":"secret"}`)
 	req := httptest.NewRequest(http.MethodPost, "/api/auth/init", body)
 	rec := httptest.NewRecorder()
 
 	router.ServeHTTP(rec, req)
 
 	require.Equal(t, http.StatusCreated, rec.Code)
+	require.Equal(t, "admin", service.initUsername)
+	require.Equal(t, "secret", service.initPassword)
 	cookies := rec.Result().Cookies()
 	require.Len(t, cookies, 1)
 	require.Equal(t, SessionCookieName, cookies[0].Name)
 	require.Equal(t, "session-token", cookies[0].Value)
 	require.True(t, cookies[0].HttpOnly)
 	require.JSONEq(t, `{"adminId":7,"username":"admin","csrfToken":"csrf-token"}`, rec.Body.String())
+}
+
+// TestInitializeAdminReportsMissingCredentialField 验证初始化接口会返回具体缺失字段，避免把字段错误误报成 body 错误。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestInitializeAdminReportsMissingCredentialField(t *testing.T) {
+	router := NewRouter(Options{Auth: &fakeAuthService{}})
+	body := bytes.NewBufferString(`{"username":"admin"}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/init", body)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusBadRequest, rec.Code)
+	require.JSONEq(t, `{"error":{"code":"bad_request","message":"Password is required","details":{"field":"password"}}}`, rec.Body.String())
+}
+
+// TestInitializeAdminReportsMalformedBody 验证初始化接口仍会把 JSON 解析失败标记为 body 错误。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestInitializeAdminReportsMalformedBody(t *testing.T) {
+	router := NewRouter(Options{Auth: &fakeAuthService{}})
+	body := bytes.NewBufferString(`{"username":`)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/init", body)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusBadRequest, rec.Code)
+	require.JSONEq(t, `{"error":{"code":"bad_request","message":"Invalid request body","details":{"field":"body"}}}`, rec.Body.String())
+}
+
+// TestLoginReportsMissingCredentialField 验证登录接口复用认证字段校验并返回具体字段。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestLoginReportsMissingCredentialField(t *testing.T) {
+	router := NewRouter(Options{Auth: &fakeAuthService{}})
+	body := bytes.NewBufferString(`{"username":" "}`)
+	req := httptest.NewRequest(http.MethodPost, "/api/auth/login", body)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusBadRequest, rec.Code)
+	require.JSONEq(t, `{"error":{"code":"bad_request","message":"Username is required","details":{"field":"username"}}}`, rec.Body.String())
 }
 
 // TestInitializeAdminRejectsRepeatedSetup 验证初始化接口会拒绝重复创建管理员。
@@ -103,7 +163,7 @@ func TestInitializeAdminCreatesSession(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestInitializeAdminRejectsRepeatedSetup(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{
+	router := NewRouter(Options{Auth: &fakeAuthService{
 		initErr: auth.ErrAdminAlreadyInitialized,
 	}})
 	body := bytes.NewBufferString(`{"username":"admin","password":"secret"}`)
@@ -124,7 +184,7 @@ func TestInitializeAdminRejectsRepeatedSetup(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestAuthStatusReportsUninitialized(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{initializedStatus: false}})
+	router := NewRouter(Options{Auth: &fakeAuthService{initializedStatus: false}})
 	req := httptest.NewRequest(http.MethodGet, "/api/auth/status", nil)
 	rec := httptest.NewRecorder()
 
@@ -142,7 +202,7 @@ func TestAuthStatusReportsUninitialized(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestAuthStatusReportsInitializedAnonymous(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{
+	router := NewRouter(Options{Auth: &fakeAuthService{
 		initializedStatus: true,
 		authErr:           auth.ErrInvalidSession,
 	}})
@@ -163,7 +223,7 @@ func TestAuthStatusReportsInitializedAnonymous(t *testing.T) {
 // 返回值:
 //   - 无。测试失败时通过 require 终止。
 func TestAuthStatusReportsAuthenticated(t *testing.T) {
-	router := NewRouter(Options{Auth: fakeAuthService{
+	router := NewRouter(Options{Auth: &fakeAuthService{
 		initializedStatus: true,
 		login: auth.LoginResult{
 			Principal: auth.Principal{AdminID: 7, Username: "admin"},
@@ -187,7 +247,7 @@ func TestAuthStatusReportsAuthenticated(t *testing.T) {
 //   - 无。测试失败时通过 require 终止。
 func TestLogoutClearsSessionCookie(t *testing.T) {
 	logoutToken := ""
-	service := fakeAuthService{logoutToken: &logoutToken}
+	service := &fakeAuthService{logoutToken: &logoutToken}
 	router := NewRouter(Options{Auth: service})
 	req := authorizedRequest(http.MethodPost, "/api/auth/logout", nil)
 	rec := httptest.NewRecorder()
@@ -206,6 +266,8 @@ func TestLogoutClearsSessionCookie(t *testing.T) {
 type fakeAuthService struct {
 	login             auth.LoginResult
 	initLogin         auth.LoginResult
+	initUsername      string
+	initPassword      string
 	initializedStatus bool
 	authErr           error
 	initErr           error
@@ -225,7 +287,9 @@ type fakeAuthService struct {
 // 返回值:
 //   - auth.LoginResult: 预设初始化后的登录结果。
 //   - error: 预设错误。
-func (fake fakeAuthService) InitializeAdminWithSession(_ context.Context, _, _ string, _ auth.LoginMetadata) (auth.LoginResult, error) {
+func (fake *fakeAuthService) InitializeAdminWithSession(_ context.Context, username, password string, _ auth.LoginMetadata) (auth.LoginResult, error) {
+	fake.initUsername = username
+	fake.initPassword = password
 	if fake.initErr != nil {
 		return auth.LoginResult{}, fake.initErr
 	}

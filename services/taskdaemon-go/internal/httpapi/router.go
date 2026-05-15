@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -386,7 +387,11 @@ func registerAuthRoutes(router *gin.Engine, service AuthService) {
 			writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Invalid request body", gin.H{"field": "body"})
 			return
 		}
-		result, err := service.InitializeAdminWithSession(ctx.Request.Context(), req.Username, req.Password, auth.LoginMetadata{
+		username, password, ok := validateAuthCredentials(ctx, req.Username, req.Password)
+		if !ok {
+			return
+		}
+		result, err := service.InitializeAdminWithSession(ctx.Request.Context(), username, password, auth.LoginMetadata{
 			UserAgent: ctx.GetHeader("User-Agent"),
 			IP:        ctx.ClientIP(),
 		})
@@ -453,7 +458,11 @@ func registerAuthRoutes(router *gin.Engine, service AuthService) {
 			writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Invalid request body", gin.H{"field": "body"})
 			return
 		}
-		result, err := service.Login(ctx.Request.Context(), req.Username, req.Password, auth.LoginMetadata{
+		username, password, ok := validateAuthCredentials(ctx, req.Username, req.Password)
+		if !ok {
+			return
+		}
+		result, err := service.Login(ctx.Request.Context(), username, password, auth.LoginMetadata{
 			UserAgent: ctx.GetHeader("User-Agent"),
 			IP:        ctx.ClientIP(),
 		})
@@ -517,8 +526,8 @@ func registerAuthRoutes(router *gin.Engine, service AuthService) {
 }
 
 type initializeAdminRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type initializeAdminResponse struct {
@@ -608,9 +617,33 @@ func writeAPIError(ctx *gin.Context, status int, code string, message string, de
 	})
 }
 
+// validateAuthCredentials 校验认证请求的必填凭证字段，并写入字段级错误响应。
+//
+// 参数:
+//   - ctx: Gin 请求上下文。
+//   - username: 请求中的管理员用户名。
+//   - password: 请求中的管理员密码。
+//
+// 返回值:
+//   - string: 去除首尾空白后的用户名。
+//   - string: 原始密码。
+//   - bool: true 表示凭证字段完整，可继续调用认证服务。
+func validateAuthCredentials(ctx *gin.Context, username string, password string) (string, string, bool) {
+	trimmedUsername := strings.TrimSpace(username)
+	if trimmedUsername == "" {
+		writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Username is required", gin.H{"field": "username"})
+		return "", "", false
+	}
+	if password == "" {
+		writeAPIError(ctx, http.StatusBadRequest, "bad_request", "Password is required", gin.H{"field": "password"})
+		return "", "", false
+	}
+	return trimmedUsername, password, true
+}
+
 type loginRequest struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type loginResponse struct {
