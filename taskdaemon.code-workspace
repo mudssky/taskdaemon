@@ -1,0 +1,16 @@
+{
+    "folders": [
+        {
+            "path": ".",
+            "name": "root",
+        },
+        {
+            "path": "apps/web",
+            "name": "web",
+        },
+        {
+            "path": "services/taskdaemon-go",
+            "name": "taskdaemon-go",
+        }
+    ]
+}
