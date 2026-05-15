@@ -243,6 +243,26 @@ func (service *Service) Login(ctx context.Context, username string, password str
 	return service.createSession(ctx, *admin, metadata)
 }
 
+// Logout 删除指定 session token 对应的登录态。
+//
+// 参数:
+//   - ctx: 控制数据库写入生命周期的 context。
+//   - token: Cookie 中携带的原始 session token，空值会被视为已经退出。
+//
+// 返回值:
+//   - error: 数据库删除失败时返回错误。
+func (service *Service) Logout(ctx context.Context, token string) error {
+	if token == "" {
+		return nil
+	}
+	if _, err := service.store.Client().Session.Delete().
+		Where(entsession.TokenHashEQ(hashToken(token))).
+		Exec(ctx); err != nil {
+		return fmt.Errorf("delete session: %w", err)
+	}
+	return nil
+}
+
 // createSession 为指定管理员创建 session 和 CSRF token。
 //
 // 参数:

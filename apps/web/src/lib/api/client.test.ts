@@ -57,13 +57,16 @@ describe("apiClient", () => {
     );
   });
 
-  it("calls auth status and initialize endpoints", async () => {
+  it("calls auth status, initialize and logout endpoints", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       if (String(input).endsWith("/status")) {
         return new Response(
           JSON.stringify({ initialized: false, authenticated: false }),
           { status: 200 },
         );
+      }
+      if (String(input).endsWith("/logout")) {
+        return new Response(null, { status: 204 });
       }
       return new Response(
         JSON.stringify({
@@ -100,6 +103,12 @@ describe("apiClient", () => {
         credentials: "include",
         body: JSON.stringify({ username: "admin", password: "secret" }),
       }),
+    );
+    await expect(apiClient.logout()).resolves.toBeUndefined();
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/auth/logout",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
     );
   });
 });

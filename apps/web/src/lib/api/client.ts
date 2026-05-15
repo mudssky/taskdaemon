@@ -85,6 +85,10 @@ export const apiClient = {
     return requestJSON<AuthPrincipal>("/api/auth/me");
   },
 
+  async logout() {
+    await requestJSON<void>("/api/auth/logout", { method: "POST" });
+  },
+
   async listTasks() {
     return requestJSON<{ tasks: Task[] }>("/api/tasks");
   },

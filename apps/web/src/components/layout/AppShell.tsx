@@ -1,7 +1,17 @@
 import { Link, Outlet } from "@tanstack/react-router";
-import { Activity, Clock3, Database, Play, Settings } from "lucide-react";
+import {
+  Activity,
+  Clock3,
+  Database,
+  LogOut,
+  Play,
+  Settings,
+} from "lucide-react";
 import type { PropsWithChildren } from "react";
-import { useAuthStatusQuery } from "../../features/auth/auth.queries";
+import {
+  useAuthStatusQuery,
+  useLogoutMutation,
+} from "../../features/auth/auth.queries";
 
 type AppShellProps = PropsWithChildren<{
   pageTitle?: string;
@@ -14,6 +24,7 @@ export function AppShell({
   children,
 }: AppShellProps) {
   const authStatus = useAuthStatusQuery();
+  const logout = useLogoutMutation();
   const statusText = authStatus.data?.authenticated
     ? `管理员 ${authStatus.data.admin?.username ?? ""}`.trim()
     : "未登录";
@@ -50,7 +61,21 @@ export function AppShell({
             <p className="eyebrow">{pageKicker}</p>
             <h1 id="page-title">{pageTitle}</h1>
           </div>
-          <span className="status">{statusText}</span>
+          <div className="topbar-actions">
+            <span className="status">{statusText}</span>
+            {authStatus.data?.authenticated ? (
+              <button
+                aria-label="退出登录"
+                className="icon-button"
+                disabled={logout.isPending}
+                onClick={() => logout.mutate()}
+                title="退出登录"
+                type="button"
+              >
+                <LogOut aria-hidden="true" size={16} />
+              </button>
+            ) : null}
+          </div>
         </header>
         {children ?? <Outlet />}
       </section>

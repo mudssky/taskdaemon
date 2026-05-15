@@ -53,9 +53,11 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * `(*auth.Service).IsAdminInitialized(ctx context.Context) (bool, error)`
 * `(*auth.Service).Login(ctx context.Context, username string, password string, metadata auth.LoginMetadata) (auth.LoginResult, error)`
 * `(*auth.Service).AuthenticateSession(ctx context.Context, token string) (auth.Principal, error)`
+* `(*auth.Service).Logout(ctx context.Context, token string) error`
 * `POST /api/auth/init`
 * `GET /api/auth/status`
 * `POST /api/auth/login`
+* `POST /api/auth/logout`
 * `GET /api/auth/me`
 
 ### 3. Contracts
@@ -68,6 +70,7 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * 首次使用由前端显示“创建管理员”向导，不提供长期有效的默认账号或默认密码。
 * `GET /api/auth/status` 是前端判断首次初始化和登录态的入口，返回 `{ initialized, authenticated, admin? }`；未初始化或未登录都返回 200，不用 401 表达普通页面分流。
 * `POST /api/auth/init` 成功后必须同时创建 session、写入 `taskdaemon_session` Cookie，并返回与登录兼容的 `{ adminId, username, csrfToken }`。
+* `POST /api/auth/logout` 删除当前 Cookie 对应的服务端 session，并返回过期的 `taskdaemon_session` Cookie；缺少 Cookie 时也返回 204，保持退出操作幂等。
 
 ### 4. Validation & Error Matrix
 
@@ -83,6 +86,7 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 * Good: `taskdaemon db migrate` 对当前配置数据库执行 Ent migration，不初始化 Desktop。
 * Good: 空数据库首次打开 Web UI 时，前端先请求 `/api/auth/status`，得到 `initialized=false` 后显示创建管理员表单。
 * Good: 用户提交创建管理员表单后，`POST /api/auth/init` 写入 session cookie，前端刷新 auth status 并进入管理台。
+* Good: 用户点击退出登录后，前端调用 `/api/auth/logout`，服务端删除 session 并清理 Cookie，随后 auth status 变为 `authenticated=false`。
 * Base: SQLite 临时库完成 migration 后，`Admin.Query().Count(ctx)` 可返回 `0`。
 * Bad: 新数据库直接显示登录表单并要求用户输入未知密码。
 * Bad: handler 直接调用 Ent client 或判断 SQL 方言；应通过 `auth.AuthService` 或后续 service/repository 边界。
@@ -90,8 +94,8 @@ taskdaemon 第一版把 SQLite 和 PostgreSQL 都作为一等目标设计。默�
 ### 6. Tests Required
 
 * 数据层测试断言 SQLite open + migration 成功，并断言不支持方言返回 `ErrUnsupportedDriver`。
-* 认证测试断言初始化状态查询、初始化后创建 session、重复初始化、登录、session 认证和错误凭证。
-* HTTP 测试断言 `/api/auth/status` 的未初始化、已初始化未登录、已登录分支；`/api/auth/me` 未登录返回稳定 401 JSON；`/api/auth/login` 写入 HttpOnly cookie；`/api/auth/init` 可初始化、写入 HttpOnly cookie、返回 CSRF token，并拒绝重复初始化。
+* 认证测试断言初始化状态查询、初始化后创建 session、重复初始化、登录、退出登录后 session 失效、session 认证和错误凭证。
+* HTTP 测试断言 `/api/auth/status` 的未初始化、已初始化未登录、已登录分支；`/api/auth/me` 未登录返回稳定 401 JSON；`/api/auth/login` 写入 HttpOnly cookie；`/api/auth/init` 可初始化、写入 HttpOnly cookie、返回 CSRF token，并拒绝重复初始化；`/api/auth/logout` 删除 session 并返回过期 Cookie。
 * PostgreSQL 集成测试在 `services/taskdaemon-go` 内使用 `go test -tags=integration ./internal/data`，或从仓库根运行 `pnpm test:go:integration`；本机 Docker 不可用时允许跳过。
 
 ### 7. Wrong vs Correct

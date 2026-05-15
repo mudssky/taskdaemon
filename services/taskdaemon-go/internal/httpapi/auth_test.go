@@ -178,6 +178,30 @@ func TestAuthStatusReportsAuthenticated(t *testing.T) {
 	require.JSONEq(t, `{"initialized":true,"authenticated":true,"admin":{"adminId":7,"username":"admin"}}`, rec.Body.String())
 }
 
+// TestLogoutClearsSessionCookie 验证退出登录会删除服务端 session 并清理浏览器 Cookie。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestLogoutClearsSessionCookie(t *testing.T) {
+	logoutToken := ""
+	service := fakeAuthService{logoutToken: &logoutToken}
+	router := NewRouter(Options{Auth: service})
+	req := authorizedRequest(http.MethodPost, "/api/auth/logout", nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusNoContent, rec.Code)
+	require.Equal(t, "session-token", logoutToken)
+	cookies := rec.Result().Cookies()
+	require.Len(t, cookies, 1)
+	require.Equal(t, SessionCookieName, cookies[0].Name)
+	require.Equal(t, -1, cookies[0].MaxAge)
+}
+
 // fakeAuthService 是 HTTP API 测试使用的认证服务替身。
 type fakeAuthService struct {
 	login             auth.LoginResult
@@ -186,6 +210,8 @@ type fakeAuthService struct {
 	authErr           error
 	initErr           error
 	statusErr         error
+	logoutToken       *string
+	logoutErr         error
 }
 
 // InitializeAdminWithSession 返回预设初始化登录结果或错误。
@@ -253,4 +279,19 @@ func (fake fakeAuthService) IsAdminInitialized(_ context.Context) (bool, error) 
 		return false, fake.statusErr
 	}
 	return fake.initializedStatus, nil
+}
+
+// Logout 记录退出登录时收到的 session token。
+//
+// 参数:
+//   - _ : 请求 context，测试替身不使用。
+//   - token: session token。
+//
+// 返回值:
+//   - error: 预设错误。
+func (fake fakeAuthService) Logout(_ context.Context, token string) error {
+	if fake.logoutToken != nil {
+		*fake.logoutToken = token
+	}
+	return fake.logoutErr
 }

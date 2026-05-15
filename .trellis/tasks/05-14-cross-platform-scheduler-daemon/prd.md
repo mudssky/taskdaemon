@@ -380,3 +380,11 @@
 **Decision**: 新增 `GET /api/auth/status`，返回 `initialized`、`authenticated` 和可选 `admin`。未初始化与已初始化未登录都返回 200，前端据此显示“创建管理员”或“登录”。
 
 **Consequences**: 前端 app shell 以 auth status 作为基础 query；`/api/auth/me` 继续保留为需要当前管理员详情时的传统 session endpoint。
+
+### Decision (ADR-lite): 配置示例归属 Go service
+
+**Context**: 配置文件实际由 `services/taskdaemon-go/internal/config` 读取，根目录只负责 pnpm workspace 聚合。如果把示例配置放在仓库根目录，会让它看起来像 workspace 级配置，也容易和开发期自动发现的项目配置混淆。
+
+**Decision**: 默认配置示例放在 `services/taskdaemon-go/taskdaemon.example.yaml`。开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml`，发布时复制到用户配置目录或通过 `--config` 显式指定。
+
+**Consequences**: 示例配置和 Go service 启动目录保持一致；仓库根目录不承担运行配置语义。

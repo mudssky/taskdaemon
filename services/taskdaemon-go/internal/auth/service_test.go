@@ -108,6 +108,28 @@ func TestInitializeAdminWithSession(t *testing.T) {
 	require.ErrorIs(t, err, ErrAdminAlreadyInitialized)
 }
 
+// TestLogoutInvalidatesSession 验证退出登录会删除当前 session。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestLogoutInvalidatesSession(t *testing.T) {
+	ctx := context.Background()
+	store := newTestStore(t)
+	service := New(store, Options{BcryptCost: bcryptMinCostForTest})
+	_, err := service.InitializeAdmin(ctx, "admin", "secret")
+	require.NoError(t, err)
+	login, err := service.Login(ctx, "admin", "secret", LoginMetadata{})
+	require.NoError(t, err)
+
+	require.NoError(t, service.Logout(ctx, login.SessionToken))
+
+	_, err = service.AuthenticateSession(ctx, login.SessionToken)
+	require.ErrorIs(t, err, ErrInvalidSession)
+}
+
 // TestLoginRejectsInvalidPassword 验证登录失败不会创建 session，也不会泄漏具体原因。
 //
 // 参数:

@@ -1,0 +1,33 @@
+# taskdaemon 默认配置示例。
+# 复制到用户配置目录的 taskdaemon/config.yaml，或使用 --config 指向自定义路径。
+#
+# Windows 默认配置路径通常是：
+#   %APPDATA%\taskdaemon\config.yaml
+#
+# 开发期如果需要项目内配置，可复制为 services/taskdaemon-go/taskdaemon.yaml。
+# 发布部署时建议只使用用户配置目录或显式 --config。
+
+server:
+  # HTTP API 监听地址。对外暴露前请先配置反向代理、TLS 与 Host/CSRF 安全策略。
+  host: 127.0.0.1
+  port: 8080
+  swagger:
+    # 生产环境默认关闭；需要调试 API 时再显式开启。
+    enabled: false
+
+database:
+  # 支持 sqlite 或 postgres。
+  driver: sqlite
+  # SQLite 推荐使用 file: DSN，并开启外键。
+  dsn: file:taskdaemon.db?_fk=1
+
+  # PostgreSQL 示例：
+  # driver: postgres
+  # dsn: postgres://taskdaemon:password@127.0.0.1:5432/taskdaemon?sslmode=disable
+
+# 环境变量覆盖示例：
+# TASKDAEMON_SERVER_HOST=127.0.0.1
+# TASKDAEMON_SERVER_PORT=8080
+# TASKDAEMON_SERVER_SWAGGER_ENABLED=false
+# TASKDAEMON_DATABASE_DRIVER=sqlite
+# TASKDAEMON_DATABASE_DSN=file:taskdaemon.db?_fk=1

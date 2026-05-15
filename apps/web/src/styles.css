@@ -103,6 +103,12 @@ p {
   margin-bottom: 20px;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .eyebrow {
   color: #64737f;
   font-size: 13px;
@@ -478,6 +484,7 @@ pre {
   }
 
   .topbar,
+  .topbar-actions,
   .form-actions,
   .panel-header,
   .auth-panel {

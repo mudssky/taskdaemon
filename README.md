@@ -21,7 +21,7 @@ pnpm exec lint-staged
 cd services/taskdaemon-go
 go test ./...
 go run ./cmd/taskdaemon serve
-go run ./cmd/taskdaemon serve --config ./config.yaml
+go run ./cmd/taskdaemon serve --config ./taskdaemon.yaml
 go run ./cmd/taskdaemon db migrate
 ```
 
@@ -47,6 +47,8 @@ scripts/                          # 本地开发与构建脚本
 5. CLI flag 或调用方 overrides
 
 如果显式传入 `--config <path>`，则只读取该文件，不再自动叠加项目内配置文件。发布环境默认只依赖系统用户配置目录。
+
+配置示例位于 `services/taskdaemon-go/taskdaemon.example.yaml`。开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml` 后在 Go service 目录启动；发布部署时建议复制到用户配置目录，或通过 `--config` 显式指定。
 
 Swagger route 默认关闭，打开 `server.swagger.enabled` 后注册 `/swagger/index.html`。
 

@@ -34,6 +34,7 @@ type AuthService interface {
 	IsAdminInitialized(context.Context) (bool, error)
 	Login(context.Context, string, string, auth.LoginMetadata) (auth.LoginResult, error)
 	AuthenticateSession(context.Context, string) (auth.Principal, error)
+	Logout(context.Context, string) error
 }
 
 // TaskService 定义 HTTP handler 依赖的任务调度能力。
@@ -473,6 +474,22 @@ func registerAuthRoutes(router *gin.Engine, service AuthService) {
 		})
 	})
 
+	router.POST("/api/auth/logout", func(ctx *gin.Context) {
+		if service == nil {
+			writeAPIError(ctx, http.StatusServiceUnavailable, "auth_unavailable", "Authentication service is unavailable", nil)
+			return
+		}
+		cookie, err := ctx.Request.Cookie(SessionCookieName)
+		if err == nil && cookie.Value != "" {
+			if err := service.Logout(ctx.Request.Context(), cookie.Value); err != nil {
+				writeAPIError(ctx, http.StatusInternalServerError, "internal_error", "Logout failed", nil)
+				return
+			}
+		}
+		clearSessionCookie(ctx)
+		ctx.Status(http.StatusNoContent)
+	})
+
 	router.GET("/api/auth/me", func(ctx *gin.Context) {
 		if service == nil {
 			writeUnauthorized(ctx)
@@ -537,6 +554,25 @@ func writeSessionCookie(ctx *gin.Context, token string) {
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Expires:  time.Now().Add(24 * time.Hour),
+	})
+}
+
+// clearSessionCookie 让浏览器立即移除管理员 session cookie。
+//
+// 参数:
+//   - ctx: Gin 请求上下文。
+//
+// 返回值:
+//   - 无。
+func clearSessionCookie(ctx *gin.Context) {
+	http.SetCookie(ctx.Writer, &http.Cookie{
+		Name:     SessionCookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+		Expires:  time.Unix(0, 0),
 	})
 }
 

@@ -74,6 +74,8 @@ taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，
 | 已存在管理员时再次初始化 | `auth.ErrAdminAlreadyInitialized` | 409 | `admin_already_initialized` |
 | 认证服务未注入 | n/a | 503 | `auth_unavailable` |
 
+`POST /api/auth/logout` 对缺失或空 session cookie 保持幂等，返回 204 并写入过期 Cookie；删除 session 时发生系统错误才返回 `500 internal_error`。
+
 未认证响应固定为：
 
 ```json

@@ -55,3 +55,14 @@ export function useInitializeAdminMutation() {
     },
   });
 }
+
+export function useLogoutMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => apiClient.logout(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: authKeys.status });
+      queryClient.invalidateQueries({ queryKey: authKeys.me });
+    },
+  });
+}

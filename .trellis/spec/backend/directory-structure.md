@@ -79,6 +79,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * 未显式传入 `--config` 时，`internal/config` 只在开发工作区里自动查找项目内配置文件，按 `taskdaemon.yaml`、`taskdaemon.yml`、`config.yaml`、`config.yml` 的顺序匹配；非工作区环境不会自动读取当前目录同名文件，找不到时回退到 `os.UserConfigDir()/taskdaemon/config.yaml`。
 * 显式 `--config <path>` 只读取指定文件，不再叠加项目内配置文件。
 * 默认配置路径为 `os.UserConfigDir()/taskdaemon/config.yaml`。
+* 配置示例归属 Go service 边界，放在 `services/taskdaemon-go/taskdaemon.example.yaml`；开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml`，发布时复制到用户配置目录或通过 `--config` 显式指定。
 * `/api/health` 是后端探活 endpoint；Swagger route 默认关闭，只在 `server.swagger.enabled=true` 时注册。
 
 ---
