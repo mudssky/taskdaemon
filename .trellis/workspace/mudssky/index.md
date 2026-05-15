@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 7
+- **Total Sessions**: 8
 - **Last Active**: 2026-05-15
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~245 | Active |
+| `journal-1.md` | ~282 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 8 | 2026-05-15 | JSON 库选型与依赖升级 | `0d153b3`, `77942c4`, `b2b8352`, `f46a867`, `5836ab4` | `master` |
 | 7 | 2026-05-15 | 完成调度核心与 runner | `66def52`, `c58df61` | `master` |
 | 6 | 2026-05-15 | 前后端分离 monorepo 迁移 | `7fb7a30`, `67e3804`, `556f12c` | `master` |
 | 5 | 2026-05-15 | 数据层与认证基础 | `9065952`, `222e3d6` | `master` |

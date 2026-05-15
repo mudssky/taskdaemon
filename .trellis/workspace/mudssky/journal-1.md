@@ -243,3 +243,40 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 8: JSON 库选型与依赖升级
+
+**Date**: 2026-05-15
+**Task**: JSON 库选型与依赖升级
+**Branch**: `master`
+
+### Summary
+
+确定 Go JSON 默认使用 encoding/json；升级 Go 基线到 1.26.3，同步升级后端、Wails、Ent 与前端 workspace 依赖，重新生成 Ent 代码并同步 Web embed 资源；更新 Trellis spec 与任务记录，质量门禁已通过。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `0d153b3` | (see git log) |
+| `77942c4` | (see git log) |
+| `b2b8352` | (see git log) |
+| `f46a867` | (see git log) |
+| `5836ab4` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
