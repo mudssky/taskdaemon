@@ -72,6 +72,7 @@ services/
 * 测试文件与被测文件相邻，使用 `*.test.ts` 或 `*.test.tsx`。
 * 路由文件遵循 TanStack Router 生成/约定模式；不要为了个人偏好创建第二套路由组织方式。
 * sidebar 顶级导航目标必须对应清晰的页面组件；不要让 `/`、`/tasks`、`/runs` 这类不同入口全部渲染同一个聚合大组件，否则 URL 会变化但用户感知为导航失效。共享内容应拆成 feature 组件，由各 page component 组合。
+* 任务创建/编辑这类复杂表单使用独立路由页面承载，例如 `/tasks/new` 和 `/tasks/$taskId/edit`；`/tasks` 只负责列表、筛选和行级操作入口，不内嵌创建/编辑表单。
 
 ---
 

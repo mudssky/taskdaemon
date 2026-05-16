@@ -107,8 +107,9 @@ describe("router", () => {
       screen.getByRole("heading", { name: "任务列表" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: "创建任务" }),
-    ).toBeInTheDocument();
+      screen.queryByRole("heading", { name: "创建任务" }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "新建任务" })).toBeInTheDocument();
     expect(
       screen.queryByRole("heading", { name: "当前关注" }),
     ).not.toBeInTheDocument();
@@ -130,6 +131,51 @@ describe("router", () => {
     expect(
       screen.queryByRole("heading", { name: "创建任务" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("opens task create and edit pages as standalone routes", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("scrollTo", vi.fn());
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL) => {
+        const path = String(input);
+        if (path === "/api/auth/status") {
+          return jsonResponse({
+            initialized: true,
+            authenticated: true,
+            admin: { adminId: 1, username: "admin" },
+          });
+        }
+        if (path === "/api/tasks") {
+          return jsonResponse({ tasks: taskFixtures });
+        }
+        return jsonResponse(null);
+      }),
+    );
+
+    renderRouter("/tasks");
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "任务" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("link", { name: "新建任务" }));
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "创建任务" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "创建任务" }),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole("link", { name: "返回列表" }));
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "任务" }),
+    ).toBeInTheDocument();
+    await user.click(screen.getByLabelText("编辑任务"));
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "编辑任务" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("任务名称")).toHaveValue("backup");
   });
 });
 

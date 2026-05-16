@@ -11,6 +11,8 @@ import { useAuthStatusQuery } from "../features/auth/auth.queries";
 import { LoginPanel } from "../features/auth/LoginPanel";
 import { RunHistoryPage } from "../features/runs/RunHistoryPage";
 import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
+import { TaskCreatePage } from "../features/tasks/TaskCreatePage";
+import { TaskEditPage } from "../features/tasks/TaskEditPage";
 import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
 
 function ProtectedApp() {
@@ -77,6 +79,18 @@ const tasksRoute = createRoute({
   component: TaskManagementPage,
 });
 
+const taskCreateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tasks/new",
+  component: TaskCreatePage,
+});
+
+const taskEditRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tasks/$taskId/edit",
+  component: TaskEditPage,
+});
+
 const runsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/runs",
@@ -86,6 +100,8 @@ const runsRoute = createRoute({
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   tasksRoute,
+  taskCreateRoute,
+  taskEditRoute,
   runsRoute,
 ]);
 

@@ -90,6 +90,12 @@ export function AppShell({
 }
 
 function pageTitleForPath(pathname: string): string {
+  if (pathname === "/tasks/new") {
+    return "创建任务";
+  }
+  if (/^\/tasks\/[^/]+\/edit$/.test(pathname)) {
+    return "编辑任务";
+  }
   if (pathname.startsWith("/tasks")) {
     return "任务";
   }

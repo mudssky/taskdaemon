@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import { Ban, Pencil, Play, Power, XCircle } from "lucide-react";
 import type { Task } from "../../lib/api/types";
 import { runnerTypeLabel, taskStatusLabel } from "./task-format";
@@ -7,7 +8,6 @@ type TaskTableProps = {
   selectedTaskId: number | null;
   busyTaskId: number | null;
   onSelect: (task: Task) => void;
-  onEdit: (task: Task) => void;
   onToggleEnabled: (task: Task) => void;
   onTrigger: (task: Task) => void;
   onCancel: (task: Task) => void;
@@ -18,7 +18,6 @@ export function TaskTable({
   selectedTaskId,
   busyTaskId,
   onSelect,
-  onEdit,
   onToggleEnabled,
   onTrigger,
   onCancel,
@@ -69,9 +68,15 @@ export function TaskTable({
               <td>{runnerTypeLabel(task.runnerType)}</td>
               <td>
                 <div className="row-actions">
-                  <IconButton label="编辑任务" onClick={() => onEdit(task)}>
+                  <Link
+                    className="icon-button"
+                    to="/tasks/$taskId/edit"
+                    params={{ taskId: String(task.id) }}
+                    aria-label="编辑任务"
+                    title="编辑任务"
+                  >
                     <Pencil aria-hidden="true" size={16} />
-                  </IconButton>
+                  </Link>
                   <IconButton
                     label={task.enabled ? "停用任务" : "启用任务"}
                     onClick={() => onToggleEnabled(task)}
