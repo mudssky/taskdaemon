@@ -6,7 +6,7 @@
 
 ## Overview
 
-前端使用 TypeScript 严格约束业务数据形状，并用 Zod 做运行时输入校验。API 类型第一版可以先手写轻量 client，但方向是接入 OpenAPI/类型生成；无论生成还是手写，都要保持 DTO、表单值和 UI view model 的边界清晰。
+前端使用 TypeScript 严格约束业务数据形状，并用 Zod 做运行时输入校验。当前 API 类型由轻量手写 client 维护；未来接入 OpenAPI/类型生成时，也必须保持 DTO、表单值和 UI view model 的边界清晰。
 
 ---
 

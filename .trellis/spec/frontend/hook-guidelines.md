@@ -6,7 +6,7 @@
 
 ## Overview
 
-前端 hook 用于封装状态ful 逻辑、server state 和业务动作。第一版使用 TanStack Query 管理服务端数据；React Hook Form 管理表单状态；TanStack Router 管理 URL 和路由状态。自定义 hook 应该让组件更薄，而不是把跨层副作用藏起来。
+前端 hook 用于封装状态ful 逻辑、server state 和业务动作。项目使用 TanStack Query 管理服务端数据，React Hook Form 管理表单状态，TanStack Router 管理 URL 和路由状态。自定义 hook 应该让组件更薄，而不是把跨层副作用藏起来。
 
 ---
 

@@ -6,7 +6,7 @@
 
 ## Overview
 
-taskdaemon 前端的状态分为 server state、URL state、form state、local UI state 和少量 app state。默认不要引入额外全局状态库；第一版使用 TanStack Query、TanStack Router、React Hook Form 和 React 本地 state 覆盖主要需求。
+taskdaemon 前端的状态分为 server state、URL state、form state、local UI state 和少量 app state。默认不要引入额外全局状态库；当前使用 TanStack Query、TanStack Router、React Hook Form 和 React 本地 state 覆盖主要需求。
 
 ---
 
@@ -16,7 +16,7 @@ taskdaemon 前端的状态分为 server state、URL state、form state、local U
 * URL state：筛选、分页、选中 tab、详情页 ID。使用 TanStack Router search params。
 * Form state：创建/编辑任务、登录、runner 配置、cron 确认。使用 React Hook Form。
 * Local UI state：dialog 开关、当前展开行、临时 hover/focus。使用组件本地 `useState`。
-* App state：主题、sidebar 折叠、Desktop/Web 能力探测等少量跨页面 UI 状态。第一版优先用 React context，确认复杂后再评估 store。
+* App state：主题、sidebar 折叠、Desktop/Web 能力探测等少量跨页面 UI 状态。优先用 React context，确认复杂后再评估 store。
 
 ---
 
@@ -29,7 +29,7 @@ taskdaemon 前端的状态分为 server state、URL state、form state、local U
 * 状态不是表单内部临时值。
 * 使用 context 已经明显造成不必要重渲染或复杂传递。
 
-第一版不要为了任务列表、执行历史或登录态引入 Zustand/Redux。它们分别由 TanStack Query 和路由保护处理。
+不要为了任务列表、执行历史或登录态引入 Zustand/Redux。它们分别由 TanStack Query 和路由保护处理。
 
 ---
 

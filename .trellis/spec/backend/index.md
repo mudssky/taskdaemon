@@ -1,39 +1,58 @@
-# Backend Development Guidelines
+# 后端开发规范
 
-> Best practices for backend development in this project.
-
----
-
-## Overview
-
-This directory contains taskdaemon backend guidelines. The project is currently early-stage, so these files combine existing code facts with decisions already captured in Trellis PRDs. When code lands, update the guidelines to reflect the implemented reality.
+> taskdaemon Go 后端的长期代码规范索引。
 
 ---
 
-## Guidelines Index
+## 概览
 
-| Guide | Description | Status |
-|-------|-------------|--------|
-| [Directory Structure](./directory-structure.md) | Module organization and file layout | Filled |
-| [Database Guidelines](./database-guidelines.md) | ORM patterns, queries, migrations | Filled |
-| [Error Handling](./error-handling.md) | Error types, handling strategies | Filled |
-| [Quality Guidelines](./quality-guidelines.md) | Code standards, forbidden patterns | Filled |
-| [Logging Guidelines](./logging-guidelines.md) | Structured logging, log levels | Filled |
+本目录只沉淀长期有效、可重复执行的后端工程约定。历史任务的 PRD、接口全集、阶段性验收矩阵和一次性需求背景应保留在 `.trellis/tasks/`、研究笔记或 ADR 中，不直接搬进长期 spec。
+
+当前 Go 后端位于 `services/taskdaemon-go`，包含 HTTP API、CLI、daemon、调度器、runner、数据层、认证和 Wails Desktop 边界。写后端代码前，应优先根据触达包读取对应规范。
 
 ---
 
-## Pre-Development Checklist
+## 规范索引
 
-Before backend implementation:
-
-1. Read [Directory Structure](./directory-structure.md).
-2. Read the domain-specific guide for the layer you are touching.
-3. For scheduler/runner work, read [Quality Guidelines](./quality-guidelines.md).
-4. For data/auth/config/API work, read [Database Guidelines](./database-guidelines.md), [Error Handling](./error-handling.md), and [Logging Guidelines](./logging-guidelines.md).
-5. Check parent task PRDs under `.trellis/tasks/` when a guide says the behavior is planned but not implemented yet.
-
-The goal is to help AI assistants and new team members match taskdaemon's current decisions without inventing a different architecture.
+| 文档 | 内容 | 状态 |
+|---|---|---|
+| [目录结构](./directory-structure.md) | workspace、Go module、入口与包边界 | 当前代码事实 |
+| [Go 文件组织与拆分](./file-organization.md) | 文件体量、职责切分、拆分顺序 | 当前代码事实 |
+| [数据库规范](./database-guidelines.md) | Ent、迁移、查询边界、事务 | 当前代码事实 |
+| [错误处理](./error-handling.md) | sentinel/typed error、API envelope、敏感信息 | 当前代码事实 |
+| [质量规范](./quality-guidelines.md) | 调度/runner 行为、测试、评审清单 | 当前代码事实 |
+| [日志规范](./logging-guidelines.md) | slog、HTTP 日志、脱敏、运行时重载 | 当前代码事实 |
 
 ---
 
-**Language**: Project working documentation is written in Chinese unless a generated tool requires otherwise.
+## 开发前检查
+
+后端实现前：
+
+1. 读取 [目录结构](./directory-structure.md)，确认要修改的包边界。
+2. 若新增或修改 Go 文件，读取 [Go 文件组织与拆分](./file-organization.md)。
+3. 数据、schema、migration 或 repository 相关工作读取 [数据库规范](./database-guidelines.md)。
+4. API、CLI、auth、scheduler、runner 相关错误路径读取 [错误处理](./error-handling.md)。
+5. 调度、runner、daemon 状态、HTTP API 和 CLI 行为读取 [质量规范](./quality-guidelines.md)。
+6. 日志、trace、HTTP body 捕获或配置热重载相关工作读取 [日志规范](./logging-guidelines.md)。
+7. 跨前后端或跨包改动时，同时读取 `.trellis/spec/guides/` 下的思考指南。
+
+---
+
+## Spec 维护边界
+
+适合写入本目录：
+
+* 已由现有代码验证的包边界、命名、错误处理、日志、测试和依赖约定。
+* 会被多个未来任务复用的接口形状、配置键、错误码、运行时行为。
+* 反复容易踩坑的禁止模式、评审清单和最小示例。
+
+不适合写入本目录：
+
+* 单个需求的完整 PRD、验收标准、任务拆解、路线图或阶段性范围。
+* 一次性接口全集，除非它已经成为长期公共契约并需要未来实现保持兼容。
+* 过期计划性描述，例如未落地计划或路线图承诺，除非明确标记为开放决策并有 owner。
+
+---
+
+**语言**：项目工作文档以中文为主；第三方工具生成内容例外。

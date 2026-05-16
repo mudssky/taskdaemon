@@ -8,15 +8,13 @@
 
 前端质量链路使用 Biome lint/format、`tsc --noEmit` typecheck、Vitest + Testing Library。`@biomejs/biome`、`typescript`、`vitest`、`@testing-library/jest-dom`、`@testing-library/react`、`@testing-library/user-event` 和 `jsdom` 是 workspace 共享开发/测试工具，统一声明在根目录 `devDependencies`；子包只声明应用运行依赖和必要的本地类型依赖。测试重点是业务逻辑、组件交互、表单校验、API client 和通用函数；不测试纯页面结构、CSS 样式或静态配置文件。
 
-当前前端工程位于 `apps/web`，相关约定来自父任务、基础 UI 子任务 PRD 和 frontend directory structure spec。
-
 ---
 
 ## Forbidden Patterns
 
 * 不创建营销式 landing/hero 作为应用首页；登录后第一屏进入任务列表/运行状态。
 * 不使用 emoji 图标；图标统一来自 `lucide-react`。
-* 不引入第一轮禁止的重型依赖：图表库、Monaco Editor、Framer Motion、终端模拟器、moment 等重型日期库。
+* 不为当前管理台需求引入重型依赖：图表库、Monaco Editor、Framer Motion、终端模拟器、moment 等重型日期库。
 * 不提供裸任意命令输入框；runner 必须是结构化类型和字段。
 * 不把服务端状态复制到全局 store。
 * 不用快照测试替代业务断言。
@@ -56,7 +54,7 @@
 * mutation 成功后是否刷新了相关 query。
 * 是否存在未处理 loading、empty、error、disabled 状态。
 * 移动端是否会出现页面级横向滚动。
-* 是否新增了第一轮禁止的重型依赖。
+* 是否新增了没有明确收益的重型依赖。
 * 是否跑过 `biome`、`tsc --noEmit` 和相关 Vitest 测试。
 
 ---

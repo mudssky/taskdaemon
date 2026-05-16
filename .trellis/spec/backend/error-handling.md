@@ -1,50 +1,42 @@
-# Error Handling
+# 错误处理
 
-> How errors are handled in this project.
-
----
-
-## Overview
-
-taskdaemon 后端用 Go 标准错误模型作为基础：底层返回 `error`，调用方用 `errors.Is` / `errors.As` 判断可预期错误，并在 API/CLI 边界转换为用户可理解的响应。错误处理需要区分业务状态、用户输入错误和系统故障，尤其是 cron 校验、runner 执行、timeout/cancel、认证失败和数据库连接失败。
-
-当前真实代码示例位于 `services/taskdaemon-go/internal/scheduler/gocron_spike_test.go`：spike 使用 sentinel error `errTaskAlreadyRunning` 表达同任务已经运行，并通过 gocron 的 skip hook 让业务层记录 `skipped`。
+> 后端错误处理基于 Go 标准错误模型，并在 API/CLI 边界转换为稳定、可理解的响应。
 
 ---
 
-## Error Categories
+## 概览
 
-* 输入错误：cron 语法非法、字段数量非法、timezone 不存在、runner 必填字段缺失。这类错误阻止保存。
-* 软警告：秒级 cron、高频表达式等可保存但需要显式确认的风险。这类结果不应伪装成硬错误。
-* 认证/授权错误：未登录、session 失效、CSRF/Host 校验失败。受保护 API 必须拒绝创建、编辑、删除、启停或触发任务。
-* 执行错误：runner 非零退出、进程启动失败、timeout、cancelled、输出截断等。需要写入执行历史。
-* 系统错误：数据库不可用、migration 失败、配置文件不可读、不可恢复的依赖初始化失败。需要记录日志并返回稳定错误摘要。
+低层返回 `error`，调用方用 `errors.Is` / `errors.As` 判断可预期错误。边界层负责记录日志、映射 HTTP 状态码、输出 CLI 提示和隐藏敏感信息。
+
+错误处理必须区分业务状态、用户输入错误和系统故障，尤其是 cron 校验、runner 执行、timeout/cancel、认证失败、配置加载和数据库连接失败。
 
 ---
 
-## Error Types
+## 错误分类
 
-* 业务可判定错误优先定义 sentinel error 或小型 typed error，放在拥有该业务概念的 package 内。
-* sentinel error 用于稳定分支，例如 `errTaskAlreadyRunning` 这类状态判断。
-* typed error 用于携带字段级校验信息、runner 退出码、stderr 摘要等结构化数据。
-* 不为只在一处处理的普通错误创建过度抽象；直接 wrap 原始错误即可。
-* error message 用英文或稳定技术短语便于日志检索；面向用户的中文文案在 UI/API 展示层映射。
+* 输入错误：cron 非法、timezone 不存在、runner 必填字段缺失、任务 ID 非正数。
+* 软警告：秒级 cron、高频 cron 等可保存但需要显式确认的风险。
+* 认证/授权错误：缺失 session、session 失效、无效凭证、重复初始化管理员。
+* 执行错误：runner 非零退出、进程启动失败、timeout、cancelled、输出截断。
+* 系统错误：数据库不可用、migration 失败、配置文件不可读、日志文件不可写。
 
----
-
-## Error Handling Patterns
-
-* Go 代码返回错误时使用 `%w` 包装底层错误，保留 `errors.Is` / `errors.As` 能力。
-* 每个接受 `context.Context` 的路径都要识别 `context.Canceled` 和 `context.DeadlineExceeded`，并分别映射为 `cancelled` 或 `timeout`。
-* runner 执行完成后，把进程退出错误转换为执行状态与错误摘要，不把原始错误字符串直接暴露给前端。
-* 调度 overlap 路径必须先写业务可见的 `skipped` 记录，再返回 sentinel error 跳过本次运行。
-* 不在低层重复记录同一个错误；低层返回错误，边界层负责日志和响应。
+软警告不能伪装成硬错误；用户取消和 timeout 也不能折叠成 generic failed。
 
 ---
 
-## API Responses
+## Go 错误类型
 
-HTTP API 使用统一 envelope。HTTP 状态码仍保持真实 2xx/4xx/5xx；顶层 `code` 只表达 envelope 成败，`0` 表示成功，`1` 表示失败。响应体默认带 `traceId`，可通过 `observability.traceId.includeInResponse=false` 关闭；响应头始终带 `X-Trace-Id`。
+* 稳定业务分支使用 sentinel error，例如任务运行中、任务未运行、无效 session。
+* 需要携带字段、退出码、stderr 摘要等结构化信息时使用 typed error。
+* 返回错误时用 `%w` 包装底层错误，保留 `errors.Is` / `errors.As` 能力。
+* 不为只在一处处理的普通错误创建过度抽象。
+* error message 使用英文或稳定技术短语，便于日志检索；用户可见中文文案在 UI 展示层映射。
+
+---
+
+## API Envelope
+
+HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层 `code` 只表达成败，`0` 成功、`1` 失败。响应头始终带 `X-Trace-Id`，响应体默认带 `traceId`。
 
 成功响应：
 
@@ -53,7 +45,7 @@ HTTP API 使用统一 envelope。HTTP 状态码仍保持真实 2xx/4xx/5xx；顶
   "code": 0,
   "msg": "ok",
   "data": {},
-  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736"
+  "traceId": "trace-id"
 }
 ```
 
@@ -62,90 +54,54 @@ HTTP API 使用统一 envelope。HTTP 状态码仍保持真实 2xx/4xx/5xx；顶
 ```json
 {
   "code": 1,
-  "msg": "Cron expression is invalid",
+  "msg": "Task definition is invalid",
   "data": null,
-  "traceId": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "traceId": "trace-id",
   "error": {
-    "code": "cron_invalid",
-    "message": "Cron expression is invalid",
+    "code": "task_invalid",
+    "message": "Task definition is invalid",
     "details": {
-      "field": "cron"
+      "field": "cronExpression"
     }
   }
 }
 ```
 
-* 顶层 `code` 固定为数字成败位，不放业务错误码。
-* `msg` 是默认提示；失败时通常与 `error.message` 一致。
-* `error.code` 是稳定机器码，前端根据它决定字段错误、toast 或确认对话框。
-* `error.message` 是简短默认说明，不承载敏感信息。
-* `error.details` 只放可安全展示的结构化信息，例如字段名、警告类型、允许范围。
-* 原本无内容成功响应统一改为 `200 OK` + `{"code":0,"msg":"ok","data":null}`。
-* 软警告使用不同响应或字段表达 `warnings`，不能和硬错误混在同一个阻断结果里。
-
-### Auth API Error Contracts
-
-认证 API 必须把认证服务 sentinel error 映射为稳定错误码：
-
-| Condition | Service error | HTTP | API code |
-|---|---|---:|---|
-| 未提供 session cookie、session 过期或 token 无效 | `auth.ErrInvalidSession` | 401 | `unauthorized` |
-| 用户名或密码错误 | `auth.ErrInvalidCredentials` | 401 | `invalid_credentials` |
-| 已存在管理员时再次初始化 | `auth.ErrAdminAlreadyInitialized` | 409 | `admin_already_initialized` |
-| 认证服务未注入 | n/a | 503 | `auth_unavailable` |
-
-`POST /api/auth/logout` 对缺失或空 session cookie 保持幂等，返回 `200 OK` envelope 并写入过期 Cookie；删除 session 时发生系统错误才返回 `500 internal_error`。
-
-`POST /api/auth/init` 与 `POST /api/auth/login` 的请求体契约为：
-
-```json
-{
-  "username": "admin",
-  "password": "secret"
-}
-```
-
-字段校验必须区分 JSON 解析错误和凭证字段缺失：
-
-| Condition | HTTP | API code | details.field |
-|---|---:|---|---|
-| body 为空、JSON 语法错误或类型无法绑定 | 400 | `bad_request` | `body` |
-| `username` 缺失或 trim 后为空 | 400 | `bad_request` | `username` |
-| `password` 缺失或为空字符串 | 400 | `bad_request` | `password` |
-
-handler 可以 trim `username` 后再传给认证服务，但不能 trim 或记录 `password`。缺字段错误不应使用 `binding:"required"` 的默认绑定错误折叠成 `field=body`，否则前端和手工调用者无法定位实际缺失字段。
-
-未认证响应固定为：
-
-```json
-{
-  "code": 1,
-  "msg": "Authentication required",
-  "data": null,
-  "error": {
-    "code": "unauthorized",
-    "message": "Authentication required",
-    "details": null
-  }
-}
-```
-
-错误响应和日志不得包含密码、密码哈希、session token、CSRF token 或完整 Cookie。
+* `error.code` 是前端稳定分支依据。
+* `error.message` 是简短默认说明，不放敏感信息。
+* `error.details` 只放可安全展示的结构化信息。
+* 无内容成功响应也返回 envelope，`data` 可为 `null`。
+* API 错误响应和日志不得包含密码、密码哈希、session token、CSRF token、完整 Cookie 或数据库密码。
 
 ---
 
-## CLI Error Handling
+## 常用映射
 
-* CLI 子命令失败时返回非零 exit code。
-* 输入错误输出可操作的提示，例如指出非法 flag、配置路径或任务 ID。
-* daemon/desktop 入口初始化失败时输出摘要，并把详细错误交给日志系统。
-* CLI-only 模式不能因为 Desktop 初始化失败而失败，除非该子命令确实需要 Desktop 能力。
+* 未登录、session 缺失或失效 -> HTTP 401，`unauthorized`。
+* 用户名或密码错误 -> HTTP 401，`invalid_credentials`。
+* 重复初始化管理员 -> HTTP 409，`admin_already_initialized`。
+* 请求体为空、JSON 非法、字段缺失 -> HTTP 400，`bad_request`，`details.field` 指向具体字段。
+* 任务定义校验失败 -> HTTP 400，`task_invalid`。
+* 删除运行中任务 -> HTTP 409，`task_running`。
+* 取消未运行任务 -> HTTP 409，`task_not_running`。
+* 依赖服务未注入或不可用 -> HTTP 503，`*_unavailable`。
+* 未分类系统故障 -> HTTP 500，`internal_error` 或更具体的稳定错误码。
 
 ---
 
-## Common Mistakes
+## CLI 错误
 
-* 不要用字符串包含判断来识别业务错误；使用 sentinel error、typed error 或稳定错误码。
-* 不要把 timeout 和用户取消都记录成 generic failed。
-* 不要把数据库连接串、session token、环境变量值、runner 环境变量写入错误响应。
-* 不要让 gocron 或其他第三方库的内部错误直接决定 taskdaemon 的业务执行状态。
+* CLI 子命令失败返回非零 exit code。
+* 输入错误输出可操作提示，例如非法 flag、配置路径、任务 ID 或缺失 session token。
+* daemon/desktop 初始化失败时输出摘要，详细错误交给日志系统。
+* CLI-only 模式不能因为 Desktop 初始化失败而失败，除非该命令确实需要 Desktop 能力。
+
+---
+
+## 禁止模式
+
+* 不用字符串包含判断识别业务错误。
+* 不把第三方库内部错误直接暴露给前端作为稳定契约。
+* 不在低层重复记录同一个错误；低层返回，边界层记录。
+* 不把数据库连接串、环境变量值、runner env、token、Cookie 写入错误响应。
+* 不让 API `msg` 成为前端分支依据；前端只依赖稳定 `error.code`。

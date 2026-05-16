@@ -112,7 +112,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * 前端应用放在 `apps/<app-name>`；主 Web 管理台固定为 `apps/web`。
 * 共享前端包放在 `packages/*`，例如 `packages/api-client`、`packages/ui`。
 * Go package 目录使用小写单词，必要时使用短横线以外的自然组合；优先选择清晰的单词名，例如 `httpapi`、`scheduler`。
-* Go service 对外发布入口统一为 `services/taskdaemon-go/cmd/taskdaemon`；第一版不创建多个 Go command 入口。
+* Go service 对外发布入口统一为 `services/taskdaemon-go/cmd/taskdaemon`；新增 command 入口前必须有明确发布边界，不为个人偏好拆多个入口。
 * spike 代码如果服务后续正式模块，优先放在目标模块附近，例如 gocron spike 放在 `services/taskdaemon-go/internal/scheduler` 附近。
 
 ---

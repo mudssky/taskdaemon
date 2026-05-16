@@ -6,7 +6,7 @@
 
 ## Overview
 
-taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰、可扫描、高信息密度和长期使用舒适度。Web 与 Desktop 共用同一套页面；Desktop 第一阶段主要增强系统通知，不维护独立 UI。
+taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰、可扫描、高信息密度和长期使用舒适度。Web 与 Desktop 共用同一套页面；Desktop 专属能力通过边界封装，不维护独立 UI。
 
 技术栈约定：React + TypeScript、Tailwind CSS、Radix UI、class-variance-authority、tailwind-merge，组件风格参考 shadcn 本地维护。图标统一使用 `lucide-react`。
 
@@ -36,10 +36,10 @@ taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰�
 
 * Tailwind 是主要样式方式；条件 class 使用 `clsx`/`tailwind-merge` 封装后的工具函数。
 * Radix 提供可访问交互原语，cva 管理 button、badge、input 等基础组件变体。
-* 默认浅色专业管理台；深色模式属于后续增强，不要在第一版为每个组件手写未验证的双主题样式。
+* 默认浅色专业管理台；深色模式需要整体设计后再做，不要为单个组件手写未验证的双主题样式。
 * 视觉风格克制，不做营销式 hero、装饰性大卡片或低信息密度布局。
 * 代码、cron 表达式、日志输出使用等宽字体。
-* 不引入第一轮禁止的重型 UI 依赖：图表库、Monaco Editor、Framer Motion、终端模拟器、重型日期库。
+* 不为单个页面引入重型 UI 依赖：图表库、Monaco Editor、Framer Motion、终端模拟器、重型日期库。
 
 ---
 
