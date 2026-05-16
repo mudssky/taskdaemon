@@ -57,7 +57,7 @@ services/
 * `apps/web/src/lib/api` 放 API client 和后端 DTO 映射；后续接 OpenAPI 生成时仍保持前端调用点稳定。
 * `apps/web/src/lib` 中的通用工具必须有明确复用场景；只被单个 feature 使用的逻辑留在 feature 内。
 * `apps/web/dist` 是 Vite 构建输出，受 `.gitignore` 管理；发布前用 `pnpm sync:web-assets` 同步到 `services/taskdaemon-go/web/embedded/dist`。`services/taskdaemon-go/web/embedded/dist` 也视为生成产物，不提交真实 JS/CSS/HTML，只保留 `.gitkeep` 让 `go:embed all:dist` 在干净 checkout 下可编译。
-* Web favicon 放在 `apps/web/public/favicon.png`，并由 `apps/web/index.html` 使用根路径 `/favicon.png` 引用。图标源自 Desktop app icon 母版时，保持与 `services/taskdaemon-go/build/appicon.png` 同步，避免 Web/Desktop 品牌图标分叉。
+* Web favicon 放在 `apps/web/public/favicon.png`，并由 `apps/web/index.html` 使用根路径 `/favicon.png` 引用。图标源自 Desktop app icon 母版时，保持与 `services/taskdaemon-go/build/appicon.png` 同步，避免 Web/Desktop 品牌图标分叉；浏览器 favicon 使用 256px 左右的压缩副本即可，不要直接使用高分辨率母版。
 * `services/taskdaemon-go/wails.json` 使用 Wails v3 嵌套配置：`frontend.dir = ../../apps/web`、`frontend.devServerUrl = http://127.0.0.1:9245`；不要恢复成 Wails 默认 `frontend/` 目录，也不要退回 v2 的 `frontend:*` 扁平键。桌面开发使用 `pnpm dev:desktop` 进入 Wails dev 模式，实际 dev watcher 配置在 `services/taskdaemon-go/build/config.yml`，前端仍由 Vite 提供 HMR。
 * `apps/web/vite.config.ts` 的普通开发端口固定为 `9245`，Vite proxy 默认转发 `/api` 到 `http://127.0.0.1:39245`。Wails dev 会注入 `WAILS_VITE_PORT`，Vite 需要优先使用该端口；所有开发模式都启用 strict port，端口冲突时直接失败，不自动漂移到随机端口。并行多实例通过 `TASKDAEMON_WEB_PORT`、Wails `-port`、`TASKDAEMON_API_ORIGIN` 或 `VITE_TASKDAEMON_API_ORIGIN` 显式覆盖。
 * `taskdaemon desktop` 在 Wails dev 模式下窗口直接打开 `FRONTEND_DEVSERVER_URL`，让 `/api` 由 Vite proxy 走普通网络请求；非 dev 桌面窗口打开本机 Go API server origin，由后端托管同步后的前端静态资源。不要让桌面前端从 `wails.localhost` 发 `/api` POST，否则 WebView 资源拦截层可能丢失 request body。

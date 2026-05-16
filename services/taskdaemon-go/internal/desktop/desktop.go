@@ -2,6 +2,7 @@ package desktop
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -22,6 +23,9 @@ import (
 
 const shutdownTimeout = 5 * time.Second
 const apiReadyTimeout = 10 * time.Second
+
+//go:embed assets/appicon.png
+var desktopIcon []byte
 
 // App 是暴露给 Wails 前端的桌面绑定根对象。
 type App struct {
@@ -63,6 +67,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 	desktopApp := application.New(application.Options{
 		Name:        "taskdaemon",
 		Description: "Cross-platform task scheduling daemon",
+		Icon:        desktopIcon,
 		Assets: application.AssetOptions{
 			Handler:        application.AssetFileServerFS(embedded.Assets),
 			DisableLogging: true,

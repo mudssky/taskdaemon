@@ -69,7 +69,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * `services/taskdaemon-go/internal/auth` 放单管理员账号、登录态、CSRF/Host 校验等认证安全能力。
 * `services/taskdaemon-go/internal/desktop` 只放 Wails 绑定与桌面专属能力，不能复制 HTTP/API/调度业务逻辑；Desktop 资产来自 `taskdaemon/web/embedded` 包。
 * `services/taskdaemon-go/web/embedded` 是发布期 Go embed 边界，构建脚本把 `apps/web/dist` 同步到 `services/taskdaemon-go/web/embedded/dist` 后再构建二进制；该 `dist` 是生成产物，不提交真实 JS/CSS/HTML，只提交 `.gitkeep` 保证干净 checkout 下 `go:embed all:dist` 目标存在。
-* Desktop app icon 母版放在 `services/taskdaemon-go/build/appicon.png`。Wails v3.0.0-alpha.91 的 `build` 命令不暴露 `-icon` 参数；需要通过 `go tool wails3 generate icons -input build/appicon.png -windowsfilename build/icon.ico -macfilename build/icons.icns` 派生平台图标，Windows 资源文件再按需使用 `go tool wails3 generate syso -icon build/icon.ico ...` 生成。
+* Desktop app icon 母版放在 `services/taskdaemon-go/build/appicon.png`。Wails v3.0.0-alpha.91 的 `build` 命令不暴露 `-icon` 参数；需要通过 `go tool wails3 generate icons -input build/appicon.png -windowsfilename build/icon.ico -macfilename build/icons.icns` 派生平台图标，Windows 资源文件再按需使用 `go tool wails3 generate syso -icon build/icon.ico ...` 生成。开发期 `pnpm dev:desktop` 通过 `go run` 启动，没有发布 exe 的 icon resource，因此 `internal/desktop` 需要 embed 包内 `assets/appicon.png` 并传给 `application.Options.Icon`，让 Windows 任务栏/窗口图标使用同一品牌图标；该运行时副本应压到 256px 左右，避免把高分辨率母版直接嵌进 Go 二进制。
 
 ---
 

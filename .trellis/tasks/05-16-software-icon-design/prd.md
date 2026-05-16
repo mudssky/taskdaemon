@@ -99,7 +99,8 @@
 * Wails Desktop 图标：`services/taskdaemon-go/build/appicon.png`。
 * Windows 图标派生产物：`services/taskdaemon-go/build/icon.ico`。
 * macOS 图标派生产物：`services/taskdaemon-go/build/icons.icns`。
-* Web favicon：`apps/web/public/favicon.png`。
+* Wails dev 运行时窗口图标：`services/taskdaemon-go/internal/desktop/assets/appicon.png`，256px 压缩副本，避免把高分辨率母版直接嵌进 Go 二进制。
+* Web favicon：`apps/web/public/favicon.png`，256px 压缩副本。
 * Web 入口：`apps/web/index.html` 通过 `<link rel="icon" type="image/png" href="/favicon.png" />` 引用。
 * 当前 Wails v3 本地版本的 `build` 命令未暴露 `-icon` 参数；发布图标应先通过 `go tool wails3 generate icons -input build/appicon.png` 派生 `.ico/.icns`，Windows 可继续通过 `go tool wails3 generate syso -icon <icon.ico>` 生成资源文件。
 
