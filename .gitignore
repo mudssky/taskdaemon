@@ -55,7 +55,8 @@ apps/web/dist/
 apps/web/.vite/
 apps/web/node_modules/
 !services/taskdaemon-go/web/embedded/dist/
-!services/taskdaemon-go/web/embedded/dist/**
+services/taskdaemon-go/web/embedded/dist/*
+!services/taskdaemon-go/web/embedded/dist/.gitkeep
 
 # Wails
 frontend/dist/

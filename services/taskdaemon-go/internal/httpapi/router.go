@@ -3,8 +3,12 @@ package httpapi
 import (
 	"context"
 	"errors"
+	"io/fs"
 	"log/slog"
+	"mime"
 	"net/http"
+	"path"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -31,6 +35,7 @@ type Options struct {
 	HTTPLog                config.LoggingHTTPConfig
 	RuntimeConfig          *RuntimeConfig
 	ReloadConfig           func(context.Context) (config.ReloadResult, error)
+	FrontendFS             fs.FS
 }
 
 // AuthService 定义 HTTP handler 依赖的认证服务能力。
@@ -85,8 +90,108 @@ func NewRouter(opts Options) http.Handler {
 			ctx.String(http.StatusOK, "Swagger UI is enabled. Generated docs will be mounted here.")
 		})
 	}
+	if opts.FrontendFS != nil {
+		registerFrontendRoutes(router, opts.FrontendFS)
+	}
 
 	return router
+}
+
+// registerFrontendRoutes 注册管理台静态资源和 SPA fallback。
+//
+// 参数:
+//   - router: Gin engine。
+//   - frontendFS: 已定位到 dist 根目录的前端静态资源文件系统。
+//
+// 返回值:
+//   - 无。
+func registerFrontendRoutes(router *gin.Engine, frontendFS fs.FS) {
+	router.NoRoute(func(ctx *gin.Context) {
+		requestPath := ctx.Request.URL.Path
+		if isReservedBackendPath(requestPath) {
+			writeAPIError(ctx, http.StatusNotFound, "not_found", "Not found", gin.H{"path": requestPath})
+			return
+		}
+		if serveFrontendFile(ctx, frontendFS, requestPath) {
+			return
+		}
+		if path.Ext(requestPath) != "" {
+			ctx.Status(http.StatusNotFound)
+			return
+		}
+		if serveFrontendFile(ctx, frontendFS, "/index.html") {
+			return
+		}
+		ctx.Status(http.StatusNotFound)
+	})
+}
+
+// serveFrontendFile 尝试从前端静态资源中写出指定文件。
+//
+// 参数:
+//   - ctx: Gin 请求上下文。
+//   - frontendFS: 前端静态资源文件系统。
+//   - requestPath: 请求路径。
+//
+// 返回值:
+//   - bool: true 表示文件存在且已经写入响应。
+func serveFrontendFile(ctx *gin.Context, frontendFS fs.FS, requestPath string) bool {
+	cleanPath := cleanFrontendPath(requestPath)
+	info, err := fs.Stat(frontendFS, cleanPath)
+	if err != nil || info.IsDir() {
+		return false
+	}
+	content, err := fs.ReadFile(frontendFS, cleanPath)
+	if err != nil {
+		ctx.Status(http.StatusInternalServerError)
+		return true
+	}
+	ctx.Data(http.StatusOK, frontendContentType(cleanPath), content)
+	return true
+}
+
+// frontendContentType 返回前端静态资源的 Content-Type。
+//
+// 参数:
+//   - filename: 静态资源文件名。
+//
+// 返回值:
+//   - string: HTTP Content-Type，无法识别时为空字符串。
+func frontendContentType(filename string) string {
+	if contentType := mime.TypeByExtension(path.Ext(filename)); contentType != "" {
+		return contentType
+	}
+	return ""
+}
+
+// cleanFrontendPath 将 URL path 转为 fs.FS 内的安全相对路径。
+//
+// 参数:
+//   - requestPath: URL path。
+//
+// 返回值:
+//   - string: 可用于 fs.FS 读取的相对路径。
+func cleanFrontendPath(requestPath string) string {
+	cleaned := path.Clean("/" + strings.TrimPrefix(requestPath, "/"))
+	cleaned = strings.TrimPrefix(cleaned, "/")
+	if cleaned == "." || cleaned == "" {
+		return "index.html"
+	}
+	return cleaned
+}
+
+// isReservedBackendPath 判断路径是否应由后端路由负责。
+//
+// 参数:
+//   - requestPath: URL path。
+//
+// 返回值:
+//   - bool: true 表示不能回退到前端 index.html。
+func isReservedBackendPath(requestPath string) bool {
+	return requestPath == "/api" ||
+		strings.HasPrefix(requestPath, "/api/") ||
+		requestPath == "/swagger" ||
+		strings.HasPrefix(requestPath, "/swagger/")
 }
 
 // loggerOrDefault 返回传入 logger 或 slog.Default。

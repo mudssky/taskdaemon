@@ -68,14 +68,14 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * `services/taskdaemon-go/internal/data` 放 Ent client、repository、migration 和数据库方言隔离。
 * `services/taskdaemon-go/internal/auth` 放单管理员账号、登录态、CSRF/Host 校验等认证安全能力。
 * `services/taskdaemon-go/internal/desktop` 只放 Wails 绑定与桌面专属能力，不能复制 HTTP/API/调度业务逻辑；Desktop 资产来自 `taskdaemon/web/embedded` 包。
-* `services/taskdaemon-go/web/embedded` 是发布期 Go embed 边界，构建脚本把 `apps/web/dist` 同步到 `services/taskdaemon-go/web/embedded/dist` 后再构建二进制；该 `dist` 需要提交，避免干净 checkout 缺少 `go:embed all:dist` 目标。
+* `services/taskdaemon-go/web/embedded` 是发布期 Go embed 边界，构建脚本把 `apps/web/dist` 同步到 `services/taskdaemon-go/web/embedded/dist` 后再构建二进制；该 `dist` 是生成产物，不提交真实 JS/CSS/HTML，只提交 `.gitkeep` 保证干净 checkout 下 `go:embed all:dist` 目标存在。
 
 ---
 
 ## Entry Contracts
 
 * `taskdaemon serve` 启动 HTTP API，不初始化 Wails Desktop。
-* `taskdaemon desktop` 启动 Wails v3 runtime，并加载 `services/taskdaemon-go/web/embedded` 中的同一套前端构建产物。
+* `taskdaemon desktop` 启动 Wails v3 runtime，同时启动本机 HTTP API server。Wails dev 模式下窗口直接打开 `FRONTEND_DEVSERVER_URL`；非 dev 模式下窗口打开本机 Go API server origin，由 `internal/httpapi` 从 `services/taskdaemon-go/web/embedded/dist` 托管前端静态资源和 SPA fallback。
 * `pnpm dev:desktop` 通过 `go tool wails3 dev -config ./build/config.yml -port 9245` 启动 Wails v3 开发模式；前端走 Vite HMR，Go 代码变更由 Wails 监控后重建并重启桌面壳。
 * `taskdaemon db migrate` 是 CLI-only 入口，不初始化 Desktop。
 * `taskdaemon config path/show/validate/reload` 是 CLI-only 配置排障入口；`reload` 通过 daemon HTTP API 触发运行时重载，需要管理员 session token。
@@ -88,7 +88,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * 配置示例归属 Go service 边界，放在 `services/taskdaemon-go/taskdaemon.example.yaml`；开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml`，本机私有覆盖写入 `services/taskdaemon-go/taskdaemon.local.yaml`，发布时复制到用户配置目录或通过 `--config` 显式指定。
 * 运行时配置重载只应用 `logging.http` 与 `observability.traceId`。`server.*`、`database.*`、`logging.level/output/file/console` 这类涉及监听地址、连接池或 handler/文件句柄的配置变更需要重启。
 * 开发默认端口固定为前端 `127.0.0.1:9245`、后端 `127.0.0.1:39245`。端口冲突时应 fail fast，不自动漂移；并行多实例通过 `TASKDAEMON_SERVER_PORT`、配置文件 `server.port`、Wails `-port`、`TASKDAEMON_WEB_PORT` 和前端代理目标环境变量显式覆盖。
-* `/api/health` 是后端探活 endpoint；Swagger route 默认关闭，只在 `server.swagger.enabled=true` 时注册。
+* `/api/health` 是后端探活 endpoint；Swagger route 默认关闭，只在 `server.swagger.enabled=true` 时注册。启用前端静态资源时，`internal/httpapi` 的 SPA fallback 不处理 `/api` 和 `/swagger` 保留路径，避免把真实后端 404 伪装成前端页面。
 
 ---
 
@@ -101,7 +101,7 @@ taskdaemon 采用 pnpm monorepo + 多后端服务边界。仓库根目录是产�
 * SQLite 当前使用 `modernc.org/sqlite v1.50.1`，对应 database/sql driver 名为 `sqlite`。
 * PostgreSQL 集成测试当前使用 `github.com/testcontainers/testcontainers-go v0.42.0` 和 `modules/postgres v0.42.0`。
 * PostgreSQL runtime driver 当前使用 `github.com/lib/pq v1.12.3`，配置方言字符串保持为 `postgres`。
-* Wails 使用 `github.com/wailsapp/wails/v3 v3.0.0-alpha.91`。Wails CLI 通过 Go tool 依赖管理，脚本使用 `go tool wails3`，不要在 `package.json` 中重复硬编码 `@version`。Desktop 入口通过 `application.New`、`application.AssetFileServerFS(embedded.Assets)`、`desktopApp.Window.NewWithOptions(...)` 与 `application.NewService` 加载前端资源和绑定服务；不要恢复旧的 `NewWebviewWindowWithOptions` 调用。
+* Wails 使用 `github.com/wailsapp/wails/v3 v3.0.0-alpha.91`。Wails CLI 通过 Go tool 依赖管理，脚本使用 `go tool wails3`，不要在 `package.json` 中重复硬编码 `@version`。Desktop 入口通过 `application.New`、`application.AssetFileServerFS(embedded.Assets)`、`desktopApp.Window.NewWithOptions(...)` 与 `application.NewService` 加载前端资源和绑定服务；不要恢复旧的 `NewWebviewWindowWithOptions` 调用。桌面窗口的 `/api` 请求必须走 Vite proxy 或 Go API server 的普通网络路径，不要依赖 `wails.localhost` AssetServer 转发 POST body。
 
 ---
 

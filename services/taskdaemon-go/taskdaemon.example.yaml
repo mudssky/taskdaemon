@@ -15,13 +15,13 @@ server:
   port: 39245
   swagger:
     # 生产环境默认关闭；需要调试 API 时再显式开启。
-    enabled: false
+    enabled: true
 
 database:
   # 支持 sqlite 或 postgres。
   driver: sqlite
   # SQLite 推荐使用 file: DSN，并开启外键。
-  dsn: file:taskdaemon.db?_fk=1
+  # dsn: file:taskdaemon.db?_fk=1
 
   # PostgreSQL 示例：
   # driver: postgres
@@ -29,9 +29,9 @@ database:
 
 logging:
   # 支持 debug、info、warn、error。
-  level: info
+  level: debug
   # 支持 console、file、both。console 适合本地开发，file 会使用轮转。
-  output: console
+  output: both
   console:
     # 控制台默认 text，可读性更高。
     format: text
@@ -46,8 +46,8 @@ logging:
     compress: true
   http:
     # 请求/响应 body 日志默认关闭；本地排障时可在 taskdaemon.local.yaml 中开启。
-    includeRequestBody: false
-    includeResponseBody: false
+    includeRequestBody: true
+    includeResponseBody: true
     # body 只记录前 N 字节，超出时日志会带 *_truncated=true。
     maxBodyBytes: 4096
     # JSON body 中这些字段会递归脱敏；非 JSON body 会做保守文本脱敏。

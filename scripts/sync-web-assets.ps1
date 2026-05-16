@@ -15,3 +15,4 @@ if (Test-Path -LiteralPath $Destination) {
 
 New-Item -ItemType Directory -Path $Destination | Out-Null
 Copy-Item -Path (Join-Path $Source "*") -Destination $Destination -Recurse -Force
+New-Item -ItemType File -Path (Join-Path $Destination ".gitkeep") -Force | Out-Null

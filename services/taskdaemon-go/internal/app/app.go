@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"log/slog"
 	"net"
 	"net/http"
@@ -20,6 +21,7 @@ import (
 	"taskdaemon/internal/httpapi"
 	"taskdaemon/internal/runner"
 	"taskdaemon/internal/scheduler"
+	"taskdaemon/web/embedded"
 )
 
 // App 组合 taskdaemon 的共享后端能力。
@@ -116,6 +118,7 @@ func (app *App) Serve(ctx context.Context) error {
 			HTTPLog:                app.cfg.Logging.HTTP,
 			RuntimeConfig:          app.runtimeConfig,
 			ReloadConfig:           app.ReloadRuntimeConfig,
+			FrontendFS:             mustFrontendFS(),
 		}),
 	}
 
@@ -140,6 +143,21 @@ func (app *App) Serve(ctx context.Context) error {
 		}
 		return err
 	}
+}
+
+// mustFrontendFS 返回嵌入的前端 dist 文件系统。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - fs.FS: dist 根目录文件系统。
+func mustFrontendFS() fs.FS {
+	frontendFS, err := fs.Sub(embedded.Assets, "dist")
+	if err != nil {
+		panic(fmt.Errorf("frontend assets unavailable: %w", err))
+	}
+	return frontendFS
 }
 
 // ReloadRuntimeConfig 重新加载配置文件并应用可热更新配置。
