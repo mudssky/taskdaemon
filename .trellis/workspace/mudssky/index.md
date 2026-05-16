@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 10
-- **Last Active**: 2026-05-16
+- **Total Sessions**: 11
+- **Last Active**: 2026-05-17
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~352 | Active |
+| `journal-1.md` | ~388 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 11 | 2026-05-17 | 归档前端规范、shadcn 迁移和图标任务 | `1f2ac5a`, `1ef32eb`, `09532ee`, `9802bf7` | `master` |
 | 10 | 2026-05-16 | 完成跨平台调度守护进程第一轮 | `03c50d2`, `640b222` | `master` |
 | 9 | 2026-05-15 | 基础 Web Desktop 管理 UI | `9ae2585`, `2a291e1`, `48f1338`, `1faca99` | `master` |
 | 8 | 2026-05-15 | JSON 库选型与依赖升级 | `0d153b3`, `77942c4`, `b2b8352`, `f46a867`, `5836ab4` | `master` |
