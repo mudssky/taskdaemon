@@ -99,6 +99,7 @@ services/
 * `apiClient.createTask(payload: TaskPayload): Promise<Task>`
 * `apiClient.updateTask(taskId: number, payload: TaskPayload): Promise<Task>`
 * `apiClient.setTaskEnabled(taskId: number, enabled: boolean): Promise<Task>`
+* `apiClient.deleteTask(taskId: number): Promise<void>`
 * `apiClient.triggerTask(taskId: number): Promise<TaskRun>`
 * `apiClient.cancelTask(taskId: number): Promise<void>`
 * `apiClient.listTaskRuns(taskId: number): Promise<{ runs: TaskRun[] }>`
@@ -111,6 +112,8 @@ services/
 * `Task.running` 来自 daemon 进程内状态，只用于 UI 控制按钮和轮询判断，不写回表单。
 * `TaskPayload.runner` 必须包含结构化字段：`type`、`inline` 或 `scriptPath`、`args`、`workDir`、`env`、`timeoutSeconds`、`outputLimitBytes`。
 * cron 软警告包括 `second_level_cron` 和 `high_frequency_cron`；保存时必须把 `confirmCronWarnings=true` 传给后端。
+* 任务删除使用 `DELETE /api/tasks/{id}`，成功后清理任务列表缓存并移除该任务的执行历史 query cache。
+* 删除是破坏性操作，UI 必须显式确认；`Task.running=true` 时删除按钮禁用，用户应先取消运行中任务。
 * 任务列表和执行历史用表格展示；移动端只允许表格容器横向滚动，不能造成页面级横向滚动。
 
 ### 4. Validation & Error Matrix
@@ -119,20 +122,24 @@ services/
 * timezone 为空或不符合 `Local` / `Area/City` 形态 -> 前端表单硬错误。
 * 秒级或高频 cron 未确认 -> 前端阻止提交并显示确认控件。
 * runner 既没有 inline 也没有 scriptPath -> 前端表单硬错误。
+* 删除任务被用户取消确认 -> 不发送 API 请求。
+* 删除运行中任务 -> UI 禁用删除入口；如果后端仍返回 `task_running`，组件按泛化失败态展示。
 * API 返回非 2xx -> `ApiClientError(status, code, message, details)`；UI 按稳定 `code` 或泛化失败态展示，不依赖 message。
 
 ### 5. Good/Base/Bad Cases
 
 * Good: 用户保存 TypeScript 脚本任务时，表单提交 `{ runner: { type: "typescript", scriptPath: "jobs/a.ts", timeoutSeconds: 3600 } }`，后端 runner 默认通过 `tsx` 执行。
 * Base: `GET /api/tasks` 失败时显示可恢复错误态，成功后根据 `running` 短轮询列表和历史。
+* Base: 删除任务成功后，`useDeleteTaskMutation` invalidate `tasksKeys.all`，并 remove `tasksKeys.runs(taskId)`，避免历史页继续展示已删除任务的旧缓存。
 * Bad: 组件直接拼接 fetch payload 或在多个组件中重复写 runner 类型字符串。
+* Bad: 任务列表组件直接调用 `fetch(..., { method: "DELETE" })`，绕过 API client 和 query invalidation。
 
 ### 6. Tests Required
 
 * cron helper 覆盖 5/6 字段、非法字段数、timezone、秒级/高频 warning。
 * task schema 覆盖 runner payload 映射、默认 timeout、TypeScript runner、env/args 映射和高频确认。
-* API client 覆盖稳定错误码映射、trigger/cancel 关键动作。
-* 组件交互覆盖创建/编辑任务、启停、触发、取消和历史查看中的关键业务分支；不测试纯 CSS。
+* API client 覆盖稳定错误码映射、trigger/cancel/delete 关键动作。
+* 组件交互覆盖创建/编辑任务、启停、触发、取消、删除确认和历史查看中的关键业务分支；不测试纯 CSS。
 
 ### 7. Wrong vs Correct
 
@@ -147,4 +154,17 @@ fetch(`/api/tasks/${task.id}/trigger`, { method: "POST" });
 ```tsx
 const triggerTask = useTriggerTaskMutation();
 triggerTask.mutate(task.id);
+```
+
+#### Wrong
+
+```tsx
+fetch(`/api/tasks/${task.id}`, { method: "DELETE" });
+```
+
+#### Correct
+
+```tsx
+const deleteTask = useDeleteTaskMutation();
+deleteTask.mutate(task.id);
 ```

@@ -75,31 +75,32 @@
 
 ## Acceptance Criteria
 
-* [ ] 开发期可以分别启动后端 API 和前端开发服务器。
-* [ ] 发布构建方案明确前端资源如何进入单二进制。
-* [ ] CLI 模式、serve 模式、desktop 模式入口边界明确。
-* [ ] 默认配置路径跨平台合理，并允许通过 `--config` 指定。
-* [ ] 默认配置可使用 SQLite 启动。
-* [ ] 可通过配置连接 PostgreSQL。
-* [ ] CLI 或启动流程支持对当前数据库执行 schema migration。
-* [ ] 系统初始化/登录流程支持单管理员账号。
-* [ ] 未登录请求不能创建、编辑、删除、启停或触发任务。
-* [ ] 可通过 API/CLI/UI 定义至少一个 cron 任务。
-* [ ] cron parser 支持 5/6 字段表达式。
-* [ ] 前端对秒级/高频 cron 给出提示和确认提交入口。
-* [ ] 后端 cron 校验返回硬错误/软警告；软警告允许带确认标记后保存。
-* [ ] 任务只能选择内置 runner 类型，不能直接保存未分类的任意命令。
-* [ ] runner 配置保存前经过结构化校验。
-* [ ] TypeScript runner 明确以 `tsx` 为默认执行器。
-* [ ] 守护进程能在后台按计划触发任务。
-* [ ] API/CLI 可以手动触发任务。
-* [ ] 同一任务重叠触发时默认跳过，并记录 `skipped` 执行历史。
-* [ ] 任务超时后终止进程，并记录 `timeout` 状态。
-* [ ] API/CLI 可以取消正在运行的任务，并记录 `cancelled` 执行历史。
-* [ ] 执行历史保存状态、退出码、耗时、错误摘要和截断 stdout/stderr。
-* [ ] Web/Desktop 共用的基础管理 UI 支持任务 CRUD、启停、触发、取消和历史查看。
-* [ ] 调度核心不依赖 Redis、Asynq 或外部分布式队列服务。
-* [ ] PRD 完成后拆分为可独立实施的 Trellis 子任务。
+* [x] 开发期可以分别启动后端 API 和前端开发服务器。
+* [x] 发布构建方案明确前端资源如何进入单二进制。
+* [x] CLI 模式、serve 模式、desktop 模式入口边界明确。
+* [x] 默认配置路径跨平台合理，并允许通过 `--config` 指定。
+* [x] 默认配置可使用 SQLite 启动。
+* [x] 可通过配置连接 PostgreSQL。
+* [x] CLI 或启动流程支持对当前数据库执行 schema migration。
+* [x] 系统初始化/登录流程支持单管理员账号。
+* [x] 未登录请求不能创建、编辑、删除、启停或触发任务。
+* [x] 可通过 API/CLI/UI 定义至少一个 cron 任务。
+* [x] cron parser 支持 5/6 字段表达式。
+* [x] 前端对秒级/高频 cron 给出提示和确认提交入口。
+* [x] 后端 cron 校验返回硬错误/软警告；软警告允许带确认标记后保存。
+* [x] 任务只能选择内置 runner 类型，不能直接保存未分类的任意命令。
+* [x] runner 配置保存前经过结构化校验。
+* [x] TypeScript runner 明确以 `tsx` 为默认执行器。
+* [x] 守护进程能在后台按计划触发任务。
+* [x] API/CLI 可以手动触发任务。
+* [x] 同一任务重叠触发时默认跳过，并记录 `skipped` 执行历史。
+* [x] 任务超时后终止进程，并记录 `timeout` 状态。
+* [x] API/CLI 可以取消正在运行的任务，并记录 `cancelled` 执行历史。
+* [x] CLI 可以查看任务执行历史。
+* [x] 执行历史保存状态、退出码、耗时、错误摘要和截断 stdout/stderr。
+* [x] Web/Desktop 共用的基础管理 UI 支持任务 CRUD、启停、触发、取消和历史查看。
+* [x] 调度核心不依赖 Redis、Asynq 或外部分布式队列服务。
+* [x] PRD 完成后拆分为可独立实施的 Trellis 子任务。
 
 ## Definition of Done
 
@@ -313,6 +314,12 @@
 * 已读取：`.trellis/spec/guides/index.md`
 * 已读取：`.trellis/spec/backend/index.md`
 * 已读取：`.trellis/spec/frontend/index.md`
+
+## Implementation Completion Notes
+
+* 2026-05-16: 已补齐任务删除链路：`DELETE /api/tasks/{id}`、scheduler 删除任务与执行历史、Web 任务列表删除入口。
+* 2026-05-16: 已补齐 CLI 执行历史查询：`taskdaemon task runs <task-id>` 通过 daemon HTTP API 查询 `/api/tasks/{id}/runs` 并输出 YAML 摘要。
+* 2026-05-16: 完整质量检查通过：`pnpm test`、`pnpm --filter @taskdaemon/web test`、`pnpm --filter @taskdaemon/service-go vet`。
 
 ## Auth Setup UX Discussion
 
