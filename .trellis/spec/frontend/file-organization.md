@@ -60,6 +60,7 @@
 * feature 工具函数：解析 env/args、格式化 label、软警告展示。
 
 表单拆分时，form state 和提交边界保持单一来源；不要让多个 section 各自维护重复状态。
+表单校验、软警告和测试分层的详细规则见 [表单校验与测试分层](./form-testing-guidelines.md)。
 
 ---
 
@@ -78,6 +79,7 @@
 * 测试与被测文件相邻；跨测试共享工具放入 `src/test`。
 * router 测试增长后按行为拆分，例如 auth gate、sidebar navigation、task routes。
 * API client、schema、format/helper、query invalidation 和组件交互分别测试，不用一个集成测试覆盖所有风险。
+* 表单测试优先拆成 schema/mapper 纯函数测试和组件交互测试；不要只靠 router 测试覆盖所有表单分支。
 * 不为了降低行数拆出无意义 helper；拆分后的测试名应能说明用户行为或业务分支。
 
 ---

@@ -38,8 +38,10 @@
 
 ## Testing Requirements
 
+* 测试分层遵循 [表单校验与测试分层](./form-testing-guidelines.md)：纯函数/schema/API client/组件/router 分别覆盖各自风险。
 * cron 解析辅助函数需要覆盖 5/6 字段、非法字段、timezone、秒级/高频 warning。
 * runner 表单需要覆盖不同 runner 类型的必填字段、默认 timeout、TypeScript 默认 `tsx`。
+* 复杂表单 schema 需要覆盖默认值、DTO -> form、form -> payload、硬错误、软警告和显式确认。
 * API client 需要覆盖错误码映射、认证失败、trigger/cancel 等关键动作。
 * 组件交互测试覆盖创建/编辑任务、启停、手动触发、取消 running、查看历史。
 * 使用 Testing Library 从用户行为角度断言，不依赖 className 或 DOM 层级细节。
@@ -52,6 +54,8 @@
 * 页面是否仍是工具型管理台，而不是营销页或低密度展示页。
 * 任务状态、执行状态、runner 类型是否使用集中类型/常量。
 * 表单硬错误和软警告是否区分清楚。
+* 复杂表单是否把 schema、默认值、payload mapper 和 UI section 分开。
+* 测试是否按风险分层，而不是用一个大型集成测试覆盖所有细节。
 * mutation 成功后是否刷新了相关 query。
 * 是否存在未处理 loading、empty、error、disabled 状态。
 * 破坏性操作是否有确认和取消路径，且失败后 UI 可恢复。

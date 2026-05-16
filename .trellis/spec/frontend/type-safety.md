@@ -24,8 +24,9 @@
 ## Validation
 
 * Zod 是前端运行时校验标准。
-* 任务表单、runner 配置、cron 输入、登录表单都必须有 schema。
+* 复杂表单、runner 配置、cron 输入都必须有 schema；简单认证表单若字段增长或校验复杂化，应迁移到 React Hook Form + Zod。
 * cron 校验需要表达硬错误和软警告：硬错误阻止提交，软警告需要显式确认后允许提交。
+* 表单 schema、默认值和 payload mapper 的组织规则见 [表单校验与测试分层](./form-testing-guidelines.md)。
 * API 响应如果来自可信生成 client，可依赖生成类型；手写 client 阶段对关键边界做最小运行时校验。
 * 从 URL search params 读取的值必须校验并提供默认值。
 
@@ -50,6 +51,7 @@ type RunStatus = (typeof runStatuses)[number];
 
 * 用 discriminated union 表达不同 runner 配置，例如 `shell`、`python`、`typescript`。
 * 用纯函数把 DTO 映射成表单默认值，反向提交时再映射成 API payload。
+* 复杂表单的 `defaultXxxValues` 和 `toXxxPayload` 必须可独立测试，不依赖 DOM。
 * 用 exhaustive check 处理任务状态、runner 类型和触发来源，避免新增类型后 UI 静默漏分支。
 * API 契约变化时同步 DTO、client、query hook、schema/payload mapper 和测试。
 

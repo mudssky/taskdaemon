@@ -15,11 +15,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `.trellis/spec/frontend` 包含表单校验和 payload 映射长期规则。
-* [ ] 明确硬错误、软警告、显式确认的边界。
-* [ ] 明确复杂表单和简单表单的实现选择。
-* [ ] 明确测试分层与测试文件拆分规则。
-* [ ] 更新 `index.md` 的规范索引或开发前检查项。
+* [x] `.trellis/spec/frontend` 包含表单校验和 payload 映射长期规则。
+* [x] 明确硬错误、软警告、显式确认的边界。
+* [x] 明确复杂表单和简单表单的实现选择。
+* [x] 明确测试分层与测试文件拆分规则。
+* [x] 更新 `index.md` 的规范索引或开发前检查项。
 
 ## Definition of Done
 
@@ -38,3 +38,4 @@
 * 来源 backlog：归档 PRD 中的“表单与校验规范”“测试分层规范”。
 * 相关现有规范：`.trellis/spec/frontend/type-safety.md`、`.trellis/spec/frontend/quality-guidelines.md`、`.trellis/spec/frontend/file-organization.md`。
 * 相关代码示例：`apps/web/src/features/tasks/task.schema.ts`、`TaskForm.tsx`、`router.test.tsx`、`client.test.ts`。
+* 已新增规范文件：`.trellis/spec/frontend/form-testing-guidelines.md`。
