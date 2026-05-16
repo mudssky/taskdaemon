@@ -16,11 +16,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `.trellis/spec/frontend` 包含轮询和刷新长期规则。
-* [ ] 明确 query hook、mutation hook 和组件展示之间的职责边界。
-* [ ] 明确轮询间隔和停止条件的治理方式。
-* [ ] 明确手动刷新和自动刷新状态展示原则。
-* [ ] 更新 `index.md` 的开发前检查项。
+* [x] `.trellis/spec/frontend` 包含轮询和刷新长期规则。
+* [x] 明确 query hook、mutation hook 和组件展示之间的职责边界。
+* [x] 明确轮询间隔和停止条件的治理方式。
+* [x] 明确手动刷新和自动刷新状态展示原则。
+* [x] 更新 `index.md` 的开发前检查项。
 
 ## Definition of Done
 

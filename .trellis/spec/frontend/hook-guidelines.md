@@ -27,6 +27,7 @@
 * mutation 成功后显式 invalidate、remove 或更新相关 query cache。
 * API client 负责 HTTP 细节，query hook 负责缓存和错误状态，组件负责展示。
 * API、query key、mutation 和缓存失效细节遵守 [API 与 Query 契约](./api-query-contracts.md)。
+* 运行态数据的自动轮询、手动刷新和后台 refetch 状态遵守 [运行时 Query 与轮询规范](./runtime-query-guidelines.md)。
 * 登录态/session 查询应作为 app shell 或受保护 route 的基础 query，不在每个页面重复请求；首次初始化分流优先使用 `GET /api/auth/status`，避免把“未初始化”和“已初始化但未登录”都折叠成 `/api/auth/me` 的 401。
 
 ---
@@ -44,8 +45,8 @@
 ## Side Effects
 
 * 副作用尽量放在事件处理、mutation lifecycle 或 route loader 中，不在 render 路径触发。
-* interval/polling 必须有清理和启停条件；执行历史或 running 状态轮询不能无条件常驻高频刷新。
-* 轮询条件优先集中在 query hook；组件不要散落 `setInterval`。
+* interval/polling 必须有清理、启停条件和常量化间隔；执行历史或 running 状态轮询不能无条件常驻高频刷新。
+* 轮询条件优先集中在 query hook；组件不要散落 `setInterval`，具体准入和停止条件见 [运行时 Query 与轮询规范](./runtime-query-guidelines.md)。
 * Desktop 专属能力通过边界 hook 封装，并提供 Web fallback。
 * 不把 localStorage/sessionStorage 访问散落到组件中；需要时集中在 auth/config 相关 hook。
 
@@ -74,3 +75,4 @@
 * 不要把 server state 复制进全局 store 再手动同步。
 * 不要在 hook 中吞掉错误；保留给调用方展示或上报。
 * 不要让 hook 同时负责 API、toast、导航、复杂 UI 状态，必要时拆成 action hook 和页面逻辑。
+* 不要把自动 refetch、手动刷新和 mutation pending 合并成一个泛化 loading。

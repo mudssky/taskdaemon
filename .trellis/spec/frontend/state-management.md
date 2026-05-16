@@ -38,7 +38,7 @@ taskdaemon 前端的状态分为 server state、URL state、form state、local U
 * TanStack Query 是服务端数据唯一缓存来源。
 * query key 必须稳定，并按 feature 集中定义。
 * mutation 成功后 invalidate、remove 或更新相关列表和详情；例如触发任务后刷新任务状态和执行历史。
-* running 任务状态可以短轮询，但必须根据页面可见性、是否存在 running 项、用户所在页面控制频率。
+* running 任务状态可以短轮询，但必须根据页面可见性、是否存在 running 项、用户所在页面控制频率；完整准入、停止和刷新状态规则见 [运行时 Query 与轮询规范](./runtime-query-guidelines.md)。
 * API 返回错误码后，组件根据错误类型展示字段错误、toast 或确认对话框。
 * 具体 query key 和缓存失效规则见 [API 与 Query 契约](./api-query-contracts.md)。
 
@@ -65,4 +65,5 @@ taskdaemon 前端的状态分为 server state、URL state、form state、local U
 * 不要把 TanStack Query 的数据复制到 `useState` 后再编辑原对象；编辑表单应创建默认值快照。
 * 不要用全局 store 保存服务端列表。
 * 不要让轮询在没有 running 任务时继续高频请求。
+* 不要把页面后台刷新状态提升为全局 UI 状态；手动刷新、自动 refetch 和 mutation pending 应在各自作用域内表达。
 * 不要把表单 dirty/valid 状态提升到全局。

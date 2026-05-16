@@ -69,6 +69,7 @@ export const tasksKeys = {
 * 触发或取消任务后刷新任务列表和对应执行历史。
 * 删除任务后刷新任务列表，并移除该任务执行历史 cache。
 * 当 action 同时影响多个页面，例如状态页、任务页、历史页，优先把失效逻辑放在同一个 mutation hook 内。
+* 状态页、任务页和历史页读取同一后端资源时必须复用同一组 query key；跨页面失效范围见 [运行时 Query 与轮询规范](./runtime-query-guidelines.md)。
 * 只有在能保持一致性时才用 `setQueryData` 局部更新；否则使用 invalidate。
 
 ---
@@ -81,6 +82,7 @@ export const tasksKeys = {
 * 没有任务、没有 running 项或 query disabled 时停止轮询。
 * 手动刷新按钮调用 query 的 `refetch`，但不改变全局轮询策略。
 * 后续若要监听页面可见性，逻辑应集中在 query hook 或共享 helper。
+* 详细准入、停止条件、手动刷新和后台 refetch 展示原则见 [运行时 Query 与轮询规范](./runtime-query-guidelines.md)。
 
 ---
 
@@ -117,3 +119,4 @@ export const tasksKeys = {
 * mutation 成功后只依赖页面刷新让数据“碰巧正确”。
 * query key 在组件中临时创建，导致缓存无法统一失效。
 * 依赖 API `message` 做稳定逻辑分支。
+* 同一业务数据在不同页面定义多套 query key 或多套轮询间隔。
