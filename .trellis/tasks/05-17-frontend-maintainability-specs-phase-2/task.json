@@ -1,0 +1,32 @@
+{
+  "id": "frontend-maintainability-specs-phase-2",
+  "name": "frontend-maintainability-specs-phase-2",
+  "title": "前端长期维护性规范第二批落地",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "mudssky",
+  "assignee": "mudssky",
+  "createdAt": "2026-05-17",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "05-17-frontend-runtime-polling-specs",
+    "05-17-frontend-interaction-error-specs",
+    "05-17-frontend-routing-desktop-specs",
+    "05-17-frontend-design-dependency-specs",
+    "05-17-frontend-form-test-specs"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

@@ -61,13 +61,13 @@ taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰�
 * 工具按钮优先使用图标加 tooltip；关键破坏性操作保留清晰文字。
 * 二元设置使用 switch/checkbox；模式选择使用 segmented control、tabs 或 select。
 * 创建、保存、触发、取消等命令需要 loading/disabled 状态，避免重复提交。
-* 删除、取消 running 任务、高频 cron 确认等风险操作使用确认对话框或明确确认状态。
+* 删除、取消 running 任务、高频 cron 确认等风险操作使用确认对话框或明确确认状态；详细规则见 [交互状态与错误恢复](./interaction-guidelines.md)。
 
 ---
 
 ## Accessibility
 
-* 表单字段必须有 label、错误信息和可聚焦控件。
+* 表单字段必须有 label、错误信息和可聚焦控件；详细错误关联规则见 [交互状态与错误恢复](./interaction-guidelines.md)。
 * Dialog、Popover、Tooltip 等交互需要保留键盘导航和焦点管理；若未引入可访问原语库，自建实现必须补齐 focus/escape/aria 行为。
 * 状态不能只靠颜色表达；执行状态 badge 需要文本。
 * 表格操作按钮需要可访问名称，图标按钮提供 `aria-label` 或 tooltip。

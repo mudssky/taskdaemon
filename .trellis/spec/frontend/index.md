@@ -20,6 +20,7 @@
 | [文件组织与拆分](./file-organization.md) | 页面、组件、表单、测试和样式拆分规则 | 当前代码事实 |
 | [API 与 Query 契约](./api-query-contracts.md) | API client、DTO、query key、mutation 和缓存失效 | 当前代码事实 |
 | [组件规范](./component-guidelines.md) | 组件拆分、props、样式、可访问性 | 当前代码事实 |
+| [交互状态与错误恢复](./interaction-guidelines.md) | loading/empty/error、确认交互、可访问性、traceId 与调试信息 | 当前代码事实 |
 | [Hook 规范](./hook-guidelines.md) | TanStack Query、表单和副作用封装 | 当前代码事实 |
 | [状态管理](./state-management.md) | server/URL/form/local/app state 边界 | 当前代码事实 |
 | [类型安全](./type-safety.md) | DTO、Zod schema、union、运行时校验 | 当前代码事实 |
@@ -34,11 +35,12 @@
 1. 读取 [目录结构](./directory-structure.md)，确认代码应放在 `routes`、`features`、`components`、`lib` 还是 `app`。
 2. 新增或拆分页面、组件、表单、测试或样式时读取 [文件组织与拆分](./file-organization.md)。
 3. 创建或修改 UI 时读取 [组件规范](./component-guidelines.md)。
-4. 增加 API、query、mutation、DTO 或缓存失效逻辑时读取 [API 与 Query 契约](./api-query-contracts.md)。
-5. 增加数据请求、表单或副作用时读取 [Hook 规范](./hook-guidelines.md) 和 [状态管理](./state-management.md)。
-6. 增加 schema、表单映射或 URL 参数时读取 [类型安全](./type-safety.md)。
-7. 修改测试、质量命令或依赖时读取 [质量规范](./quality-guidelines.md)。
-8. 跨前后端契约变更时，同时读取后端错误/API 相关规范和 `.trellis/spec/guides/cross-layer-thinking-guide.md`。
+4. 修改 loading、empty、error、disabled、确认对话框、可访问性或调试信息时读取 [交互状态与错误恢复](./interaction-guidelines.md)。
+5. 增加 API、query、mutation、DTO 或缓存失效逻辑时读取 [API 与 Query 契约](./api-query-contracts.md)。
+6. 增加数据请求、表单或副作用时读取 [Hook 规范](./hook-guidelines.md) 和 [状态管理](./state-management.md)。
+7. 增加 schema、表单映射或 URL 参数时读取 [类型安全](./type-safety.md)。
+8. 修改测试、质量命令或依赖时读取 [质量规范](./quality-guidelines.md)。
+9. 跨前后端契约变更时，同时读取后端错误/API 相关规范和 `.trellis/spec/guides/cross-layer-thinking-guide.md`。
 
 ---
 
@@ -48,6 +50,7 @@
 
 * 已经在 `apps/web` 中形成的目录、命名、文件拆分、状态管理、表单、测试和 API client 约定。
 * 多个未来任务会复用的 DTO/错误码/缓存失效/校验边界。
+* 多个页面会复用的 loading、empty、error、disabled、确认交互和可访问性约定。
 * 明确禁止模式和常见错误。
 
 不适合写入本目录：
