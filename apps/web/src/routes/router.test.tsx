@@ -181,10 +181,6 @@ describe("router", () => {
   it("deletes a task from the task list after confirmation", async () => {
     const user = userEvent.setup();
     vi.stubGlobal("scrollTo", vi.fn());
-    vi.stubGlobal(
-      "confirm",
-      vi.fn(() => true),
-    );
     const fetchMock = vi.fn(
       async (input: RequestInfo | URL, init?: RequestInit) => {
         const path = String(input);
@@ -213,14 +209,62 @@ describe("router", () => {
     ).toBeInTheDocument();
     await user.click(await screen.findByRole("button", { name: "删除任务" }));
 
-    expect(globalThis.confirm).toHaveBeenCalledWith(
-      "确定删除任务 backup？执行历史也会被清理。",
-    );
+    expect(
+      screen.getByRole("alertdialog", { name: "删除任务" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("确定删除任务 backup？执行历史也会被清理。"),
+    ).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "删除任务" }));
+
     await waitFor(() =>
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/tasks/1",
         expect.objectContaining({ method: "DELETE", credentials: "include" }),
       ),
+    );
+  });
+
+  it("cancels task deletion from the confirmation dialog", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("scrollTo", vi.fn());
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(input);
+        if (path === "/api/auth/status") {
+          return jsonResponse({
+            initialized: true,
+            authenticated: true,
+            admin: { adminId: 1, username: "admin" },
+          });
+        }
+        if (path === "/api/tasks/1" && init?.method === "DELETE") {
+          return jsonResponse(null);
+        }
+        if (path === "/api/tasks") {
+          return jsonResponse({ tasks: taskFixtures });
+        }
+        return jsonResponse(null);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderRouter("/tasks");
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "任务" }),
+    ).toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "删除任务" }));
+    await user.click(screen.getByRole("button", { name: "取消" }));
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("alertdialog", { name: "删除任务" }),
+      ).not.toBeInTheDocument(),
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/tasks/1",
+      expect.objectContaining({ method: "DELETE" }),
     );
   });
 });

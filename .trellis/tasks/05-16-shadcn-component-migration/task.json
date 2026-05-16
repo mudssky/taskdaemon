@@ -1,0 +1,30 @@
+{
+  "id": "shadcn-component-migration",
+  "name": "shadcn-component-migration",
+  "title": "brainstorm: shadcn 组件迁移",
+  "description": "",
+  "status": "planning",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "mudssky",
+  "assignee": "mudssky",
+  "createdAt": "2026-05-16",
+  "completedAt": null,
+  "branch": null,
+  "base_branch": "master",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [
+    "05-16-shadcn-ui-primitives",
+    "05-16-shadcn-task-list-migration",
+    "05-16-shadcn-form-auth-migration"
+  ],
+  "parent": null,
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {}
+}

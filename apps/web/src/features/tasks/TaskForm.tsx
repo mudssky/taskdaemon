@@ -2,6 +2,19 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Save } from "lucide-react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { runnerTypes, type Task } from "../../lib/api/types";
 import { validateCronExpression, warningLabel } from "../scheduler/cron";
 import {
@@ -39,14 +52,17 @@ export function TaskForm({ task, isSubmitting, onSubmit }: TaskFormProps) {
       })}
     >
       <div className="form-grid">
-        <label className="field span-2">
-          任务名称
-          <input {...form.register("name")} placeholder="PostgreSQL backup" />
+        <Field className="span-2" id="task-name" label="任务名称">
+          <Input
+            id="task-name"
+            {...form.register("name")}
+            placeholder="PostgreSQL backup"
+          />
           <ErrorMessage message={form.formState.errors.name?.message} />
-        </label>
-        <label className="field">
-          cron
-          <input
+        </Field>
+        <Field id="task-cron" label="cron">
+          <Input
+            id="task-cron"
             className="mono"
             {...form.register("cronExpression")}
             placeholder="30 9 * * *"
@@ -54,15 +70,21 @@ export function TaskForm({ task, isSubmitting, onSubmit }: TaskFormProps) {
           <ErrorMessage
             message={form.formState.errors.cronExpression?.message}
           />
-        </label>
-        <label className="field">
-          timezone
-          <input {...form.register("timezone")} placeholder="Asia/Hong_Kong" />
-        </label>
-        <label className="field span-2">
-          描述
-          <textarea rows={2} {...form.register("description")} />
-        </label>
+        </Field>
+        <Field id="task-timezone" label="timezone">
+          <Input
+            id="task-timezone"
+            {...form.register("timezone")}
+            placeholder="Asia/Hong_Kong"
+          />
+        </Field>
+        <Field className="span-2" id="task-description" label="描述">
+          <Textarea
+            id="task-description"
+            rows={2}
+            {...form.register("description")}
+          />
+        </Field>
       </div>
 
       {cron.ok && cron.warnings.length > 0 ? (
@@ -71,10 +93,16 @@ export function TaskForm({ task, isSubmitting, onSubmit }: TaskFormProps) {
           {cron.warnings.map((warning) => (
             <p key={warning}>{warningLabel(warning)}</p>
           ))}
-          <label className="check-row">
-            <input type="checkbox" {...form.register("confirmCronWarnings")} />
-            我确认这个调度频率符合预期
-          </label>
+          <CheckboxRow
+            checked={values.confirmCronWarnings}
+            label="我确认这个调度频率符合预期"
+            onCheckedChange={(checked) =>
+              form.setValue("confirmCronWarnings", checked, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+          />
           <ErrorMessage
             message={form.formState.errors.confirmCronWarnings?.message}
           />
@@ -84,57 +112,99 @@ export function TaskForm({ task, isSubmitting, onSubmit }: TaskFormProps) {
       <fieldset className="fieldset">
         <legend>Runner</legend>
         <div className="form-grid">
-          <label className="field">
-            类型
-            <select {...form.register("runnerType")}>
-              {runnerTypes.map((type) => (
-                <option key={type} value={type}>
-                  {runnerTypeLabel(type)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            命令来源
-            <select {...form.register("commandMode")}>
-              <option value="inline">命令片段</option>
-              <option value="script">脚本路径</option>
-            </select>
-          </label>
+          <Field id="task-runner-type" label="类型">
+            <Select
+              value={values.runnerType}
+              onValueChange={(value) =>
+                form.setValue(
+                  "runnerType",
+                  value as TaskFormValues["runnerType"],
+                  {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  },
+                )
+              }
+            >
+              <SelectTrigger id="task-runner-type">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {runnerTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {runnerTypeLabel(type)}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+          <Field id="task-command-mode" label="命令来源">
+            <Select
+              value={values.commandMode}
+              onValueChange={(value) =>
+                form.setValue(
+                  "commandMode",
+                  value as TaskFormValues["commandMode"],
+                  {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  },
+                )
+              }
+            >
+              <SelectTrigger id="task-command-mode">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="inline">命令片段</SelectItem>
+                  <SelectItem value="script">脚本路径</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
           {values.commandMode === "inline" ? (
-            <label className="field span-2">
-              命令片段
-              <textarea
+            <Field className="span-2" id="task-inline" label="命令片段">
+              <Textarea
+                id="task-inline"
                 className="mono"
                 rows={4}
                 {...form.register("inline")}
               />
               <ErrorMessage message={form.formState.errors.inline?.message} />
-            </label>
+            </Field>
           ) : (
-            <label className="field span-2">
-              脚本路径
-              <input className="mono" {...form.register("scriptPath")} />
+            <Field className="span-2" id="task-script-path" label="脚本路径">
+              <Input
+                id="task-script-path"
+                className="mono"
+                {...form.register("scriptPath")}
+              />
               <ErrorMessage
                 message={form.formState.errors.scriptPath?.message}
               />
-            </label>
+            </Field>
           )}
-          <label className="field">
-            参数
-            <input
+          <Field id="task-args" label="参数">
+            <Input
+              id="task-args"
               className="mono"
               {...form.register("argsText")}
               placeholder="--full --quiet"
             />
-          </label>
-          <label className="field">
-            工作目录
-            <input className="mono" {...form.register("workDir")} />
-          </label>
-          <label className="field">
-            timeout 秒
-            <input
+          </Field>
+          <Field id="task-work-dir" label="工作目录">
+            <Input
+              id="task-work-dir"
+              className="mono"
+              {...form.register("workDir")}
+            />
+          </Field>
+          <Field id="task-timeout" label="timeout 秒">
+            <Input
+              id="task-timeout"
               type="number"
               min={1}
               {...form.register("timeoutSeconds", { valueAsNumber: true })}
@@ -142,42 +212,83 @@ export function TaskForm({ task, isSubmitting, onSubmit }: TaskFormProps) {
             <ErrorMessage
               message={form.formState.errors.timeoutSeconds?.message}
             />
-          </label>
-          <label className="field">
-            输出截断字节
-            <input
+          </Field>
+          <Field id="task-output-limit" label="输出截断字节">
+            <Input
+              id="task-output-limit"
               type="number"
               min={0}
               {...form.register("outputLimitBytes", { valueAsNumber: true })}
             />
-          </label>
-          <label className="field span-2">
-            环境变量
-            <textarea
+          </Field>
+          <Field className="span-2" id="task-env" label="环境变量">
+            <Textarea
+              id="task-env"
               className="mono"
               rows={3}
               {...form.register("envText")}
               placeholder="KEY=value"
             />
-          </label>
+          </Field>
         </div>
       </fieldset>
 
       <div className="form-actions">
-        <label className="check-row">
-          <input type="checkbox" {...form.register("enabled")} />
-          保存后启用任务
-        </label>
-        <button
-          className="button primary"
-          type="submit"
-          disabled={isSubmitting}
-        >
-          <Save aria-hidden="true" size={16} />
+        <CheckboxRow
+          checked={values.enabled}
+          label="保存后启用任务"
+          onCheckedChange={(checked) =>
+            form.setValue("enabled", checked, {
+              shouldDirty: true,
+              shouldValidate: true,
+            })
+          }
+        />
+        <Button variant="primary" type="submit" disabled={isSubmitting}>
+          <Save aria-hidden="true" data-icon="inline-start" />
           {isSubmitting ? "保存中" : task ? "保存修改" : "创建任务"}
-        </button>
+        </Button>
       </div>
     </form>
+  );
+}
+
+function Field({
+  id,
+  label,
+  className,
+  children,
+}: {
+  id: string;
+  label: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className={`field ${className ?? ""}`.trim()}>
+      <Label htmlFor={id}>{label}</Label>
+      {children}
+    </div>
+  );
+}
+
+function CheckboxRow({
+  checked,
+  label,
+  onCheckedChange,
+}: {
+  checked: boolean;
+  label: string;
+  onCheckedChange: (checked: boolean) => void;
+}) {
+  return (
+    <Label className="check-row">
+      <Checkbox
+        checked={checked}
+        onCheckedChange={(value) => onCheckedChange(value === true)}
+      />
+      {label}
+    </Label>
   );
 }
 

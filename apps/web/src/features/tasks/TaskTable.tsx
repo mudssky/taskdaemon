@@ -1,5 +1,16 @@
 import { Link } from "@tanstack/react-router";
 import { Ban, Pencil, Play, Power, Trash2, XCircle } from "lucide-react";
+import type * as React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { Task } from "../../lib/api/types";
 import { runnerTypeLabel, taskStatusLabel } from "./task-format";
 
@@ -14,6 +25,12 @@ type TaskTableProps = {
   onDelete: (task: Task) => void;
 };
 
+/**
+ * 渲染任务列表表格和行级操作。
+ *
+ * @param props - 任务数据、选中状态、忙碌任务 ID 和行级操作回调。
+ * @returns 任务列表表格或空状态。
+ */
 export function TaskTable({
   tasks,
   selectedTaskId,
@@ -33,94 +50,102 @@ export function TaskTable({
   }
 
   return (
-    <div className="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>任务</th>
-            <th>状态</th>
-            <th>cron</th>
-            <th>runner</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody>
-          {tasks.map((task) => (
-            <tr key={task.id} data-selected={task.id === selectedTaskId}>
-              <td>
-                <button
-                  className="link-button"
-                  type="button"
-                  onClick={() => onSelect(task)}
+    <Table>
+      <TableHeader>
+        <TableRow>
+          <TableHead>任务</TableHead>
+          <TableHead>状态</TableHead>
+          <TableHead>cron</TableHead>
+          <TableHead>runner</TableHead>
+          <TableHead>操作</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {tasks.map((task) => (
+          <TableRow key={task.id} data-selected={task.id === selectedTaskId}>
+            <TableCell>
+              <Button
+                variant="link"
+                type="button"
+                onClick={() => onSelect(task)}
+              >
+                {task.name}
+              </Button>
+              {task.description ? (
+                <span className="muted block">{task.description}</span>
+              ) : null}
+            </TableCell>
+            <TableCell>
+              <Badge variant={taskStatusVariant(task)}>
+                {taskStatusLabel(task)}
+              </Badge>
+            </TableCell>
+            <TableCell className="mono">{task.cronExpression}</TableCell>
+            <TableCell>{runnerTypeLabel(task.runnerType)}</TableCell>
+            <TableCell>
+              <div className="row-actions">
+                <Button
+                  asChild
+                  variant="default"
+                  size="icon"
+                  aria-label="编辑任务"
+                  title="编辑任务"
                 >
-                  {task.name}
-                </button>
-                {task.description ? (
-                  <span className="muted block">{task.description}</span>
-                ) : null}
-              </td>
-              <td>
-                <span
-                  className={`badge ${task.running ? "running" : task.enabled ? "success" : "muted"}`}
-                >
-                  {taskStatusLabel(task)}
-                </span>
-              </td>
-              <td className="mono">{task.cronExpression}</td>
-              <td>{runnerTypeLabel(task.runnerType)}</td>
-              <td>
-                <div className="row-actions">
                   <Link
-                    className="icon-button"
                     to="/tasks/$taskId/edit"
                     params={{ taskId: String(task.id) }}
-                    aria-label="编辑任务"
-                    title="编辑任务"
                   >
-                    <Pencil aria-hidden="true" size={16} />
+                    <Pencil aria-hidden="true" data-icon="inline-start" />
                   </Link>
+                </Button>
+                <IconButton
+                  label={task.enabled ? "停用任务" : "启用任务"}
+                  onClick={() => onToggleEnabled(task)}
+                  disabled={busyTaskId === task.id}
+                >
+                  <Power aria-hidden="true" data-icon="inline-start" />
+                </IconButton>
+                <IconButton
+                  label="手动触发"
+                  onClick={() => onTrigger(task)}
+                  disabled={busyTaskId === task.id}
+                >
+                  <Play aria-hidden="true" data-icon="inline-start" />
+                </IconButton>
+                {task.running ? (
                   <IconButton
-                    label={task.enabled ? "停用任务" : "启用任务"}
-                    onClick={() => onToggleEnabled(task)}
+                    label="取消运行"
+                    onClick={() => onCancel(task)}
                     disabled={busyTaskId === task.id}
                   >
-                    <Power aria-hidden="true" size={16} />
+                    <XCircle aria-hidden="true" data-icon="inline-start" />
                   </IconButton>
-                  <IconButton
-                    label="手动触发"
-                    onClick={() => onTrigger(task)}
-                    disabled={busyTaskId === task.id}
-                  >
-                    <Play aria-hidden="true" size={16} />
-                  </IconButton>
-                  {task.running ? (
-                    <IconButton
-                      label="取消运行"
-                      onClick={() => onCancel(task)}
-                      disabled={busyTaskId === task.id}
-                    >
-                      <XCircle aria-hidden="true" size={16} />
-                    </IconButton>
-                  ) : (
-                    <span className="icon-placeholder" aria-hidden="true">
-                      <Ban size={16} />
-                    </span>
-                  )}
-                  <IconButton
-                    label="删除任务"
-                    onClick={() => onDelete(task)}
-                    disabled={busyTaskId === task.id || task.running}
-                  >
-                    <Trash2 aria-hidden="true" size={16} />
-                  </IconButton>
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                ) : (
+                  <span className="icon-placeholder" aria-hidden="true">
+                    <Ban size={16} />
+                  </span>
+                )}
+                <IconButton
+                  label="删除任务"
+                  onClick={() => onDelete(task)}
+                  disabled={busyTaskId === task.id || task.running}
+                >
+                  <Trash2 aria-hidden="true" data-icon="inline-start" />
+                </IconButton>
+              </div>
+            </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
   );
+}
+
+function taskStatusVariant(task: Task): "running" | "success" | "muted" {
+  if (task.running) {
+    return "running";
+  }
+  return task.enabled ? "success" : "muted";
 }
 
 function IconButton({
@@ -135,8 +160,9 @@ function IconButton({
   children: React.ReactNode;
 }) {
   return (
-    <button
-      className="icon-button"
+    <Button
+      variant="default"
+      size="icon"
       type="button"
       aria-label={label}
       title={label}
@@ -144,6 +170,6 @@ function IconButton({
       disabled={disabled}
     >
       {children}
-    </button>
+    </Button>
   );
 }

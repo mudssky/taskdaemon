@@ -1,5 +1,8 @@
 import { LogIn } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useLoginMutation } from "./auth.queries";
 
 export function LoginPanel() {
@@ -21,34 +24,30 @@ export function LoginPanel() {
           login.mutate({ username, password });
         }}
       >
-        <label>
+        <Label>
           用户名
-          <input
+          <Input
             autoComplete="username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           />
-        </label>
-        <label>
+        </Label>
+        <Label>
           密码
-          <input
+          <Input
             autoComplete="current-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-        </label>
+        </Label>
         {login.isError ? (
           <p className="form-error">登录失败，请检查账号或服务状态。</p>
         ) : null}
-        <button
-          className="button primary"
-          type="submit"
-          disabled={login.isPending}
-        >
-          <LogIn aria-hidden="true" size={16} />
+        <Button variant="primary" type="submit" disabled={login.isPending}>
+          <LogIn aria-hidden="true" data-icon="inline-start" />
           {login.isPending ? "登录中" : "登录"}
-        </button>
+        </Button>
       </form>
     </section>
   );

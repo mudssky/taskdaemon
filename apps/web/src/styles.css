@@ -12,7 +12,7 @@
   --popover: oklch(1 0 0);
   --popover-foreground: var(--foreground);
   --primary: oklch(0.45 0.095 226.207);
-  --primary-foreground: oklch(0.98 0.004 247.858);
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.93 0.013 255.508);
   --secondary-foreground: var(--foreground);
   --muted: oklch(0.94 0.008 247.858);
@@ -21,6 +21,15 @@
   --accent-foreground: var(--foreground);
   --destructive: oklch(0.55 0.19 25.331);
   --destructive-foreground: oklch(0.98 0.004 247.858);
+  --destructive-soft: #fff0ef;
+  --destructive-soft-foreground: #9b2d24;
+  --destructive-border: #efc0bd;
+  --success: #eaf6ef;
+  --success-foreground: #1d6844;
+  --success-border: #b7d7c7;
+  --warning: #fbf6ea;
+  --warning-foreground: #755819;
+  --warning-border: #d9d1bd;
   --border: oklch(0.87 0.014 253.1);
   --input: var(--border);
   --ring: oklch(0.58 0.116 226.207);
@@ -43,6 +52,15 @@
   --accent-foreground: var(--foreground);
   --destructive: oklch(0.65 0.18 25.331);
   --destructive-foreground: var(--foreground);
+  --destructive-soft: oklch(0.29 0.06 25.331);
+  --destructive-soft-foreground: oklch(0.88 0.08 25.331);
+  --destructive-border: oklch(0.45 0.1 25.331);
+  --success: oklch(0.28 0.04 150);
+  --success-foreground: oklch(0.84 0.08 150);
+  --success-border: oklch(0.43 0.07 150);
+  --warning: oklch(0.31 0.04 80);
+  --warning-foreground: oklch(0.86 0.08 80);
+  --warning-border: oklch(0.48 0.07 80);
   --border: oklch(0.37 0.034 264.665);
   --input: var(--border);
   --ring: oklch(0.72 0.112 226.207);
@@ -69,6 +87,15 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-soft-foreground: var(--destructive-soft-foreground);
+  --color-destructive-border: var(--destructive-border);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-border: var(--success-border);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-border: var(--warning-border);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -109,9 +136,11 @@ button:disabled {
   opacity: 0.58;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+@layer base {
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 h1,

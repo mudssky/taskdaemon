@@ -36,12 +36,22 @@ taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰�
 
 * 新增可复用控件优先使用 shadcn/ui 模式：Radix 原语 + cva variants + `cn` 合并 class。
 * `src/styles.css` 保留 Tailwind v4 入口、shadcn theme variables、基础布局和过渡期全局 class；不要继续把可复用控件逻辑堆进全局 CSS。
+* Tailwind v4 项目里的全局 reset（例如 `a`、`button` 的基础样式）应放进 `@layer base`，避免非 layer 样式压过 shadcn/Tailwind utilities（例如链接按钮上的 `text-primary-foreground`）。
 * 重复色值、间距、radius、字号等样式值应优先沉淀为 CSS variables 或 Tailwind theme token。
 * 默认浅色专业管理台；深色模式需要整体设计后再做，不要为单个组件手写未验证的双主题样式。
 * 视觉风格克制，不做营销式 hero、装饰性大卡片或低信息密度布局。
 * 代码、cron 表达式、日志输出使用等宽字体。
 * 不为单个页面引入重型 UI 依赖：图表库、Monaco Editor、Framer Motion、终端模拟器、重型日期库。
 * 不在单个页面临时创造第二套 variant/helper；通用控件变体集中在 `components/ui`。
+
+---
+
+## shadcn / Radix Form Controls
+
+* `Input`、`Textarea`、`SelectTrigger`、`Checkbox` 等本地组件必须保持可访问名称；字段标签优先用 `Label htmlFor` + 控件 `id`，不要依赖 lint 无法识别的自定义组件嵌套。
+* React Hook Form 可继续对 `Input`、`Textarea` 使用 `register`；Radix `Select` 和 `Checkbox` 需要通过 `value/checked` + `form.setValue(..., { shouldDirty: true, shouldValidate: true })` 接入，避免把非原生控件当作原生表单控件。
+* 测试环境若使用 Radix `Select`、`Checkbox`、Dialog 等依赖尺寸观测的组件，需要在 `src/test/setup.ts` 提供 `ResizeObserver` mock。
+* `AlertDialog` 必须包含 `AlertDialogTitle` 和 `AlertDialogDescription`；破坏性操作要同时覆盖确认和取消路径。
 
 ---
 

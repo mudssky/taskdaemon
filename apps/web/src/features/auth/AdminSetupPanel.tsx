@@ -1,5 +1,8 @@
 import { UserPlus } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useInitializeAdminMutation } from "./auth.queries";
 
 export function AdminSetupPanel() {
@@ -36,42 +39,42 @@ export function AdminSetupPanel() {
           });
         }}
       >
-        <label>
+        <Label>
           用户名
-          <input
+          <Input
             autoComplete="username"
             value={username}
             onChange={(event) => setUsername(event.target.value)}
           />
-        </label>
-        <label>
+        </Label>
+        <Label>
           密码
-          <input
+          <Input
             autoComplete="new-password"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-        </label>
-        <label>
+        </Label>
+        <Label>
           确认密码
-          <input
+          <Input
             autoComplete="new-password"
             type="password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
           />
-        </label>
+        </Label>
         {passwordMismatch ? (
           <p className="form-error">两次输入的密码不一致。</p>
         ) : null}
         {initializeAdmin.isError ? (
           <p className="form-error">创建失败，请检查账号信息或服务状态。</p>
         ) : null}
-        <button className="button primary" type="submit" disabled={!canSubmit}>
-          <UserPlus aria-hidden="true" size={16} />
+        <Button variant="primary" type="submit" disabled={!canSubmit}>
+          <UserPlus aria-hidden="true" data-icon="inline-start" />
           {initializeAdmin.isPending ? "创建中" : "创建管理员"}
-        </button>
+        </Button>
       </form>
     </section>
   );
