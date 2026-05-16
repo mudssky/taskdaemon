@@ -33,7 +33,7 @@ describe("apiClient", () => {
     } satisfies Partial<ApiClientError>);
   });
 
-  it("calls trigger and cancel task endpoints", async () => {
+  it("calls trigger, cancel and delete task endpoints", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       if (String(input).endsWith("/trigger")) {
         return new Response(
@@ -56,6 +56,7 @@ describe("apiClient", () => {
       status: "success",
     });
     await expect(apiClient.cancelTask(7)).resolves.toBeUndefined();
+    await expect(apiClient.deleteTask(7)).resolves.toBeUndefined();
     expect(fetchMock).toHaveBeenNthCalledWith(
       1,
       "/api/tasks/7/trigger",
@@ -65,6 +66,11 @@ describe("apiClient", () => {
       2,
       "/api/tasks/7/cancel",
       expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/tasks/7",
+      expect.objectContaining({ method: "DELETE", credentials: "include" }),
     );
   });
 

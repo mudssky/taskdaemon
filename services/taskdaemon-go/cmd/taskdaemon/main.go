@@ -83,6 +83,33 @@ func run(ctx context.Context, args []string) error {
 				defer logger.Close()
 				return app.New(cfg, logger.Logger).CancelTask(ctx, taskID, cli.SessionTokenFromContext(ctx))
 			},
+			TaskRuns: func(ctx context.Context, cfg config.Config, taskID int) ([]cli.TaskRunSummary, error) {
+				logger, err := logging.New(cfg.Logging, logging.Options{})
+				if err != nil {
+					return nil, err
+				}
+				defer logger.Close()
+				runs, err := app.New(cfg, logger.Logger).ListTaskRuns(ctx, taskID, cli.SessionTokenFromContext(ctx))
+				if err != nil {
+					return nil, err
+				}
+				summaries := make([]cli.TaskRunSummary, 0, len(runs))
+				for _, run := range runs {
+					summaries = append(summaries, cli.TaskRunSummary{
+						ID:           run.ID,
+						Trigger:      run.Trigger,
+						Status:       run.Status,
+						ExitCode:     run.ExitCode,
+						StartedAt:    run.StartedAt,
+						FinishedAt:   run.FinishedAt,
+						DurationMs:   run.DurationMs,
+						ErrorSummary: run.ErrorSummary,
+						Stdout:       run.Stdout,
+						Stderr:       run.Stderr,
+					})
+				}
+				return summaries, nil
+			},
 			ConfigReload: func(ctx context.Context, cfg config.Config) (config.ReloadResult, error) {
 				logger, err := logging.New(cfg.Logging, logging.Options{})
 				if err != nil {

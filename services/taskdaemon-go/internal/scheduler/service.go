@@ -273,6 +273,33 @@ func (service *Service) SetTaskEnabled(ctx context.Context, taskID int, enabled 
 	return taskRecord, nil
 }
 
+// DeleteTask 删除任务定义、执行历史和进程内 cron 注册。
+//
+// 参数:
+//   - service: 调度服务。
+//   - ctx: 控制数据库写入生命周期的 context。
+//   - taskID: 任务 ID。
+//
+// 返回值:
+//   - error: 任务正在运行、cron job 移除失败或数据库删除失败时返回错误。
+func (service *Service) DeleteTask(ctx context.Context, taskID int) error {
+	if service.IsTaskRunning(taskID) {
+		return ErrTaskAlreadyRunning
+	}
+	if err := service.removeRegisteredCronTask(taskID); err != nil {
+		return err
+	}
+	if _, err := service.store.Client().Run.Delete().
+		Where(entrun.HasTaskWith(enttask.IDEQ(taskID))).
+		Exec(ctx); err != nil {
+		return fmt.Errorf("delete task runs: %w", err)
+	}
+	if err := service.store.Client().Task.DeleteOneID(taskID).Exec(ctx); err != nil {
+		return fmt.Errorf("delete task: %w", err)
+	}
+	return nil
+}
+
 // validateTaskInput 校验任务输入并转换为可落库字段。
 //
 // 参数:

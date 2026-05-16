@@ -68,6 +68,17 @@ export function useSetTaskEnabledMutation() {
   });
 }
 
+export function useDeleteTaskMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (taskId: number) => apiClient.deleteTask(taskId),
+    onSuccess: (_result, taskId) => {
+      queryClient.invalidateQueries({ queryKey: tasksKeys.all });
+      queryClient.removeQueries({ queryKey: tasksKeys.runs(taskId) });
+    },
+  });
+}
+
 export function useTriggerTaskMutation() {
   const queryClient = useQueryClient();
   return useMutation({

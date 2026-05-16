@@ -119,6 +119,10 @@ export const apiClient = {
     });
   },
 
+  async deleteTask(taskId: number) {
+    await requestJSON<void>(`/api/tasks/${taskId}`, { method: "DELETE" });
+  },
+
   async triggerTask(taskId: number) {
     return requestJSON<TaskRun>(`/api/tasks/${taskId}/trigger`, {
       method: "POST",

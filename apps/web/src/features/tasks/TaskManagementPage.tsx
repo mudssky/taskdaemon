@@ -5,6 +5,7 @@ import type { Task } from "../../lib/api/types";
 import { TaskTable } from "./TaskTable";
 import {
   useCancelTaskMutation,
+  useDeleteTaskMutation,
   useSetTaskEnabledMutation,
   useTasksQuery,
   useTriggerTaskMutation,
@@ -16,11 +17,13 @@ export function TaskManagementPage() {
   const setEnabled = useSetTaskEnabledMutation();
   const triggerTask = useTriggerTaskMutation();
   const cancelTask = useCancelTaskMutation();
+  const deleteTask = useDeleteTaskMutation();
   const tasks = tasksQuery.data ?? [];
   const busyTaskId =
     setEnabled.variables?.taskId ??
     triggerTask.variables ??
     cancelTask.variables ??
+    deleteTask.variables ??
     null;
 
   function selectTask(task: Task) {
@@ -64,6 +67,13 @@ export function TaskManagementPage() {
           }
           onTrigger={(task) => triggerTask.mutate(task.id)}
           onCancel={(task) => cancelTask.mutate(task.id)}
+          onDelete={(task) => {
+            if (
+              window.confirm(`确定删除任务 ${task.name}？执行历史也会被清理。`)
+            ) {
+              deleteTask.mutate(task.id);
+            }
+          }}
         />
       )}
     </section>

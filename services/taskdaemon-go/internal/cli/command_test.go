@@ -3,6 +3,7 @@ package cli
 import (
 	"bytes"
 	"context"
+	"strings"
 	"testing"
 
 	"taskdaemon/internal/config"
@@ -336,6 +337,50 @@ func TestTaskCancelCommandReadsSessionTokenFromEnv(t *testing.T) {
 	}
 }
 
+// TestTaskRunsCommandLoadsConfigAndPrintsHistory 验证 task runs 会加载配置、传递 session 并输出执行历史。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestTaskRunsCommandLoadsConfigAndPrintsHistory(t *testing.T) {
+	var stdout bytes.Buffer
+	var runsTaskID int
+	var sessionToken string
+	err := Execute(context.Background(), Options{
+		Args:       []string{"--session-token", "session-token", "task", "runs", "42"},
+		Stdout:     &stdout,
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+		Hooks: Hooks{
+			TaskRuns: func(ctx context.Context, _ config.Config, taskID int) ([]TaskRunSummary, error) {
+				runsTaskID = taskID
+				sessionToken = SessionTokenFromContext(ctx)
+				return []TaskRunSummary{
+					{ID: 11, Trigger: "manual", Status: "success", ExitCode: intPtr(0), DurationMs: 1200, Stdout: "ok"},
+				}, nil
+			},
+		},
+	})
+
+	if err != nil {
+		t.Fatalf("execute task runs: %v", err)
+	}
+	if runsTaskID != 42 {
+		t.Fatalf("runs task ID = %d, want 42", runsTaskID)
+	}
+	if sessionToken != "session-token" {
+		t.Fatalf("session token = %s, want session-token", sessionToken)
+	}
+	output := stdout.String()
+	for _, want := range []string{"id: 11", "trigger: manual", "status: success", "exitCode: 0", "stdout: ok"} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("task runs output = %q, want %q", output, want)
+		}
+	}
+}
+
 // TestSessionTokenFromContextPrefersFlag 验证 flag token 优先于环境变量。
 //
 // 参数:
@@ -378,4 +423,15 @@ func staticConfigLoader() func(config.LoadOptions) (config.Config, error) {
 	return func(config.LoadOptions) (config.Config, error) {
 		return config.Default(), nil
 	}
+}
+
+// intPtr 返回整数指针，便于测试构造可选退出码。
+//
+// 参数:
+//   - value: 整数值。
+//
+// 返回值:
+//   - *int: 指向 value 的指针。
+func intPtr(value int) *int {
+	return &value
 }

@@ -104,6 +104,26 @@ func registerTaskRoutes(router *gin.Engine, authService AuthService, taskService
 		writeAPIOK(ctx, taskResponseFromEnt(taskRecord, taskService.IsTaskRunning(taskRecord.ID)))
 	})
 
+	group.DELETE("/:id", func(ctx *gin.Context) {
+		if taskService == nil {
+			writeAPIError(ctx, http.StatusServiceUnavailable, "task_service_unavailable", "Task service is unavailable", nil)
+			return
+		}
+		taskID, ok := parseTaskID(ctx)
+		if !ok {
+			return
+		}
+		if err := taskService.DeleteTask(ctx.Request.Context(), taskID); err != nil {
+			if errors.Is(err, scheduler.ErrTaskAlreadyRunning) {
+				writeAPIError(ctx, http.StatusConflict, "task_running", "Task is running", nil)
+				return
+			}
+			writeAPIError(ctx, http.StatusConflict, "task_delete_failed", "Task delete failed", nil)
+			return
+		}
+		writeAPIOK(ctx, nil)
+	})
+
 	group.POST("/:id/trigger", func(ctx *gin.Context) {
 		if taskService == nil {
 			writeAPIError(ctx, http.StatusServiceUnavailable, "task_service_unavailable", "Task service is unavailable", nil)

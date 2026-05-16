@@ -229,6 +229,75 @@ func TestSetTaskEnabledUpdatesRegisteredCronJobs(t *testing.T) {
 	require.NoError(t, service.Shutdown())
 }
 
+// TestDeleteTaskRemovesTaskRunsAndCronJob 验证删除任务会移除 cron 注册并清理执行历史。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestDeleteTaskRemovesTaskRunsAndCronJob(t *testing.T) {
+	ctx := context.Background()
+	store := openTestStore(t)
+	service := NewService(store, Options{})
+	taskID := createShellTask(t, ctx, service, runner.Config{
+		Type:    runner.TypeShell,
+		Inline:  shellPrintCommand("ok"),
+		Timeout: time.Second,
+	})
+	_, err := store.Client().Run.Create().
+		SetTaskID(taskID).
+		SetTrigger(entrun.TriggerManual).
+		SetStatus(entrun.StatusSuccess).
+		Save(ctx)
+	require.NoError(t, err)
+	require.NoError(t, service.RegisterEnabledTasks(ctx))
+	require.Equal(t, []int{taskID}, service.RegisteredTaskIDs())
+
+	require.NoError(t, service.DeleteTask(ctx, taskID))
+
+	exists, err := store.Client().Task.Query().Exist(ctx)
+	require.NoError(t, err)
+	require.False(t, exists)
+	runExists, err := store.Client().Run.Query().Exist(ctx)
+	require.NoError(t, err)
+	require.False(t, runExists)
+	require.Empty(t, service.RegisteredTaskIDs())
+	require.NoError(t, service.Shutdown())
+}
+
+// TestDeleteRunningTaskFails 验证运行中的任务不能直接删除。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestDeleteRunningTaskFails(t *testing.T) {
+	ctx := context.Background()
+	store := openTestStore(t)
+	service := NewService(store, Options{})
+	taskID := createShellTask(t, ctx, service, runner.Config{
+		Type:    runner.TypeShell,
+		Inline:  shellSleepCommand(),
+		Timeout: time.Second,
+	})
+	errCh := make(chan error, 1)
+	go func() {
+		_, err := service.TriggerTask(ctx, taskID)
+		errCh <- err
+	}()
+	require.Eventually(t, func() bool {
+		return service.IsTaskRunning(taskID)
+	}, time.Second, time.Millisecond)
+
+	err := service.DeleteTask(ctx, taskID)
+
+	require.ErrorIs(t, err, ErrTaskAlreadyRunning)
+	require.NoError(t, service.CancelTask(ctx, taskID))
+	require.NoError(t, <-errCh)
+}
+
 // TestTriggerTaskRecordsSuccessfulRun 验证手动触发会执行 runner 并写入 success 历史。
 //
 // 参数:

@@ -162,6 +162,29 @@ func TestSetTaskEnabledCallsTaskService(t *testing.T) {
 	require.False(t, service.enabledValue)
 }
 
+// TestDeleteTaskCallsTaskService 验证删除任务 API 会调用调度服务并返回空成功响应。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 require 终止。
+func TestDeleteTaskCallsTaskService(t *testing.T) {
+	service := &recordingTaskService{}
+	router := NewRouter(Options{Auth: loggedInAuthService(), Tasks: service})
+	req := authorizedRequest(http.MethodDelete, "/api/tasks/7", nil)
+	rec := httptest.NewRecorder()
+
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	require.Equal(t, 7, service.deletedID)
+	var envelope apiResponse
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &envelope))
+	require.Equal(t, responseEnvelopeSuccessCode, envelope.Code)
+	require.Nil(t, envelope.Data)
+}
+
 // TestTriggerTaskCallsTaskService 验证手动触发 API 会调用调度服务并返回执行历史。
 //
 // 参数:
@@ -310,6 +333,8 @@ type recordingTaskService struct {
 	enabledID    int
 	enabledValue bool
 	enabledTask  *ent.Task
+	deletedID    int
+	deleteErr    error
 	triggeredID  int
 	triggered    *ent.Run
 	cancelledID  int
@@ -377,6 +402,19 @@ func (service *recordingTaskService) SetTaskEnabled(_ context.Context, taskID in
 	service.enabledID = taskID
 	service.enabledValue = enabled
 	return service.enabledTask, nil
+}
+
+// DeleteTask 记录删除任务 ID。
+//
+// 参数:
+//   - _ : 请求 context，测试替身不使用。
+//   - taskID: 任务 ID。
+//
+// 返回值:
+//   - error: 当前测试替身按预设返回。
+func (service *recordingTaskService) DeleteTask(_ context.Context, taskID int) error {
+	service.deletedID = taskID
+	return service.deleteErr
 }
 
 // TriggerTask 记录触发任务 ID 并返回预设执行历史。
@@ -487,6 +525,18 @@ func (fakeTaskService) UpdateTask(context.Context, int, scheduler.CreateTaskInpu
 //   - error: 当前测试替身不返回错误。
 func (fakeTaskService) SetTaskEnabled(context.Context, int, bool) (*ent.Task, error) {
 	return &ent.Task{}, nil
+}
+
+// DeleteTask 模拟删除成功。
+//
+// 参数:
+//   - _ : 请求 context，测试替身不使用。
+//   - _ : 任务 ID，测试替身不使用。
+//
+// 返回值:
+//   - error: 当前测试替身不返回错误。
+func (fakeTaskService) DeleteTask(context.Context, int) error {
+	return nil
 }
 
 // TriggerTask 返回空执行历史。

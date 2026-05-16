@@ -22,7 +22,22 @@ type Hooks struct {
 	DBMigrate    func(context.Context, config.Config) error
 	TaskTrigger  func(context.Context, config.Config, int) error
 	TaskCancel   func(context.Context, config.Config, int) error
+	TaskRuns     func(context.Context, config.Config, int) ([]TaskRunSummary, error)
 	ConfigReload func(context.Context, config.Config) (config.ReloadResult, error)
+}
+
+// TaskRunSummary 是 CLI 展示执行历史所需的稳定摘要。
+type TaskRunSummary struct {
+	ID           int    `yaml:"id" json:"id"`
+	Trigger      string `yaml:"trigger" json:"trigger"`
+	Status       string `yaml:"status" json:"status"`
+	ExitCode     *int   `yaml:"exitCode,omitempty" json:"exitCode,omitempty"`
+	StartedAt    string `yaml:"startedAt,omitempty" json:"startedAt,omitempty"`
+	FinishedAt   string `yaml:"finishedAt,omitempty" json:"finishedAt,omitempty"`
+	DurationMs   int64  `yaml:"durationMs" json:"durationMs"`
+	ErrorSummary string `yaml:"errorSummary,omitempty" json:"errorSummary,omitempty"`
+	Stdout       string `yaml:"stdout,omitempty" json:"stdout,omitempty"`
+	Stderr       string `yaml:"stderr,omitempty" json:"stderr,omitempty"`
 }
 
 // Options 控制 CLI 执行时的输入、输出、配置加载器和入口 hooks。
@@ -236,6 +251,29 @@ func NewRootCommand(ctx context.Context, opts Options) *cobra.Command {
 				return fmt.Errorf("task cancel hook is not configured")
 			}
 			return opts.Hooks.TaskCancel(withSessionToken(ctx, sessionToken), cfg, taskID)
+		},
+	})
+	task.AddCommand(&cobra.Command{
+		Use:   "runs <task-id>",
+		Short: "List recent task run history",
+		Args:  cobra.ExactArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			cfg, err := load()
+			if err != nil {
+				return err
+			}
+			taskID, err := parsePositiveTaskID(args[0])
+			if err != nil {
+				return err
+			}
+			if opts.Hooks.TaskRuns == nil {
+				return fmt.Errorf("task runs hook is not configured")
+			}
+			runs, err := opts.Hooks.TaskRuns(withSessionToken(ctx, sessionToken), cfg, taskID)
+			if err != nil {
+				return err
+			}
+			return printYAML(cmd.OutOrStdout(), runs)
 		},
 	})
 	root.AddCommand(task)

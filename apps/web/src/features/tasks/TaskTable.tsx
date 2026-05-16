@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Ban, Pencil, Play, Power, XCircle } from "lucide-react";
+import { Ban, Pencil, Play, Power, Trash2, XCircle } from "lucide-react";
 import type { Task } from "../../lib/api/types";
 import { runnerTypeLabel, taskStatusLabel } from "./task-format";
 
@@ -11,6 +11,7 @@ type TaskTableProps = {
   onToggleEnabled: (task: Task) => void;
   onTrigger: (task: Task) => void;
   onCancel: (task: Task) => void;
+  onDelete: (task: Task) => void;
 };
 
 export function TaskTable({
@@ -21,6 +22,7 @@ export function TaskTable({
   onToggleEnabled,
   onTrigger,
   onCancel,
+  onDelete,
 }: TaskTableProps) {
   if (tasks.length === 0) {
     return (
@@ -104,6 +106,13 @@ export function TaskTable({
                       <Ban size={16} />
                     </span>
                   )}
+                  <IconButton
+                    label="删除任务"
+                    onClick={() => onDelete(task)}
+                    disabled={busyTaskId === task.id || task.running}
+                  >
+                    <Trash2 aria-hidden="true" size={16} />
+                  </IconButton>
                 </div>
               </td>
             </tr>

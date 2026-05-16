@@ -124,6 +124,64 @@ func TestCancelTaskRequiresSessionToken(t *testing.T) {
 	}
 }
 
+// TestListTaskRunsCallsDaemonAPIWithSessionCookie 验证 CLI runs hook 会调用 daemon HTTP API 并携带 session cookie。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestListTaskRunsCallsDaemonAPIWithSessionCookie(t *testing.T) {
+	var requestedPath string
+	var sessionToken string
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+		requestedPath = req.URL.Path
+		cookie, err := req.Cookie(httpapi.SessionCookieName)
+		if err != nil {
+			t.Fatalf("session cookie missing: %v", err)
+		}
+		sessionToken = cookie.Value
+		writer.WriteHeader(http.StatusOK)
+		_, _ = writer.Write([]byte(`{"code":0,"msg":"ok","data":{"runs":[{"id":11,"trigger":"manual","status":"success","exitCode":0,"durationMs":1200,"stdout":"ok"}]}}`))
+	}))
+	defer server.Close()
+	cfg := config.Default()
+	cfg.Server.Host, cfg.Server.Port = serverHostPort(t, server.URL)
+
+	runs, err := New(cfg, discardLogger()).ListTaskRuns(context.Background(), 42, "session-token")
+
+	if err != nil {
+		t.Fatalf("list task runs: %v", err)
+	}
+	if requestedPath != "/api/tasks/42/runs" {
+		t.Fatalf("request path = %s, want /api/tasks/42/runs", requestedPath)
+	}
+	if sessionToken != "session-token" {
+		t.Fatalf("session token = %s, want session-token", sessionToken)
+	}
+	if len(runs) != 1 {
+		t.Fatalf("runs len = %d, want 1", len(runs))
+	}
+	if runs[0].ID != 11 || runs[0].Status != "success" || runs[0].ExitCode == nil || *runs[0].ExitCode != 0 {
+		t.Fatalf("run summary = %+v, want success with exit code 0", runs[0])
+	}
+}
+
+// TestListTaskRunsRequiresSessionToken 验证查询执行历史时必须提供管理员 session token。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。测试失败时通过 t.Fatal/t.Fatalf 终止。
+func TestListTaskRunsRequiresSessionToken(t *testing.T) {
+	_, err := New(config.Default(), discardLogger()).ListTaskRuns(context.Background(), 42, "")
+
+	if err == nil {
+		t.Fatal("list task runs should require session token")
+	}
+}
+
 // TestServeMigratesEmptySQLiteBeforeRegisteringTasks 验证空 SQLite 首次启动会先迁移 schema，再注册任务并提供认证状态 API。
 //
 // 参数:

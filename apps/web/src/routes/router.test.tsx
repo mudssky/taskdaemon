@@ -177,6 +177,52 @@ describe("router", () => {
     ).toBeInTheDocument();
     expect(screen.getByLabelText("任务名称")).toHaveValue("backup");
   });
+
+  it("deletes a task from the task list after confirmation", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("scrollTo", vi.fn());
+    vi.stubGlobal(
+      "confirm",
+      vi.fn(() => true),
+    );
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(input);
+        if (path === "/api/auth/status") {
+          return jsonResponse({
+            initialized: true,
+            authenticated: true,
+            admin: { adminId: 1, username: "admin" },
+          });
+        }
+        if (path === "/api/tasks/1" && init?.method === "DELETE") {
+          return jsonResponse(null);
+        }
+        if (path === "/api/tasks") {
+          return jsonResponse({ tasks: taskFixtures });
+        }
+        return jsonResponse(null);
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderRouter("/tasks");
+
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "任务" }),
+    ).toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "删除任务" }));
+
+    expect(globalThis.confirm).toHaveBeenCalledWith(
+      "确定删除任务 backup？执行历史也会被清理。",
+    );
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/tasks/1",
+        expect.objectContaining({ method: "DELETE", credentials: "include" }),
+      ),
+    );
+  });
 });
 
 function jsonResponse(data: unknown, status = 200) {

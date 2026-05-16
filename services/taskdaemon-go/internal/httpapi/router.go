@@ -53,6 +53,7 @@ type TaskService interface {
 	ListTasks(context.Context, int) ([]*ent.Task, error)
 	UpdateTask(context.Context, int, scheduler.CreateTaskInput) (*ent.Task, error)
 	SetTaskEnabled(context.Context, int, bool) (*ent.Task, error)
+	DeleteTask(context.Context, int) error
 	TriggerTask(context.Context, int) (*ent.Run, error)
 	CancelTask(context.Context, int) error
 	ListTaskRuns(context.Context, int, int) ([]*ent.Run, error)

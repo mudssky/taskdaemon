@@ -33,6 +33,20 @@ type App struct {
 	runtimeConfig *httpapi.RuntimeConfig
 }
 
+// TaskRunSummary 是应用层暴露给 CLI 查询的执行历史摘要。
+type TaskRunSummary struct {
+	ID           int    `json:"id"`
+	Trigger      string `json:"trigger"`
+	Status       string `json:"status"`
+	ExitCode     *int   `json:"exitCode"`
+	StartedAt    string `json:"startedAt"`
+	FinishedAt   string `json:"finishedAt"`
+	DurationMs   int64  `json:"durationMs"`
+	ErrorSummary string `json:"errorSummary"`
+	Stdout       string `json:"stdout"`
+	Stderr       string `json:"stderr"`
+}
+
 // New 创建应用装配实例。
 //
 // 参数:
@@ -235,6 +249,26 @@ func (app *App) CancelTask(ctx context.Context, taskID int, sessionToken string)
 	}
 	app.logger.Info("task cancel requested", "task_id", taskID)
 	return nil
+}
+
+// ListTaskRuns 通过正在运行的 daemon HTTP API 查询任务执行历史。
+//
+// 参数:
+//   - ctx: 控制 HTTP 请求生命周期的 context。
+//   - taskID: 任务 ID。
+//   - sessionToken: 管理员 session token，会作为 session cookie 发送。
+//
+// 返回值:
+//   - []cli.TaskRunSummary: 最近执行历史摘要。
+//   - error: token 缺失、请求失败或 daemon 返回非成功状态时返回错误。
+func (app *App) ListTaskRuns(ctx context.Context, taskID int, sessionToken string) ([]TaskRunSummary, error) {
+	var response struct {
+		Runs []TaskRunSummary `json:"runs"`
+	}
+	if err := app.callDaemonAPI(ctx, http.MethodGet, fmt.Sprintf("tasks/%d/runs", taskID), sessionToken, nil, &response, 10*time.Second, http.StatusOK); err != nil {
+		return nil, err
+	}
+	return response.Runs, nil
 }
 
 // callDaemonAPI 调用 daemon HTTP API。
