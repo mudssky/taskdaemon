@@ -77,6 +77,7 @@ services/
 * mutation 成功后显式 invalidate 或 remove 相关 query cache。
 * 执行状态、任务状态、runner 类型和触发来源使用集中 union/常量，不在组件里重复裸字符串。
 * 前端可以做快速校验和软警告展示，后端仍是最终校验来源。
+* 详细规则见 [API 与 Query 契约](./api-query-contracts.md)。
 
 ---
 
@@ -120,3 +121,4 @@ services/
 * 不绕过 `apiClient` 在组件里直接 `fetch` 业务接口。
 * 不把只被单个 feature 使用的工具提前放进全局 `lib`。
 * 不提交 `dist` 中真实构建产物。
+* 不绕过 shadcn/ui 本地组件模式引入另一套样式工具链。

@@ -12,7 +12,7 @@
 
 ## Type Organization
 
-* 后端 API DTO 类型放在 `src/lib/api` 或生成目录中。
+* 后端 API DTO 类型放在 `src/lib/api` 或生成目录中，并遵守 [API 与 Query 契约](./api-query-contracts.md)。
 * feature 内部类型放在 `src/features/<domain>` 附近，例如 `task.types.ts`。
 * 表单值类型由 Zod schema 推导，使用 `z.infer<typeof schema>`。
 * UI 专用 view model 与 API DTO 分开，例如执行状态展示字段、格式化后的耗时文本。
@@ -51,6 +51,7 @@ type RunStatus = (typeof runStatuses)[number];
 * 用 discriminated union 表达不同 runner 配置，例如 `shell`、`python`、`typescript`。
 * 用纯函数把 DTO 映射成表单默认值，反向提交时再映射成 API payload。
 * 用 exhaustive check 处理任务状态、runner 类型和触发来源，避免新增类型后 UI 静默漏分支。
+* API 契约变化时同步 DTO、client、query hook、schema/payload mapper 和测试。
 
 ---
 

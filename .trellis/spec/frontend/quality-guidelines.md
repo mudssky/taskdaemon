@@ -28,7 +28,7 @@
 * 使用 TanStack Router 管理路由。
 * 使用 TanStack Query 管理 server state。
 * 使用 React Hook Form + Zod 管理表单和校验。
-* 使用 Tailwind CSS + Radix UI + cva + tailwind-merge 维护本地组件。
+* 使用 Tailwind CSS v4 + shadcn/ui 本地组件模式维护可复用控件；过渡期全局 CSS 只承载基础布局和旧页面样式。
 * 使用 dayjs 处理日期时间，并按需引入插件。
 * 任务列表和执行历史优先用表格展示，移动端必须避免页面级横向滚动。
 * 高频/秒级 cron 需要软警告和显式确认提交流程。
@@ -55,6 +55,7 @@
 * 是否存在未处理 loading、empty、error、disabled 状态。
 * 移动端是否会出现页面级横向滚动。
 * 是否新增了没有明确收益的重型依赖。
+* 是否绕过 shadcn/ui 本地组件模式另起一套样式或 variant 工具。
 * 是否跑过 `biome`、`tsc --noEmit` 和相关 Vitest 测试。
 
 ---

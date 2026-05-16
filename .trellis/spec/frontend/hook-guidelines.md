@@ -24,8 +24,9 @@
 
 * server state 统一使用 TanStack Query。
 * query key 放在 feature 附近集中管理，例如 `tasksKeys.list(filters)`。
-* mutation 成功后显式 invalidate 或更新相关 query cache。
+* mutation 成功后显式 invalidate、remove 或更新相关 query cache。
 * API client 负责 HTTP 细节，query hook 负责缓存和错误状态，组件负责展示。
+* API、query key、mutation 和缓存失效细节遵守 [API 与 Query 契约](./api-query-contracts.md)。
 * 登录态/session 查询应作为 app shell 或受保护 route 的基础 query，不在每个页面重复请求；首次初始化分流优先使用 `GET /api/auth/status`，避免把“未初始化”和“已初始化但未登录”都折叠成 `/api/auth/me` 的 401。
 
 ---
@@ -44,6 +45,7 @@
 
 * 副作用尽量放在事件处理、mutation lifecycle 或 route loader 中，不在 render 路径触发。
 * interval/polling 必须有清理和启停条件；执行历史或 running 状态轮询不能无条件常驻高频刷新。
+* 轮询条件优先集中在 query hook；组件不要散落 `setInterval`。
 * Desktop 专属能力通过边界 hook 封装，并提供 Web fallback。
 * 不把 localStorage/sessionStorage 访问散落到组件中；需要时集中在 auth/config 相关 hook。
 
