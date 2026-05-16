@@ -3,12 +3,15 @@ import {
   createRoute,
   createRouter,
   Outlet,
+  type RouterHistory,
 } from "@tanstack/react-router";
 import { AppShell } from "../components/layout/AppShell";
 import { AdminSetupPanel } from "../features/auth/AdminSetupPanel";
 import { useAuthStatusQuery } from "../features/auth/auth.queries";
 import { LoginPanel } from "../features/auth/LoginPanel";
-import { TaskDashboard } from "../features/tasks/TaskDashboard";
+import { RunHistoryPage } from "../features/runs/RunHistoryPage";
+import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
+import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
 
 function ProtectedApp() {
   const authStatus = useAuthStatusQuery();
@@ -65,19 +68,19 @@ const rootRoute = createRootRoute({
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: TaskDashboard,
+  component: StatusOverviewPage,
 });
 
 const tasksRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tasks",
-  component: TaskDashboard,
+  component: TaskManagementPage,
 });
 
 const runsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/runs",
-  component: TaskDashboard,
+  component: RunHistoryPage,
 });
 
 export const routeTree = rootRoute.addChildren([
@@ -86,7 +89,11 @@ export const routeTree = rootRoute.addChildren([
   runsRoute,
 ]);
 
-export const router = createRouter({ routeTree });
+export function createAppRouter(history?: RouterHistory) {
+  return createRouter({ routeTree, history });
+}
+
+export const router = createAppRouter();
 
 declare module "@tanstack/react-router" {
   interface Register {

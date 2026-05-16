@@ -1,34 +1,27 @@
 import { Plus, RefreshCw } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import type { Task, TaskPayload } from "../../lib/api/types";
-import { RunHistoryTable } from "../runs/RunHistoryTable";
 import { TaskForm } from "./TaskForm";
 import { TaskTable } from "./TaskTable";
 import {
   useCancelTaskMutation,
   useCreateTaskMutation,
-  useRunHistoryQuery,
   useSetTaskEnabledMutation,
   useTasksQuery,
   useTriggerTaskMutation,
   useUpdateTaskMutation,
 } from "./tasks.queries";
 
-export function TaskDashboard() {
+export function TaskManagementPage() {
   const tasksQuery = useTasksQuery();
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
-  const tasks = tasksQuery.data ?? [];
-  const selectedTask = useMemo(
-    () => tasks.find((task) => task.id === selectedTaskId) ?? tasks[0] ?? null,
-    [selectedTaskId, tasks],
-  );
-  const runsQuery = useRunHistoryQuery(selectedTask?.id ?? null);
   const createTask = useCreateTaskMutation();
   const updateTask = useUpdateTaskMutation();
   const setEnabled = useSetTaskEnabledMutation();
   const triggerTask = useTriggerTaskMutation();
   const cancelTask = useCancelTaskMutation();
+  const tasks = tasksQuery.data ?? [];
   const busyTaskId =
     setEnabled.variables?.taskId ??
     triggerTask.variables ??
@@ -70,7 +63,7 @@ export function TaskDashboard() {
         ) : (
           <TaskTable
             tasks={tasks}
-            selectedTaskId={selectedTask?.id ?? null}
+            selectedTaskId={selectedTaskId}
             busyTaskId={busyTaskId}
             onSelect={(task) => setSelectedTaskId(task.id)}
             onEdit={(task) => setEditingTask(task)}
@@ -109,23 +102,6 @@ export function TaskDashboard() {
         {createTask.isError || updateTask.isError ? (
           <p className="form-error">保存失败，请检查字段或后端校验结果。</p>
         ) : null}
-      </section>
-
-      <section className="panel wide" aria-labelledby="runs-title">
-        <div className="panel-header">
-          <div>
-            <h2 id="runs-title">执行历史</h2>
-            <p>
-              {selectedTask
-                ? selectedTask.name
-                : "选择一个任务后查看历史记录。"}
-            </p>
-          </div>
-        </div>
-        <RunHistoryTable
-          runs={runsQuery.data ?? []}
-          isLoading={runsQuery.isLoading}
-        />
       </section>
     </div>
   );

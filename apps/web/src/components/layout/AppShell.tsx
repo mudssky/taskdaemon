@@ -1,4 +1,4 @@
-import { Link, Outlet } from "@tanstack/react-router";
+import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import {
   Activity,
   Clock3,
@@ -19,12 +19,14 @@ type AppShellProps = PropsWithChildren<{
 }>;
 
 export function AppShell({
-  pageTitle = "运行状态",
+  pageTitle,
   pageKicker = "本地守护进程",
   children,
 }: AppShellProps) {
+  const location = useLocation();
   const authStatus = useAuthStatusQuery();
   const logout = useLogoutMutation();
+  const title = pageTitle ?? pageTitleForPath(location.pathname);
   const statusText = authStatus.data?.authenticated
     ? `管理员 ${authStatus.data.admin?.username ?? ""}`.trim()
     : "未登录";
@@ -37,7 +39,11 @@ export function AppShell({
           taskdaemon
         </div>
         <nav>
-          <Link to="/" activeProps={{ "aria-current": "page" }}>
+          <Link
+            to="/"
+            activeOptions={{ exact: true }}
+            activeProps={{ "aria-current": "page" }}
+          >
             <Activity aria-hidden="true" size={18} />
             运行状态
           </Link>
@@ -59,7 +65,7 @@ export function AppShell({
         <header className="topbar">
           <div>
             <p className="eyebrow">{pageKicker}</p>
-            <h1 id="page-title">{pageTitle}</h1>
+            <h1 id="page-title">{title}</h1>
           </div>
           <div className="topbar-actions">
             <span className="status">{statusText}</span>
@@ -81,4 +87,14 @@ export function AppShell({
       </section>
     </main>
   );
+}
+
+function pageTitleForPath(pathname: string): string {
+  if (pathname.startsWith("/tasks")) {
+    return "任务";
+  }
+  if (pathname.startsWith("/runs")) {
+    return "执行历史";
+  }
+  return "运行状态";
 }
