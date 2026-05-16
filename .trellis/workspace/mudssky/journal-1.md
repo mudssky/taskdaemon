@@ -316,3 +316,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 10: 完成跨平台调度守护进程第一轮
+
+**Date**: 2026-05-16
+**Task**: 完成跨平台调度守护进程第一轮
+**Branch**: `master`
+
+### Summary
+
+补齐任务删除和 CLI 执行历史查询，更新主任务验收状态与前后端契约规范，并归档 cross-platform-scheduler-daemon。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `03c50d2` | (see git log) |
+| `640b222` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
