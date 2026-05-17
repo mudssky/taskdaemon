@@ -20,6 +20,7 @@
 | [文件组织与拆分](./file-organization.md) | 页面、组件、表单、测试和样式拆分规则 | 当前代码事实 |
 | [API 与 Query 契约](./api-query-contracts.md) | API client、DTO、query key、mutation 和缓存失效 | 当前代码事实 |
 | [组件规范](./component-guidelines.md) | 组件拆分、props、样式、可访问性 | 当前代码事实 |
+| [设计系统与依赖治理](./design-dependency-guidelines.md) | shadcn/ui、全局样式边界、token、常用 UI 模式和依赖准入 | 当前代码事实 |
 | [交互状态与错误恢复](./interaction-guidelines.md) | loading/empty/error、确认交互、可访问性、traceId 与调试信息 | 当前代码事实 |
 | [Hook 规范](./hook-guidelines.md) | TanStack Query、表单和副作用封装 | 当前代码事实 |
 | [状态管理](./state-management.md) | server/URL/form/local/app state 边界 | 当前代码事实 |
@@ -37,16 +38,17 @@
 
 1. 读取 [目录结构](./directory-structure.md)，确认代码应放在 `routes`、`features`、`components`、`lib` 还是 `app`。
 2. 新增或拆分页面、组件、表单、测试或样式时读取 [文件组织与拆分](./file-organization.md)。
-3. 创建或修改 UI 时读取 [组件规范](./component-guidelines.md)。
-4. 修改 loading、empty、error、disabled、确认对话框、可访问性或调试信息时读取 [交互状态与错误恢复](./interaction-guidelines.md)。
-5. 增加 API、query、mutation、DTO 或缓存失效逻辑时读取 [API 与 Query 契约](./api-query-contracts.md)。
-6. 增加数据请求、表单或副作用时读取 [Hook 规范](./hook-guidelines.md) 和 [状态管理](./state-management.md)。
-7. 增加运行态数据、自动轮询、手动刷新、后台 refetch 或跨页面 query cache 复用时读取 [运行时 Query 与轮询规范](./runtime-query-guidelines.md)。
-8. 增加路由、认证守卫、页面标题/导航、URL 参数或 Desktop/Web 平台能力时读取 [路由认证与平台边界](./routing-platform-guidelines.md)。
-9. 增加 schema、表单映射或 URL 参数时读取 [类型安全](./type-safety.md)。
-10. 新增或修改复杂表单、软警告、payload mapper 或测试分层时读取 [表单校验与测试分层](./form-testing-guidelines.md)。
-11. 修改测试、质量命令或依赖时读取 [质量规范](./quality-guidelines.md)。
-12. 跨前后端契约变更时，同时读取后端错误/API 相关规范和 `.trellis/spec/guides/cross-layer-thinking-guide.md`。
+3. 创建或修改 UI 时读取 [组件规范](./component-guidelines.md) 和 [设计系统与依赖治理](./design-dependency-guidelines.md)。
+4. 修改 shadcn/ui、本地 UI 组件、`styles.css`、设计 token 或新增前端依赖时读取 [设计系统与依赖治理](./design-dependency-guidelines.md)。
+5. 修改 loading、empty、error、disabled、确认对话框、可访问性或调试信息时读取 [交互状态与错误恢复](./interaction-guidelines.md)。
+6. 增加 API、query、mutation、DTO 或缓存失效逻辑时读取 [API 与 Query 契约](./api-query-contracts.md)。
+7. 增加数据请求、表单或副作用时读取 [Hook 规范](./hook-guidelines.md) 和 [状态管理](./state-management.md)。
+8. 增加运行态数据、自动轮询、手动刷新、后台 refetch 或跨页面 query cache 复用时读取 [运行时 Query 与轮询规范](./runtime-query-guidelines.md)。
+9. 增加路由、认证守卫、页面标题/导航、URL 参数或 Desktop/Web 平台能力时读取 [路由认证与平台边界](./routing-platform-guidelines.md)。
+10. 增加 schema、表单映射或 URL 参数时读取 [类型安全](./type-safety.md)。
+11. 新增或修改复杂表单、软警告、payload mapper 或测试分层时读取 [表单校验与测试分层](./form-testing-guidelines.md)。
+12. 修改测试、质量命令或依赖时读取 [质量规范](./quality-guidelines.md)。
+13. 跨前后端契约变更时，同时读取后端错误/API 相关规范和 `.trellis/spec/guides/cross-layer-thinking-guide.md`。
 
 ---
 
@@ -60,6 +62,7 @@
 * 多个页面会复用的 loading、empty、error、disabled、确认交互和可访问性约定。
 * 多个运行态页面会复用的轮询准入、停止条件、刷新状态和 query cache 失效约定。
 * 多个页面或平台会复用的路由守卫、URL 参数校验和 Web/Desktop 边界约定。
+* 多个页面会复用的设计 token、UI 组件、样式增长边界和依赖准入规则。
 * 明确禁止模式和常见错误。
 
 不适合写入本目录：

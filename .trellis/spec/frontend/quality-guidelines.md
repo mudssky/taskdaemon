@@ -15,6 +15,7 @@
 * 不创建营销式 landing/hero 作为应用首页；登录后第一屏进入任务列表/运行状态。
 * 不使用 emoji 图标；图标统一来自 `lucide-react`。
 * 不为当前管理台需求引入重型依赖：图表库、Monaco Editor、Framer Motion、终端模拟器、moment 等重型日期库。
+* 不引入第二套 UI、表单、路由、状态、日期或样式方案；依赖准入见 [设计系统与依赖治理](./design-dependency-guidelines.md)。
 * 不提供裸任意命令输入框；runner 必须是结构化类型和字段。
 * 不把服务端状态复制到全局 store。
 * 不用快照测试替代业务断言。
@@ -29,6 +30,7 @@
 * 使用 TanStack Query 管理 server state。
 * 使用 React Hook Form + Zod 管理表单和校验。
 * 使用 Tailwind CSS v4 + shadcn/ui 本地组件模式维护可复用控件；过渡期全局 CSS 只承载基础布局和旧页面样式。
+* 新增前端运行依赖前先检查本地模式、bundle 成本、Web/Desktop 可用性和是否引入第二套方案。
 * 使用 dayjs 处理日期时间，并按需引入插件。
 * 任务列表和执行历史优先用表格展示，移动端必须避免页面级横向滚动。
 * 高频/秒级 cron 需要软警告和显式确认提交流程。
@@ -63,6 +65,7 @@
 * 移动端是否会出现页面级横向滚动。
 * 是否新增了没有明确收益的重型依赖。
 * 是否绕过 shadcn/ui 本地组件模式另起一套样式或 variant 工具。
+* 是否把应用运行依赖放在 `apps/web/package.json`，共享开发/测试工具放在根 `devDependencies`。
 * 是否跑过 `biome`、`tsc --noEmit` 和相关 Vitest 测试。
 
 ---

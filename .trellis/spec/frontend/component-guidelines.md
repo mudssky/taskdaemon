@@ -10,6 +10,8 @@ taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰�
 
 当前 UI 基础栈：React + TypeScript + shadcn/ui 本地组件模式。Tailwind CSS v4、Radix primitives、class-variance-authority、tailwind-merge 和 `lucide-react` 是长期组件基础；已有全局 CSS class 属于过渡层，后续新增可复用控件优先沉淀到 `components/ui`。
 
+设计 token、`styles.css` 增长边界、shadcn/ui 与依赖准入遵守 [设计系统与依赖治理](./design-dependency-guidelines.md)。
+
 ---
 
 ## Component Structure
@@ -38,6 +40,7 @@ taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰�
 * `src/styles.css` 保留 Tailwind v4 入口、shadcn theme variables、基础布局和过渡期全局 class；不要继续把可复用控件逻辑堆进全局 CSS。
 * Tailwind v4 项目里的全局 reset（例如 `a`、`button` 的基础样式）应放进 `@layer base`，避免非 layer 样式压过 shadcn/Tailwind utilities（例如链接按钮上的 `text-primary-foreground`）。
 * 重复色值、间距、radius、字号等样式值应优先沉淀为 CSS variables 或 Tailwind theme token。
+* 常用 UI 模式的归属、过渡期全局 class 和新增 token 规则见 [设计系统与依赖治理](./design-dependency-guidelines.md)。
 * 默认浅色专业管理台；深色模式需要整体设计后再做，不要为单个组件手写未验证的双主题样式。
 * 视觉风格克制，不做营销式 hero、装饰性大卡片或低信息密度布局。
 * 代码、cron 表达式、日志输出使用等宽字体。
@@ -82,3 +85,4 @@ taskdaemon 前端是运维/开发工具型管理台，组件设计优先清晰�
 * 不要用裸任意命令输入框替代结构化 runner 表单。
 * 不要让表格在移动端撑出页面级横向滚动。
 * 不要为了单个页面引入重型依赖。
+* 不要在单个页面临时创造第二套按钮、badge、表格或表单控件体系。

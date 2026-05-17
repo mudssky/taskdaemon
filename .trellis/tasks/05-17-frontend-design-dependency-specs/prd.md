@@ -15,11 +15,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `.trellis/spec/frontend` 包含设计系统和样式增长边界规则。
-* [ ] `.trellis/spec/frontend` 包含前端依赖治理规则。
-* [ ] 明确 shadcn/ui 与过渡期全局 CSS 的关系。
-* [ ] 明确禁止单页面临时创造第二套控件体系。
-* [ ] 更新 `index.md` 的规范索引或开发前检查项。
+* [x] `.trellis/spec/frontend` 包含设计系统和样式增长边界规则。
+* [x] `.trellis/spec/frontend` 包含前端依赖治理规则。
+* [x] 明确 shadcn/ui 与过渡期全局 CSS 的关系。
+* [x] 明确禁止单页面临时创造第二套控件体系。
+* [x] 更新 `index.md` 的规范索引或开发前检查项。
 
 ## Definition of Done
 
