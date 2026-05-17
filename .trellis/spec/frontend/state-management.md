@@ -49,6 +49,7 @@ taskdaemon 前端的状态分为 server state、URL state、form state、local U
 * 列表筛选、分页、执行历史 task id、状态过滤放进 URL，便于刷新和分享。
 * dialog 是否打开通常不放 URL，除非它代表可独立访问的详情状态。
 * URL search params 需要类型校验和默认值，避免非法 URL 让页面崩溃。
+* URL 参数进入组件前的校验、默认值和非法值兜底见 [路由认证与平台边界](./routing-platform-guidelines.md)。
 
 ---
 
@@ -67,3 +68,4 @@ taskdaemon 前端的状态分为 server state、URL state、form state、local U
 * 不要让轮询在没有 running 任务时继续高频请求。
 * 不要把页面后台刷新状态提升为全局 UI 状态；手动刷新、自动 refetch 和 mutation pending 应在各自作用域内表达。
 * 不要把表单 dirty/valid 状态提升到全局。
+* 不要把 Desktop/Web 能力探测散落到业务组件；跨平台能力应通过边界 hook 或 service 表达。

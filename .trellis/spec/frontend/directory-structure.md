@@ -66,6 +66,7 @@ services/
 * 任务创建/编辑这类复杂表单使用独立路由页面承载，例如 `/tasks/new` 和 `/tasks/$taskId/edit`。
 * `/tasks` 负责列表、筛选和行级操作入口，不内嵌复杂创建/编辑表单。
 * 页面组件保持薄层：组合路由参数、query/mutation hook 和 feature 组件。
+* 路由认证、URL 参数和 Web/Desktop 平台边界遵守 [路由认证与平台边界](./routing-platform-guidelines.md)。
 
 ---
 
@@ -99,6 +100,7 @@ services/
 * 并行多实例通过 `TASKDAEMON_WEB_PORT`、Wails `-port`、`TASKDAEMON_API_ORIGIN` 或 `VITE_TASKDAEMON_API_ORIGIN` 显式覆盖。
 * 桌面开发使用 `pnpm dev:desktop` 进入 Wails dev 模式，前端仍由 Vite 提供 HMR。
 * 桌面前端的 `/api` 请求走 Vite proxy 或 Go API server 普通网络路径，不依赖 `wails.localhost` AssetServer 转发 POST body。
+* Desktop 专属能力通过边界 hook/service 注入，业务页面不直接依赖 Wails 全局对象；详见 [路由认证与平台边界](./routing-platform-guidelines.md)。
 
 ---
 

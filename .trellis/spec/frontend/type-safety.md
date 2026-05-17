@@ -28,7 +28,7 @@
 * cron 校验需要表达硬错误和软警告：硬错误阻止提交，软警告需要显式确认后允许提交。
 * 表单 schema、默认值和 payload mapper 的组织规则见 [表单校验与测试分层](./form-testing-guidelines.md)。
 * API 响应如果来自可信生成 client，可依赖生成类型；手写 client 阶段对关键边界做最小运行时校验。
-* 从 URL search params 读取的值必须校验并提供默认值。
+* 从 URL search params 读取的值必须校验并提供默认值；路由层边界见 [路由认证与平台边界](./routing-platform-guidelines.md)。
 
 ---
 

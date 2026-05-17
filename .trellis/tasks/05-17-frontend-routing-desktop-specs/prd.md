@@ -15,11 +15,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `.trellis/spec/frontend` 包含路由与认证守卫长期规则。
-* [ ] `.trellis/spec/frontend` 包含 Web/Desktop 共用边界规则。
-* [ ] 明确 Desktop 专属能力的封装边界和 Web fallback 原则。
-* [ ] 明确 URL 参数进入组件前的类型校验原则。
-* [ ] 更新 `index.md` 的规范索引或开发前检查项。
+* [x] `.trellis/spec/frontend` 包含路由与认证守卫长期规则。
+* [x] `.trellis/spec/frontend` 包含 Web/Desktop 共用边界规则。
+* [x] 明确 Desktop 专属能力的封装边界和 Web fallback 原则。
+* [x] 明确 URL 参数进入组件前的类型校验原则。
+* [x] 更新 `index.md` 的规范索引或开发前检查项。
 
 ## Definition of Done
 
