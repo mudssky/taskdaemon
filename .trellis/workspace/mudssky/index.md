@@ -8,8 +8,8 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 11
-- **Last Active**: 2026-05-17
+- **Total Sessions**: 12
+- **Last Active**: 2026-05-18
 <!-- @@@/auto:current-status -->
 
 ---
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~388 | Active |
+| `journal-1.md` | ~423 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 12 | 2026-05-18 | Go 后端配置拆分与拆分队列 | `1f09d47`, `0144776`, `19eefb4` | `master` |
 | 11 | 2026-05-17 | 归档前端规范、shadcn 迁移和图标任务 | `1f2ac5a`, `1ef32eb`, `09532ee`, `9802bf7` | `master` |
 | 10 | 2026-05-16 | 完成跨平台调度守护进程第一轮 | `03c50d2`, `640b222` | `master` |
 | 9 | 2026-05-15 | 基础 Web Desktop 管理 UI | `9ae2585`, `2a291e1`, `48f1338`, `1faca99` | `master` |

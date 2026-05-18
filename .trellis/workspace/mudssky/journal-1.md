@@ -386,3 +386,38 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 12: Go 后端配置拆分与拆分队列
+
+**Date**: 2026-05-18
+**Task**: Go 后端配置拆分与拆分队列
+**Branch**: `master`
+
+### Summary
+
+补充后端长期规范，创建 Go 大文件拆分任务队列，并完成 internal/config 配置加载文件的同 package 纯拆分。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `1f09d47` | (see git log) |
+| `0144776` | (see git log) |
+| `19eefb4` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
