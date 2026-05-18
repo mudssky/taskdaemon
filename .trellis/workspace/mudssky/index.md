@@ -8,7 +8,7 @@
 
 <!-- @@@auto:current-status -->
 - **Active File**: `journal-1.md`
-- **Total Sessions**: 15
+- **Total Sessions**: 16
 - **Last Active**: 2026-05-18
 <!-- @@@/auto:current-status -->
 
@@ -19,7 +19,7 @@
 <!-- @@@auto:active-documents -->
 | File | Lines | Status |
 |------|-------|--------|
-| `journal-1.md` | ~522 | Active |
+| `journal-1.md` | ~556 | Active |
 <!-- @@@/auto:active-documents -->
 
 ---
@@ -29,6 +29,7 @@
 <!-- @@@auto:session-history -->
 | # | Date | Title | Commits | Branch |
 |---|------|-------|---------|--------|
+| 16 | 2026-05-18 | CLI command 文件拆分 | `f0b9812`, `46d43b5` | `master` |
 | 15 | 2026-05-18 | Go 后端 HTTP middleware 文件拆分 | `b05baf9` | `master` |
 | 14 | 2026-05-18 | Go 后端 logging 文件拆分 | `60dbf57` | `master` |
 | 13 | 2026-05-18 | Go 后端 scheduler 文件拆分 | `4d901c1` | `master` |

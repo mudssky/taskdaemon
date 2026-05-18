@@ -520,3 +520,37 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 16: CLI command 文件拆分
+
+**Date**: 2026-05-18
+**Task**: CLI command 文件拆分
+**Branch**: `master`
+
+### Summary
+
+拆分 Go CLI command.go：根命令保留装配主线，config/task/output/session 分离到同 package 文件，并补充 Cobra flag 拆分时需延迟读取绑定变量的规范。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `f0b9812` | (see git log) |
+| `46d43b5` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
