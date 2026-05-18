@@ -118,6 +118,7 @@ CLI 调用受保护 daemon API 时，session token 来源：
 * token 仅用于构造 `taskdaemon_session` Cookie 调用本机 daemon。
 * 缺失 token 时返回可操作错误，不静默降级为未认证请求。
 * token 不写入日志、错误响应、`config show` 或测试快照。
+* 拆分 Cobra 子命令构造函数时，`--session-token`、`--config` 这类 `StringVar` 绑定变量必须在 `RunE` 执行时读取；跨文件传递时使用指针或 getter，不能传解析前的字符串副本，避免 flag 值永远为空并破坏 flag 优先于 env 的契约。
 
 ---
 
