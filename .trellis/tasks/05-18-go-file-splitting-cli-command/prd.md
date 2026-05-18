@@ -18,11 +18,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `internal/cli/command.go` 收敛为根命令装配入口。
-* [ ] config/task/session/output 职责可分别定位。
-* [ ] `go test ./internal/cli` 通过。
-* [ ] `pnpm test:go` 通过。
-* [ ] 提交说明标明这是纯拆分。
+* [x] `internal/cli/command.go` 收敛为根命令装配入口。
+* [x] config/task/session/output 职责可分别定位。
+* [x] `go test ./internal/cli` 通过。
+* [x] `pnpm test:go` 通过。
+* [x] 提交说明标明这是纯拆分。
 
 ## Out of Scope
 
@@ -34,3 +34,5 @@
 
 * 来源规范：`.trellis/spec/backend/file-organization.md`。
 * 相关规范：`.trellis/spec/backend/configuration-runtime-guidelines.md`、`.trellis/spec/backend/api-contracts.md`、`.trellis/spec/backend/quality-guidelines.md`。
+* 实现按同 package 纯拆分为 `config_commands.go`、`task_commands.go`、`output.go`、`session.go`，未创建子 package。
+* 已额外验证 `pnpm vet:go` 与 `git diff --check`。

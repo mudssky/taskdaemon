@@ -3,7 +3,7 @@
   "name": "go-file-splitting-cli-command",
   "title": "Go 后端 CLI command 大文件拆分",
   "description": "",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
