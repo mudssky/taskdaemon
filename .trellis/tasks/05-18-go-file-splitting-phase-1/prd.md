@@ -14,11 +14,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `internal/config/config.go` 不再承载全部配置职责。
-* [ ] 新文件名能表达职责，并保持同 package 内聚。
-* [ ] 配置相关测试通过。
-* [ ] `pnpm test:go` 通过。
-* [ ] 提交说明明确这是纯拆分。
+* [x] `internal/config/config.go` 不再承载全部配置职责。
+* [x] 新文件名能表达职责，并保持同 package 内聚。
+* [x] 配置相关测试通过。
+* [x] `pnpm test:go` 通过。
+* [x] 提交说明明确这是纯拆分。
 
 ## Definition of Done
 
@@ -38,6 +38,8 @@
 * 来源任务：`.trellis/tasks/archive/2026-05/05-16-code-spec-go-file-splitting/prd.md`。
 * 规范：`.trellis/spec/backend/file-organization.md`。
 * 第一批选择 `internal/config/config.go`，因为它是纯配置层，已有 `config_test.go` 覆盖默认路径、加载顺序、local 覆盖、env 映射和显式配置路径。
+* 已拆分为 `types.go`、`defaults.go`、`paths.go`、`load.go`、`env.go`。
+* 已运行 `go test ./internal/config` 和 `pnpm test:go`，均通过。
 
 ## Follow-up Splitting Tasks
 
