@@ -421,3 +421,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 13: Go 后端 scheduler 文件拆分
+
+**Date**: 2026-05-18
+**Task**: Go 后端 scheduler 文件拆分
+**Branch**: `master`
+
+### Summary
+
+按同 package 纯拆分方案拆分 internal/scheduler/service.go，将 cron 校验、任务生命周期、运行生命周期、gocron 注册和 runner JSON 编解码分离到职责文件，并完成 Go 测试、vet 与 diff 检查。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `4d901c1` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
