@@ -454,3 +454,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 14: Go 后端 logging 文件拆分
+
+**Date**: 2026-05-18
+**Task**: Go 后端 logging 文件拆分
+**Branch**: `master`
+
+### Summary
+
+按同 package 纯拆分方案拆分 internal/logging/logger.go，将文件 handler、fanout handler、pretty handler 和 HTTP 日志格式化拆入职责文件，并完成 logging 测试、Go 测试、vet 与 diff 检查。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `60dbf57` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
