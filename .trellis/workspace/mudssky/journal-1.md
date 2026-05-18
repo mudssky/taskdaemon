@@ -487,3 +487,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 15: Go 后端 HTTP middleware 文件拆分
+
+**Date**: 2026-05-18
+**Task**: Go 后端 HTTP middleware 文件拆分
+**Branch**: `master`
+
+### Summary
+
+按同 package 纯拆分方案拆分 internal/httpapi/middleware.go，将 trace、请求日志、body capture、redaction、session auth 和 recovery 拆入职责文件，并完成 httpapi 测试、Go 测试、vet 与 diff 检查。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `b05baf9` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
