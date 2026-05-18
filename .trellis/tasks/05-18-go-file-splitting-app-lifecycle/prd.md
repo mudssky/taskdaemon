@@ -19,11 +19,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `internal/app/app.go` 收敛为 App 类型和构造入口。
-* [ ] serve/reload/daemon client/migration/address 职责可分别定位。
-* [ ] `go test ./internal/app` 通过。
-* [ ] `pnpm test:go` 通过。
-* [ ] 提交说明标明这是纯拆分。
+* [x] `internal/app/app.go` 收敛为 App 类型和构造入口。
+* [x] serve/reload/daemon client/migration/address 职责可分别定位。
+* [x] `go test ./internal/app` 通过。
+* [x] `pnpm test:go` 通过。
+* [x] 提交说明标明这是纯拆分。
 
 ## Out of Scope
 
@@ -35,3 +35,5 @@
 
 * 来源规范：`.trellis/spec/backend/file-organization.md`。
 * 相关规范：`.trellis/spec/backend/configuration-runtime-guidelines.md`、`.trellis/spec/backend/api-contracts.md`、`.trellis/spec/backend/database-guidelines.md`。
+* 实现按同 package 纯拆分为 `serve.go`、`reload.go`、`daemon_client.go`、`migration.go`、`address.go`，未创建子 package。
+* 已额外验证 `pnpm vet:go` 与 `git diff --check`。
