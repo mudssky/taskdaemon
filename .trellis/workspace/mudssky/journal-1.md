@@ -554,3 +554,36 @@
 ### Next Steps
 
 - None - task complete
+
+
+## Session 17: App lifecycle 文件拆分
+
+**Date**: 2026-05-18
+**Task**: App lifecycle 文件拆分
+**Branch**: `master`
+
+### Summary
+
+拆分 Go app.go：App 类型和构造保留在入口文件，HTTP server 生命周期、runtime reload、daemon API client、migration 与地址工具分离到同 package 文件。
+
+### Main Changes
+
+(Add details)
+
+### Git Commits
+
+| Hash | Message |
+|------|---------|
+| `8a6727a` | (see git log) |
+
+### Testing
+
+- [OK] (Add test results)
+
+### Status
+
+[OK] **Completed**
+
+### Next Steps
+
+- None - task complete
