@@ -18,11 +18,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `internal/logging/logger.go` 不再承载所有 handler 和格式化逻辑。
-* [ ] 新文件职责清晰，私有 helper 放在最接近调用者的位置。
-* [ ] `go test ./internal/logging` 通过。
-* [ ] `pnpm test:go` 通过。
-* [ ] 提交说明标明这是纯拆分。
+* [x] `internal/logging/logger.go` 不再承载所有 handler 和格式化逻辑。
+* [x] 新文件职责清晰，私有 helper 放在最接近调用者的位置。
+* [x] `go test ./internal/logging` 通过。
+* [x] `pnpm test:go` 通过。
+* [x] 提交说明标明这是纯拆分。
 
 ## Out of Scope
 
@@ -34,3 +34,5 @@
 
 * 来源规范：`.trellis/spec/backend/file-organization.md`。
 * 相关规范：`.trellis/spec/backend/logging-guidelines.md`、`.trellis/spec/backend/configuration-runtime-guidelines.md`。
+* 实际拆分保持 `logging` package 不变，未创建子 package。
+* 已额外验证：`pnpm vet:go`、`git diff --check`。

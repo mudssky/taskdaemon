@@ -3,7 +3,7 @@
   "name": "go-file-splitting-logging",
   "title": "Go 后端 logging 大文件拆分",
   "description": "",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
