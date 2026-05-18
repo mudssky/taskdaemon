@@ -3,7 +3,7 @@
   "name": "go-file-splitting-scheduler",
   "title": "Go 后端 scheduler 大文件拆分",
   "description": "",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

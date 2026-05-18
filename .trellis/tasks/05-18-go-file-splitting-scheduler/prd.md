@@ -19,11 +19,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `internal/scheduler/service.go` 明显收敛为入口和主结构。
-* [ ] 新文件按职责命名，未引入循环依赖。
-* [ ] `go test ./internal/scheduler` 通过。
-* [ ] `pnpm test:go` 通过。
-* [ ] 提交说明标明这是纯拆分。
+* [x] `internal/scheduler/service.go` 明显收敛为入口和主结构。
+* [x] 新文件按职责命名，未引入循环依赖。
+* [x] `go test ./internal/scheduler` 通过。
+* [x] `pnpm test:go` 通过。
+* [x] 提交说明标明这是纯拆分。
 
 ## Out of Scope
 
@@ -35,3 +35,5 @@
 
 * 来源规范：`.trellis/spec/backend/file-organization.md`。
 * 相关规范：`.trellis/spec/backend/scheduler-runner-guidelines.md`、`.trellis/spec/backend/quality-guidelines.md`。
+* 实际拆分保持 `scheduler` package 不变，未创建子 package。
+* 已额外验证：`pnpm vet:go`、`git diff --check`。
