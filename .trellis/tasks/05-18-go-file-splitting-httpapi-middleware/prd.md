@@ -20,11 +20,11 @@
 
 ## Acceptance Criteria
 
-* [ ] `internal/httpapi/middleware.go` 明显收敛。
-* [ ] body capture、redaction、auth、recovery 逻辑可分别定位。
-* [ ] `go test ./internal/httpapi` 通过。
-* [ ] `pnpm test:go` 通过。
-* [ ] 提交说明标明这是纯拆分。
+* [x] `internal/httpapi/middleware.go` 明显收敛。
+* [x] body capture、redaction、auth、recovery 逻辑可分别定位。
+* [x] `go test ./internal/httpapi` 通过。
+* [x] `pnpm test:go` 通过。
+* [x] 提交说明标明这是纯拆分。
 
 ## Out of Scope
 
@@ -36,3 +36,6 @@
 
 * 来源规范：`.trellis/spec/backend/file-organization.md`。
 * 相关规范：`.trellis/spec/backend/api-contracts.md`、`.trellis/spec/backend/logging-guidelines.md`、`.trellis/spec/backend/error-handling.md`。
+* 实际拆分保持 `httpapi` package 不变，未创建子 package。
+* `middleware.go` 保留全局 middleware 注册入口；注册顺序仍为 trace、response options、request logger、recovery。
+* 已额外验证：`pnpm vet:go`、`git diff --check`。

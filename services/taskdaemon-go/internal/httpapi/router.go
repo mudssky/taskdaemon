@@ -71,12 +71,7 @@ func NewRouter(opts Options) http.Handler {
 	gin.SetMode(gin.ReleaseMode)
 	router := gin.New()
 
-	logger := loggerOrDefault(opts.Logger)
-	runtimeConfig := runtimeConfigOption(opts)
-	router.Use(traceIDMiddleware())
-	router.Use(responseOptionsMiddleware(runtimeConfig))
-	router.Use(requestLoggerMiddleware(logger, runtimeConfig))
-	router.Use(recoveryMiddleware())
+	useCoreMiddleware(router, opts)
 
 	router.GET("/api/health", func(ctx *gin.Context) {
 		writeAPISuccess(ctx, http.StatusOK, gin.H{"status": "ok"})
