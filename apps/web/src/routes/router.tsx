@@ -6,6 +6,7 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 import { AppShell } from "../components/layout/AppShell";
+import { AudioSettingsPage } from "../features/audio/AudioSettingsPage";
 import { AdminSetupPanel } from "../features/auth/AdminSetupPanel";
 import { useAuthStatusQuery } from "../features/auth/auth.queries";
 import { LoginPanel } from "../features/auth/LoginPanel";
@@ -97,12 +98,19 @@ const runsRoute = createRoute({
   component: RunHistoryPage,
 });
 
+const settingsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/settings",
+  component: AudioSettingsPage,
+});
+
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   tasksRoute,
   taskCreateRoute,
   taskEditRoute,
   runsRoute,
+  settingsRoute,
 ]);
 
 export function createAppRouter(history?: RouterHistory) {

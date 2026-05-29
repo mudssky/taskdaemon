@@ -139,4 +139,91 @@ describe("apiClient", () => {
       expect.objectContaining({ method: "POST", credentials: "include" }),
     );
   });
+
+  it("calls audio history, replay and config endpoints", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input).endsWith("/config/audio")) {
+        return new Response(
+          JSON.stringify({
+            code: 0,
+            msg: "ok",
+            data: {
+              autoplay: { enabled: true, target: "backend" },
+              playback: { queueLimit: 20 },
+              inbound: {
+                tokenConfigured: true,
+                maxBytes: 209715200,
+                url: {
+                  allowedSchemes: ["https"],
+                  allowPrivateNetworks: false,
+                  allowedHosts: [],
+                  downloadTimeoutSeconds: 60,
+                  maxRedirects: 3,
+                },
+              },
+              history: { limit: 50 },
+              ffmpeg: {
+                pathConfigured: false,
+                probePathConfigured: false,
+                transcodeTimeoutSeconds: 120,
+              },
+              configuration: {
+                runtimeEditable: ["autoplay"],
+                restartRequired: ["ffmpeg.path"],
+              },
+            },
+          }),
+          { status: 200 },
+        );
+      }
+      if (String(input).endsWith("/replay")) {
+        return new Response(
+          JSON.stringify({
+            code: 0,
+            msg: "ok",
+            data: { id: 9, sourceKind: "upload", status: "queued" },
+          }),
+          { status: 200 },
+        );
+      }
+      return new Response(
+        JSON.stringify({
+          code: 0,
+          msg: "ok",
+          data: {
+            records: [{ id: 9, sourceKind: "upload", status: "played" }],
+          },
+        }),
+        { status: 200 },
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiClient.listAudioHistory(25)).resolves.toMatchObject({
+      records: [{ id: 9, status: "played" }],
+    });
+    await expect(apiClient.replayAudioRecord(9)).resolves.toMatchObject({
+      id: 9,
+      status: "queued",
+    });
+    await expect(apiClient.audioConfig()).resolves.toMatchObject({
+      autoplay: { enabled: true, target: "backend" },
+      inbound: { tokenConfigured: true },
+    });
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/api/audio/history?limit=25",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/audio/history/9/replay",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/config/audio",
+      expect.objectContaining({ credentials: "include" }),
+    );
+  });
 });

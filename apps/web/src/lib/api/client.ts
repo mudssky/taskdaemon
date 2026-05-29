@@ -1,6 +1,8 @@
 import type {
   ApiEnvelope,
   ApiErrorBody,
+  AudioConfig,
+  AudioRecord,
   AuthLoginResponse,
   AuthPrincipal,
   AuthStatus,
@@ -135,5 +137,23 @@ export const apiClient = {
 
   async listTaskRuns(taskId: number) {
     return requestJSON<{ runs: TaskRun[] }>(`/api/tasks/${taskId}/runs`);
+  },
+
+  async listAudioHistory(limit?: number) {
+    const query =
+      limit === undefined ? "" : `?limit=${encodeURIComponent(limit)}`;
+    return requestJSON<{ records: AudioRecord[] }>(
+      `/api/audio/history${query}`,
+    );
+  },
+
+  async replayAudioRecord(recordId: number) {
+    return requestJSON<AudioRecord>(`/api/audio/history/${recordId}/replay`, {
+      method: "POST",
+    });
+  },
+
+  async audioConfig() {
+    return requestJSON<AudioConfig>("/api/config/audio");
   },
 };

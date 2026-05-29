@@ -55,10 +55,10 @@ export function AppShell({
             <Database aria-hidden="true" size={18} />
             执行历史
           </Link>
-          <a href="#settings" aria-disabled="true">
+          <Link to="/settings" activeProps={{ "aria-current": "page" }}>
             <Settings aria-hidden="true" size={18} />
             设置
-          </a>
+          </Link>
         </nav>
       </aside>
       <section className="content" aria-labelledby="page-title">
@@ -101,6 +101,9 @@ function pageTitleForPath(pathname: string): string {
   }
   if (pathname.startsWith("/runs")) {
     return "执行历史";
+  }
+  if (pathname.startsWith("/settings")) {
+    return "设置";
   }
   return "运行状态";
 }

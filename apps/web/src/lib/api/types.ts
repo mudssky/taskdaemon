@@ -82,6 +82,69 @@ export type TaskRun = {
   stderr: string;
 };
 
+export const audioSourceKinds = ["url", "upload"] as const;
+export type AudioSourceKind = (typeof audioSourceKinds)[number];
+
+export const audioRecordStatuses = [
+  "received",
+  "queued",
+  "playing",
+  "played",
+  "failed",
+  "skipped",
+  "queued_skipped",
+] as const;
+export type AudioRecordStatus = (typeof audioRecordStatuses)[number];
+
+export type AudioRecord = {
+  id: number;
+  sourceKind: AudioSourceKind;
+  source: string;
+  originalFilename: string;
+  storedPath: string;
+  mimeType: string;
+  sizeBytes: number;
+  sha256: string;
+  status: AudioRecordStatus;
+  errorSummary: string;
+  playedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type AudioConfig = {
+  autoplay: {
+    enabled: boolean;
+    target: "backend" | "frontend" | string;
+  };
+  playback: {
+    queueLimit: number;
+  };
+  inbound: {
+    tokenConfigured: boolean;
+    maxBytes: number;
+    url: {
+      allowedSchemes: string[];
+      allowPrivateNetworks: boolean;
+      allowedHosts: string[];
+      downloadTimeoutSeconds: number;
+      maxRedirects: number;
+    };
+  };
+  history: {
+    limit: number;
+  };
+  ffmpeg: {
+    pathConfigured: boolean;
+    probePathConfigured: boolean;
+    transcodeTimeoutSeconds: number;
+  };
+  configuration: {
+    runtimeEditable: string[];
+    restartRequired: string[];
+  };
+};
+
 export type AuthPrincipal = {
   adminId: number;
   username: string;
