@@ -56,6 +56,27 @@ logging:
 observability:
   traceId:
     includeInResponse: false
+audio:
+  autoplay:
+    enabled: true
+  playback:
+    queueLimit: 3
+  inbound:
+    tokenHash: file-token-hash
+    maxBytes: 1024
+    url:
+      allowedSchemes:
+        - https
+        - http
+      allowPrivateNetworks: true
+      allowedHosts:
+        - media.internal.local
+      downloadTimeoutSeconds: 30
+      maxRedirects: 1
+  history:
+    limit: 9
+  ffmpeg:
+    transcodeTimeoutSeconds: 45
 `)
 	if err := os.WriteFile(configFile, content, 0o600); err != nil {
 		t.Fatalf("write config: %v", err)
@@ -65,6 +86,9 @@ observability:
 	t.Setenv("TASKDAEMON_DATABASE_DSN", "postgres://env")
 	t.Setenv("TASKDAEMON_LOGGING_FILE_MAX_SIZE_MB", "20")
 	t.Setenv("TASKDAEMON_OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE", "true")
+	t.Setenv("TASKDAEMON_AUDIO_PLAYBACK_QUEUE_LIMIT", "5")
+	t.Setenv("TASKDAEMON_AUDIO_INBOUND_MAX_BYTES", "2048")
+	t.Setenv("TASKDAEMON_AUDIO_INBOUND_URL_ALLOWED_SCHEMES", "https,http")
 
 	cfg, err := Load(LoadOptions{
 		ConfigPath: configFile,
@@ -116,6 +140,30 @@ observability:
 	if !cfg.Observability.TraceID.IncludeInResponse {
 		t.Fatal("trace id response flag should be overridden by env alias")
 	}
+	if !cfg.Audio.Autoplay.Enabled {
+		t.Fatal("audio autoplay should be enabled from config file")
+	}
+	if cfg.Audio.Playback.QueueLimit != 5 {
+		t.Fatalf("audio queue limit = %d, want env override", cfg.Audio.Playback.QueueLimit)
+	}
+	if cfg.Audio.Inbound.TokenHash != "file-token-hash" {
+		t.Fatalf("audio token hash = %s, want file config", cfg.Audio.Inbound.TokenHash)
+	}
+	if cfg.Audio.Inbound.MaxBytes != 2048 {
+		t.Fatalf("audio max bytes = %d, want env override", cfg.Audio.Inbound.MaxBytes)
+	}
+	if len(cfg.Audio.Inbound.URL.AllowedSchemes) != 2 || cfg.Audio.Inbound.URL.AllowedSchemes[1] != "http" {
+		t.Fatalf("audio allowed schemes = %#v, want env list", cfg.Audio.Inbound.URL.AllowedSchemes)
+	}
+	if !cfg.Audio.Inbound.URL.AllowPrivateNetworks {
+		t.Fatal("audio private network flag should be enabled from config file")
+	}
+	if cfg.Audio.Inbound.URL.AllowedHosts[0] != "media.internal.local" {
+		t.Fatalf("audio allowed hosts = %#v, want file config", cfg.Audio.Inbound.URL.AllowedHosts)
+	}
+	if cfg.Audio.History.Limit != 9 {
+		t.Fatalf("audio history limit = %d, want file config", cfg.Audio.History.Limit)
+	}
 }
 
 // TestLoadDefaultsWhenConfigFileIsMissing 验证未显式指定配置文件且默认文件不存在时使用默认值。
@@ -142,6 +190,15 @@ func TestLoadDefaultsWhenConfigFileIsMissing(t *testing.T) {
 	}
 	if cfg.Database.Driver != "sqlite" {
 		t.Fatalf("database driver = %s, want sqlite", cfg.Database.Driver)
+	}
+	if cfg.Audio.Inbound.MaxBytes != 209715200 {
+		t.Fatalf("audio max bytes = %d, want 200MB default", cfg.Audio.Inbound.MaxBytes)
+	}
+	if cfg.Audio.Playback.QueueLimit != 20 {
+		t.Fatalf("audio queue limit = %d, want default 20", cfg.Audio.Playback.QueueLimit)
+	}
+	if cfg.Audio.History.Limit != 50 {
+		t.Fatalf("audio history limit = %d, want default 50", cfg.Audio.History.Limit)
 	}
 }
 

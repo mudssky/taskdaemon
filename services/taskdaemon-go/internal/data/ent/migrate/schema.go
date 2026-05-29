@@ -24,6 +24,29 @@ var (
 		Columns:    AdminsColumns,
 		PrimaryKey: []*schema.Column{AdminsColumns[0]},
 	}
+	// AudioRecordsColumns holds the columns for the "audio_records" table.
+	AudioRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "source_kind", Type: field.TypeEnum, Enums: []string{"url", "upload"}, Default: "url"},
+		{Name: "source", Type: field.TypeString, Nullable: true},
+		{Name: "source_url", Type: field.TypeString, Nullable: true},
+		{Name: "original_filename", Type: field.TypeString, Nullable: true},
+		{Name: "stored_path", Type: field.TypeString},
+		{Name: "mime_type", Type: field.TypeString, Nullable: true},
+		{Name: "size_bytes", Type: field.TypeInt64},
+		{Name: "sha256", Type: field.TypeString},
+		{Name: "status", Type: field.TypeEnum, Enums: []string{"received", "queued", "playing", "played", "failed", "skipped", "queued_skipped"}, Default: "received"},
+		{Name: "error_summary", Type: field.TypeString, Nullable: true},
+		{Name: "played_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// AudioRecordsTable holds the schema information for the "audio_records" table.
+	AudioRecordsTable = &schema.Table{
+		Name:       "audio_records",
+		Columns:    AudioRecordsColumns,
+		PrimaryKey: []*schema.Column{AudioRecordsColumns[0]},
+	}
 	// RunsColumns holds the columns for the "runs" table.
 	RunsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -104,6 +127,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AdminsTable,
+		AudioRecordsTable,
 		RunsTable,
 		SessionsTable,
 		TasksTable,

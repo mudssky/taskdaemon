@@ -21,9 +21,12 @@ type ConfigReloadFunc func(context.Context) (config.ReloadResult, error)
 //
 // 返回值:
 //   - 无。
-func registerConfigRoutes(router *gin.Engine, authService AuthService, reload ConfigReloadFunc) {
+func registerConfigRoutes(router *gin.Engine, authService AuthService, reload ConfigReloadFunc, runtimeConfig *RuntimeConfig) {
 	group := router.Group("/api/config")
 	group.Use(requireSession(authService))
+	group.GET("/audio", func(ctx *gin.Context) {
+		writeAPIOK(ctx, audioConfigResponseFromConfig(runtimeConfig.Audio()))
+	})
 	group.POST("/reload", func(ctx *gin.Context) {
 		if reload == nil {
 			writeAPIError(ctx, http.StatusServiceUnavailable, "config_reload_unavailable", "Config reload is unavailable", nil)

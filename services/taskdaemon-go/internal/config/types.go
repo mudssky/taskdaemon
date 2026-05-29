@@ -6,6 +6,7 @@ type Config struct {
 	Database      DatabaseConfig
 	Logging       LoggingConfig
 	Observability ObservabilityConfig
+	Audio         AudioConfig
 }
 
 // ResolvedPaths 保存本次配置加载会使用的文件路径。
@@ -82,6 +83,54 @@ type ObservabilityConfig struct {
 // TraceIDConfig 控制 trace id 的响应暴露行为。
 type TraceIDConfig struct {
 	IncludeInResponse bool
+}
+
+// AudioConfig 保存外部音频播放请求的配置。
+type AudioConfig struct {
+	Autoplay AudioAutoplayConfig
+	Playback AudioPlaybackConfig
+	Inbound  AudioInboundConfig
+	History  AudioHistoryConfig
+	FFmpeg   AudioFFmpegConfig
+}
+
+// AudioAutoplayConfig 控制收到音频播放请求后的自动播放行为。
+type AudioAutoplayConfig struct {
+	Enabled bool
+	Target  string
+}
+
+// AudioPlaybackConfig 保存后端播放队列配置。
+type AudioPlaybackConfig struct {
+	QueueLimit int
+}
+
+// AudioInboundConfig 保存外部入站播放请求的认证和下载限制。
+type AudioInboundConfig struct {
+	TokenHash string
+	MaxBytes  int64
+	URL       AudioInboundURLConfig
+}
+
+// AudioInboundURLConfig 保存 URL 来源音频的下载安全策略。
+type AudioInboundURLConfig struct {
+	AllowedSchemes         []string
+	AllowPrivateNetworks   bool
+	AllowedHosts           []string
+	DownloadTimeoutSeconds int
+	MaxRedirects           int
+}
+
+// AudioHistoryConfig 保存最近音频记录保留策略。
+type AudioHistoryConfig struct {
+	Limit int
+}
+
+// AudioFFmpegConfig 保存 FFmpeg/ffprobe 定位与转码限制。
+type AudioFFmpegConfig struct {
+	Path                    string
+	ProbePath               string
+	TranscodeTimeoutSeconds int
 }
 
 // LoadOptions 控制配置加载来源和覆盖值。

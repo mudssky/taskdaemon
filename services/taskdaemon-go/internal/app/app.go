@@ -3,6 +3,7 @@ package app
 import (
 	"log/slog"
 
+	"taskdaemon/internal/audio"
 	"taskdaemon/internal/config"
 	"taskdaemon/internal/httpapi"
 )
@@ -14,6 +15,8 @@ type App struct {
 	loadConfig    func(config.LoadOptions) (config.Config, error)
 	loadOptions   config.LoadOptions
 	runtimeConfig *httpapi.RuntimeConfig
+	audioService  *audio.Service
+	audioQueue    *audio.Queue
 }
 
 // New 创建应用装配实例。

@@ -90,6 +90,34 @@ func sanitizedConfig(cfg config.Config) map[string]any {
 				"includeInResponse": cfg.Observability.TraceID.IncludeInResponse,
 			},
 		},
+		"audio": map[string]any{
+			"autoplay": map[string]any{
+				"enabled": cfg.Audio.Autoplay.Enabled,
+				"target":  cfg.Audio.Autoplay.Target,
+			},
+			"playback": map[string]any{
+				"queueLimit": cfg.Audio.Playback.QueueLimit,
+			},
+			"inbound": map[string]any{
+				"tokenHash": redactConfigValue(cfg.Audio.Inbound.TokenHash),
+				"maxBytes":  cfg.Audio.Inbound.MaxBytes,
+				"url": map[string]any{
+					"allowedSchemes":         cfg.Audio.Inbound.URL.AllowedSchemes,
+					"allowPrivateNetworks":   cfg.Audio.Inbound.URL.AllowPrivateNetworks,
+					"allowedHosts":           cfg.Audio.Inbound.URL.AllowedHosts,
+					"downloadTimeoutSeconds": cfg.Audio.Inbound.URL.DownloadTimeoutSeconds,
+					"maxRedirects":           cfg.Audio.Inbound.URL.MaxRedirects,
+				},
+			},
+			"history": map[string]any{
+				"limit": cfg.Audio.History.Limit,
+			},
+			"ffmpeg": map[string]any{
+				"path":                    cfg.Audio.FFmpeg.Path,
+				"probePath":               cfg.Audio.FFmpeg.ProbePath,
+				"transcodeTimeoutSeconds": cfg.Audio.FFmpeg.TranscodeTimeoutSeconds,
+			},
+		},
 	}
 }
 
@@ -105,7 +133,7 @@ func redactConfigValue(value string) string {
 		return value
 	}
 	lower := strings.ToLower(value)
-	if strings.Contains(lower, "password") || strings.Contains(lower, "://") && strings.Contains(value, "@") {
+	if strings.Contains(lower, "password") || strings.Contains(lower, "token") || strings.Contains(lower, "hash") || strings.Contains(lower, "://") && strings.Contains(value, "@") {
 		return "[REDACTED]"
 	}
 	return value

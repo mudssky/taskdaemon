@@ -12,6 +12,7 @@ import (
 	"taskdaemon/internal/data/ent/migrate"
 
 	"taskdaemon/internal/data/ent/admin"
+	"taskdaemon/internal/data/ent/audiorecord"
 	"taskdaemon/internal/data/ent/run"
 	"taskdaemon/internal/data/ent/session"
 	"taskdaemon/internal/data/ent/task"
@@ -29,6 +30,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Admin is the client for interacting with the Admin builders.
 	Admin *AdminClient
+	// AudioRecord is the client for interacting with the AudioRecord builders.
+	AudioRecord *AudioRecordClient
 	// Run is the client for interacting with the Run builders.
 	Run *RunClient
 	// Session is the client for interacting with the Session builders.
@@ -47,6 +50,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Admin = NewAdminClient(c.config)
+	c.AudioRecord = NewAudioRecordClient(c.config)
 	c.Run = NewRunClient(c.config)
 	c.Session = NewSessionClient(c.config)
 	c.Task = NewTaskClient(c.config)
@@ -140,12 +144,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Admin:   NewAdminClient(cfg),
-		Run:     NewRunClient(cfg),
-		Session: NewSessionClient(cfg),
-		Task:    NewTaskClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Admin:       NewAdminClient(cfg),
+		AudioRecord: NewAudioRecordClient(cfg),
+		Run:         NewRunClient(cfg),
+		Session:     NewSessionClient(cfg),
+		Task:        NewTaskClient(cfg),
 	}, nil
 }
 
@@ -163,12 +168,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:     ctx,
-		config:  cfg,
-		Admin:   NewAdminClient(cfg),
-		Run:     NewRunClient(cfg),
-		Session: NewSessionClient(cfg),
-		Task:    NewTaskClient(cfg),
+		ctx:         ctx,
+		config:      cfg,
+		Admin:       NewAdminClient(cfg),
+		AudioRecord: NewAudioRecordClient(cfg),
+		Run:         NewRunClient(cfg),
+		Session:     NewSessionClient(cfg),
+		Task:        NewTaskClient(cfg),
 	}, nil
 }
 
@@ -198,6 +204,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Admin.Use(hooks...)
+	c.AudioRecord.Use(hooks...)
 	c.Run.Use(hooks...)
 	c.Session.Use(hooks...)
 	c.Task.Use(hooks...)
@@ -207,6 +214,7 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Admin.Intercept(interceptors...)
+	c.AudioRecord.Intercept(interceptors...)
 	c.Run.Intercept(interceptors...)
 	c.Session.Intercept(interceptors...)
 	c.Task.Intercept(interceptors...)
@@ -217,6 +225,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *AdminMutation:
 		return c.Admin.mutate(ctx, m)
+	case *AudioRecordMutation:
+		return c.AudioRecord.mutate(ctx, m)
 	case *RunMutation:
 		return c.Run.mutate(ctx, m)
 	case *SessionMutation:
@@ -374,6 +384,139 @@ func (c *AdminClient) mutate(ctx context.Context, m *AdminMutation) (Value, erro
 		return (&AdminDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Admin mutation op: %q", m.Op())
+	}
+}
+
+// AudioRecordClient is a client for the AudioRecord schema.
+type AudioRecordClient struct {
+	config
+}
+
+// NewAudioRecordClient returns a client for the AudioRecord from the given config.
+func NewAudioRecordClient(c config) *AudioRecordClient {
+	return &AudioRecordClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `audiorecord.Hooks(f(g(h())))`.
+func (c *AudioRecordClient) Use(hooks ...Hook) {
+	c.hooks.AudioRecord = append(c.hooks.AudioRecord, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `audiorecord.Intercept(f(g(h())))`.
+func (c *AudioRecordClient) Intercept(interceptors ...Interceptor) {
+	c.inters.AudioRecord = append(c.inters.AudioRecord, interceptors...)
+}
+
+// Create returns a builder for creating a AudioRecord entity.
+func (c *AudioRecordClient) Create() *AudioRecordCreate {
+	mutation := newAudioRecordMutation(c.config, OpCreate)
+	return &AudioRecordCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of AudioRecord entities.
+func (c *AudioRecordClient) CreateBulk(builders ...*AudioRecordCreate) *AudioRecordCreateBulk {
+	return &AudioRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *AudioRecordClient) MapCreateBulk(slice any, setFunc func(*AudioRecordCreate, int)) *AudioRecordCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &AudioRecordCreateBulk{err: fmt.Errorf("calling to AudioRecordClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*AudioRecordCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &AudioRecordCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for AudioRecord.
+func (c *AudioRecordClient) Update() *AudioRecordUpdate {
+	mutation := newAudioRecordMutation(c.config, OpUpdate)
+	return &AudioRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *AudioRecordClient) UpdateOne(_m *AudioRecord) *AudioRecordUpdateOne {
+	mutation := newAudioRecordMutation(c.config, OpUpdateOne, withAudioRecord(_m))
+	return &AudioRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *AudioRecordClient) UpdateOneID(id int) *AudioRecordUpdateOne {
+	mutation := newAudioRecordMutation(c.config, OpUpdateOne, withAudioRecordID(id))
+	return &AudioRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for AudioRecord.
+func (c *AudioRecordClient) Delete() *AudioRecordDelete {
+	mutation := newAudioRecordMutation(c.config, OpDelete)
+	return &AudioRecordDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *AudioRecordClient) DeleteOne(_m *AudioRecord) *AudioRecordDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *AudioRecordClient) DeleteOneID(id int) *AudioRecordDeleteOne {
+	builder := c.Delete().Where(audiorecord.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &AudioRecordDeleteOne{builder}
+}
+
+// Query returns a query builder for AudioRecord.
+func (c *AudioRecordClient) Query() *AudioRecordQuery {
+	return &AudioRecordQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeAudioRecord},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a AudioRecord entity by its id.
+func (c *AudioRecordClient) Get(ctx context.Context, id int) (*AudioRecord, error) {
+	return c.Query().Where(audiorecord.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *AudioRecordClient) GetX(ctx context.Context, id int) *AudioRecord {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *AudioRecordClient) Hooks() []Hook {
+	return c.hooks.AudioRecord
+}
+
+// Interceptors returns the client interceptors.
+func (c *AudioRecordClient) Interceptors() []Interceptor {
+	return c.inters.AudioRecord
+}
+
+func (c *AudioRecordClient) mutate(ctx context.Context, m *AudioRecordMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&AudioRecordCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&AudioRecordUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&AudioRecordUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&AudioRecordDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown AudioRecord mutation op: %q", m.Op())
 	}
 }
 
@@ -827,9 +970,9 @@ func (c *TaskClient) mutate(ctx context.Context, m *TaskMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Admin, Run, Session, Task []ent.Hook
+		Admin, AudioRecord, Run, Session, Task []ent.Hook
 	}
 	inters struct {
-		Admin, Run, Session, Task []ent.Interceptor
+		Admin, AudioRecord, Run, Session, Task []ent.Interceptor
 	}
 )

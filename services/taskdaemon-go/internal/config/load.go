@@ -90,6 +90,34 @@ func Load(opts LoadOptions) (Config, error) {
 				IncludeInResponse: k.Bool("observability.traceId.includeInResponse"),
 			},
 		},
+		Audio: AudioConfig{
+			Autoplay: AudioAutoplayConfig{
+				Enabled: k.Bool("audio.autoplay.enabled"),
+				Target:  k.String("audio.autoplay.target"),
+			},
+			Playback: AudioPlaybackConfig{
+				QueueLimit: k.Int("audio.playback.queueLimit"),
+			},
+			Inbound: AudioInboundConfig{
+				TokenHash: k.String("audio.inbound.tokenHash"),
+				MaxBytes:  int64Value(k.Get("audio.inbound.maxBytes")),
+				URL: AudioInboundURLConfig{
+					AllowedSchemes:         stringSliceValue(k.Get("audio.inbound.url.allowedSchemes")),
+					AllowPrivateNetworks:   k.Bool("audio.inbound.url.allowPrivateNetworks"),
+					AllowedHosts:           stringSliceValue(k.Get("audio.inbound.url.allowedHosts")),
+					DownloadTimeoutSeconds: k.Int("audio.inbound.url.downloadTimeoutSeconds"),
+					MaxRedirects:           k.Int("audio.inbound.url.maxRedirects"),
+				},
+			},
+			History: AudioHistoryConfig{
+				Limit: k.Int("audio.history.limit"),
+			},
+			FFmpeg: AudioFFmpegConfig{
+				Path:                    k.String("audio.ffmpeg.path"),
+				ProbePath:               k.String("audio.ffmpeg.probePath"),
+				TranscodeTimeoutSeconds: k.Int("audio.ffmpeg.transcodeTimeoutSeconds"),
+			},
+		},
 	}, nil
 }
 
@@ -195,4 +223,26 @@ func cleanStringSlice(values []string) []string {
 		}
 	}
 	return cleaned
+}
+
+// int64Value 将配置值转换为 int64。
+//
+// 参数:
+//   - value: koanf 读取到的配置值。
+//
+// 返回值:
+//   - int64: 转换后的整数，不支持的类型返回 0。
+func int64Value(value any) int64 {
+	switch typed := value.(type) {
+	case int:
+		return int64(typed)
+	case int64:
+		return typed
+	case int32:
+		return int64(typed)
+	case float64:
+		return int64(typed)
+	default:
+		return 0
+	}
 }

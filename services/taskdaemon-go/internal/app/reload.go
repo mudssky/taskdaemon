@@ -29,6 +29,12 @@ func (app *App) ReloadRuntimeConfig(ctx context.Context) (config.ReloadResult, e
 		return config.ReloadResult{}, err
 	}
 	result := app.runtimeConfig.Apply(cfg)
+	if app.audioService != nil {
+		app.audioService.UpdateConfig(cfg.Audio)
+	}
+	if app.audioQueue != nil {
+		app.audioQueue.UpdateConfig(cfg.Audio)
+	}
 	app.logger.Info("runtime config reloaded", "applied", result.Applied, "restart_required", result.RestartRequired)
 	return result, nil
 }

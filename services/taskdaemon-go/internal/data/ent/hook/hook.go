@@ -20,6 +20,18 @@ func (f AdminFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AdminMutation", m)
 }
 
+// The AudioRecordFunc type is an adapter to allow the use of ordinary
+// function as AudioRecord mutator.
+type AudioRecordFunc func(context.Context, *ent.AudioRecordMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AudioRecordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AudioRecordMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AudioRecordMutation", m)
+}
+
 // The RunFunc type is an adapter to allow the use of ordinary
 // function as Run mutator.
 type RunFunc func(context.Context, *ent.RunMutation) (ent.Value, error)

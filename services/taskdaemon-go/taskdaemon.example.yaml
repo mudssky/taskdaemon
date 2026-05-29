@@ -68,6 +68,39 @@ observability:
     # 响应头始终写入 X-Trace-Id；响应体默认也写入 traceId，方便排障复制。
     includeInResponse: true
 
+audio:
+  autoplay:
+    # 收到外部音频播放请求后是否自动播放。关闭时仍会保存历史记录。
+    enabled: false
+    # 当前版本只支持 backend；frontend 预留给后续前端播放。
+    target: backend
+  playback:
+    # 后端播放队列等待上限；0 表示无上限。
+    queueLimit: 20
+  inbound:
+    # 入站 Bearer Token 只保存 SHA-256 哈希，原文只在生成时显示一次。
+    tokenHash: ""
+    # 上传或下载的音频文件大小上限，默认 200MB。
+    maxBytes: 209715200
+    url:
+      # 默认只允许 HTTPS；内网 HTTP 场景需要显式加入 http。
+      allowedSchemes:
+        - https
+      # 默认禁止回环、链路本地和私有网段；内网音频源需要显式开启。
+      allowPrivateNetworks: false
+      # 留空表示不限制 Host；需要更细安全策略时填写域名或 IP。
+      allowedHosts: []
+      downloadTimeoutSeconds: 60
+      maxRedirects: 3
+  history:
+    # 最近音频记录保留条数；0 表示无上限。
+    limit: 50
+  ffmpeg:
+    # 留空时按内置二进制 -> PATH 解析；正式包优先内置。
+    path: ""
+    probePath: ""
+    transcodeTimeoutSeconds: 120
+
 # 环境变量覆盖示例：
 # TASKDAEMON_SERVER_HOST=127.0.0.1
 # TASKDAEMON_SERVER_PORT=39245
@@ -88,3 +121,17 @@ observability:
 # TASKDAEMON_LOGGING_HTTP_MAX_BODY_BYTES=4096
 # TASKDAEMON_LOGGING_HTTP_REDACT_FIELDS=password,token,cookie,authorization
 # TASKDAEMON_OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE=true
+# TASKDAEMON_AUDIO_AUTOPLAY_ENABLED=false
+# TASKDAEMON_AUDIO_AUTOPLAY_TARGET=backend
+# TASKDAEMON_AUDIO_PLAYBACK_QUEUE_LIMIT=20
+# TASKDAEMON_AUDIO_INBOUND_TOKEN_HASH=<sha256>
+# TASKDAEMON_AUDIO_INBOUND_MAX_BYTES=209715200
+# TASKDAEMON_AUDIO_INBOUND_URL_ALLOWED_SCHEMES=https,http
+# TASKDAEMON_AUDIO_INBOUND_URL_ALLOW_PRIVATE_NETWORKS=false
+# TASKDAEMON_AUDIO_INBOUND_URL_ALLOWED_HOSTS=media.internal.local
+# TASKDAEMON_AUDIO_INBOUND_URL_DOWNLOAD_TIMEOUT_SECONDS=60
+# TASKDAEMON_AUDIO_INBOUND_URL_MAX_REDIRECTS=3
+# TASKDAEMON_AUDIO_HISTORY_LIMIT=50
+# TASKDAEMON_AUDIO_FFMPEG_PATH=
+# TASKDAEMON_AUDIO_FFMPEG_PROBE_PATH=
+# TASKDAEMON_AUDIO_FFMPEG_TRANSCODE_TIMEOUT_SECONDS=120

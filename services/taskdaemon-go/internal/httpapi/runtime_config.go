@@ -11,6 +11,7 @@ type RuntimeConfig struct {
 	mu                     sync.RWMutex
 	loggingHTTP            config.LoggingHTTPConfig
 	includeTraceInResponse bool
+	audio                  config.AudioConfig
 }
 
 // NewRuntimeConfig 创建 HTTP API 运行时配置。
@@ -24,6 +25,7 @@ func NewRuntimeConfig(cfg config.Config) *RuntimeConfig {
 	return &RuntimeConfig{
 		loggingHTTP:            cfg.Logging.HTTP,
 		includeTraceInResponse: cfg.Observability.TraceID.IncludeInResponse,
+		audio:                  cfg.Audio,
 	}
 }
 
@@ -59,6 +61,22 @@ func (runtime *RuntimeConfig) IncludeTraceInResponse() bool {
 	return runtime.includeTraceInResponse
 }
 
+// Audio 返回当前音频运行时配置快照。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - config.AudioConfig: 当前音频配置。
+func (runtime *RuntimeConfig) Audio() config.AudioConfig {
+	if runtime == nil {
+		return config.Default().Audio
+	}
+	runtime.mu.RLock()
+	defer runtime.mu.RUnlock()
+	return runtime.audio
+}
+
 // Apply 更新可热重载的运行时配置。
 //
 // 参数:
@@ -73,9 +91,10 @@ func (runtime *RuntimeConfig) Apply(cfg config.Config) config.ReloadResult {
 	runtime.mu.Lock()
 	runtime.loggingHTTP = cfg.Logging.HTTP
 	runtime.includeTraceInResponse = cfg.Observability.TraceID.IncludeInResponse
+	runtime.audio = cfg.Audio
 	runtime.mu.Unlock()
 	return config.ReloadResult{
-		Applied:         []string{"logging.http", "observability.traceId"},
-		RestartRequired: []string{"server", "database"},
+		Applied:         []string{"logging.http", "observability.traceId", "audio.autoplay", "audio.playback", "audio.inbound", "audio.history"},
+		RestartRequired: []string{"server", "database", "audio.ffmpeg"},
 	}
 }

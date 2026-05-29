@@ -12,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"taskdaemon/internal/audio"
 	"taskdaemon/internal/auth"
 	"taskdaemon/internal/config"
 	"taskdaemon/internal/data/ent"
@@ -30,6 +31,7 @@ type Options struct {
 	EnableSwagger          bool
 	Auth                   AuthService
 	Tasks                  TaskService
+	Audio                  AudioService
 	Logger                 *slog.Logger
 	IncludeTraceInResponse *bool
 	HTTPLog                config.LoggingHTTPConfig
@@ -60,6 +62,14 @@ type TaskService interface {
 	IsTaskRunning(int) bool
 }
 
+// AudioService 定义 HTTP handler 依赖的音频播放请求能力。
+type AudioService interface {
+	SubmitURL(context.Context, string, audio.URLRequest) (*ent.AudioRecord, error)
+	SubmitUpload(context.Context, string, audio.UploadRequest) (*ent.AudioRecord, error)
+	ListHistory(context.Context, int) ([]*ent.AudioRecord, error)
+	Replay(context.Context, int) (*ent.AudioRecord, error)
+}
+
 // NewRouter 创建 taskdaemon HTTP API router。
 //
 // 参数:
@@ -79,7 +89,8 @@ func NewRouter(opts Options) http.Handler {
 
 	registerAuthRoutes(router, opts.Auth)
 	registerTaskRoutes(router, opts.Auth, opts.Tasks)
-	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig)
+	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig, runtimeConfigOption(opts))
+	registerAudioRoutes(router, opts.Auth, opts.Audio)
 
 	if opts.EnableSwagger {
 		router.GET("/swagger/index.html", func(ctx *gin.Context) {

@@ -9,6 +9,9 @@ import (
 // Admin is the predicate function for admin builders.
 type Admin func(*sql.Selector)
 
+// AudioRecord is the predicate function for audiorecord builders.
+type AudioRecord func(*sql.Selector)
+
 // Run is the predicate function for run builders.
 type Run func(*sql.Selector)
 

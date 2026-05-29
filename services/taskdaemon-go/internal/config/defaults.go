@@ -62,6 +62,31 @@ func Default() Config {
 				IncludeInResponse: true,
 			},
 		},
+		Audio: AudioConfig{
+			Autoplay: AudioAutoplayConfig{
+				Enabled: false,
+				Target:  "backend",
+			},
+			Playback: AudioPlaybackConfig{
+				QueueLimit: 20,
+			},
+			Inbound: AudioInboundConfig{
+				MaxBytes: 209715200,
+				URL: AudioInboundURLConfig{
+					AllowedSchemes:         []string{"https"},
+					AllowPrivateNetworks:   false,
+					AllowedHosts:           []string{},
+					DownloadTimeoutSeconds: 60,
+					MaxRedirects:           3,
+				},
+			},
+			History: AudioHistoryConfig{
+				Limit: 50,
+			},
+			FFmpeg: AudioFFmpegConfig{
+				TranscodeTimeoutSeconds: 120,
+			},
+		},
 	}
 }
 
@@ -75,25 +100,39 @@ func Default() Config {
 func defaultMap() map[string]any {
 	defaults := Default()
 	return map[string]any{
-		"server.host":                             defaults.Server.Host,
-		"server.port":                             defaults.Server.Port,
-		"server.swagger.enabled":                  defaults.Server.Swagger.Enabled,
-		"database.driver":                         defaults.Database.Driver,
-		"database.dsn":                            defaults.Database.DSN,
-		"logging.level":                           defaults.Logging.Level,
-		"logging.output":                          defaults.Logging.Output,
-		"logging.console.format":                  defaults.Logging.Console.Format,
-		"logging.file.path":                       defaults.Logging.File.Path,
-		"logging.file.format":                     defaults.Logging.File.Format,
-		"logging.file.maxSizeMB":                  defaults.Logging.File.MaxSizeMB,
-		"logging.file.maxBackups":                 defaults.Logging.File.MaxBackups,
-		"logging.file.maxAgeDays":                 defaults.Logging.File.MaxAgeDays,
-		"logging.file.compress":                   defaults.Logging.File.Compress,
-		"logging.http.includeRequestBody":         defaults.Logging.HTTP.IncludeRequestBody,
-		"logging.http.includeResponseBody":        defaults.Logging.HTTP.IncludeResponseBody,
-		"logging.http.maxBodyBytes":               defaults.Logging.HTTP.MaxBodyBytes,
-		"logging.http.redactFields":               defaults.Logging.HTTP.RedactFields,
-		"observability.traceId.includeInResponse": defaults.Observability.TraceID.IncludeInResponse,
+		"server.host":                              defaults.Server.Host,
+		"server.port":                              defaults.Server.Port,
+		"server.swagger.enabled":                   defaults.Server.Swagger.Enabled,
+		"database.driver":                          defaults.Database.Driver,
+		"database.dsn":                             defaults.Database.DSN,
+		"logging.level":                            defaults.Logging.Level,
+		"logging.output":                           defaults.Logging.Output,
+		"logging.console.format":                   defaults.Logging.Console.Format,
+		"logging.file.path":                        defaults.Logging.File.Path,
+		"logging.file.format":                      defaults.Logging.File.Format,
+		"logging.file.maxSizeMB":                   defaults.Logging.File.MaxSizeMB,
+		"logging.file.maxBackups":                  defaults.Logging.File.MaxBackups,
+		"logging.file.maxAgeDays":                  defaults.Logging.File.MaxAgeDays,
+		"logging.file.compress":                    defaults.Logging.File.Compress,
+		"logging.http.includeRequestBody":          defaults.Logging.HTTP.IncludeRequestBody,
+		"logging.http.includeResponseBody":         defaults.Logging.HTTP.IncludeResponseBody,
+		"logging.http.maxBodyBytes":                defaults.Logging.HTTP.MaxBodyBytes,
+		"logging.http.redactFields":                defaults.Logging.HTTP.RedactFields,
+		"observability.traceId.includeInResponse":  defaults.Observability.TraceID.IncludeInResponse,
+		"audio.autoplay.enabled":                   defaults.Audio.Autoplay.Enabled,
+		"audio.autoplay.target":                    defaults.Audio.Autoplay.Target,
+		"audio.playback.queueLimit":                defaults.Audio.Playback.QueueLimit,
+		"audio.inbound.tokenHash":                  defaults.Audio.Inbound.TokenHash,
+		"audio.inbound.maxBytes":                   defaults.Audio.Inbound.MaxBytes,
+		"audio.inbound.url.allowedSchemes":         defaults.Audio.Inbound.URL.AllowedSchemes,
+		"audio.inbound.url.allowPrivateNetworks":   defaults.Audio.Inbound.URL.AllowPrivateNetworks,
+		"audio.inbound.url.allowedHosts":           defaults.Audio.Inbound.URL.AllowedHosts,
+		"audio.inbound.url.downloadTimeoutSeconds": defaults.Audio.Inbound.URL.DownloadTimeoutSeconds,
+		"audio.inbound.url.maxRedirects":           defaults.Audio.Inbound.URL.MaxRedirects,
+		"audio.history.limit":                      defaults.Audio.History.Limit,
+		"audio.ffmpeg.path":                        defaults.Audio.FFmpeg.Path,
+		"audio.ffmpeg.probePath":                   defaults.Audio.FFmpeg.ProbePath,
+		"audio.ffmpeg.transcodeTimeoutSeconds":     defaults.Audio.FFmpeg.TranscodeTimeoutSeconds,
 	}
 }
 

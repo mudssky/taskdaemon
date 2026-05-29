@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"net/http"
 
+	"taskdaemon/internal/audio"
 	"taskdaemon/internal/auth"
 	"taskdaemon/internal/data"
 	"taskdaemon/internal/httpapi"
@@ -51,6 +52,10 @@ func (app *App) Serve(ctx context.Context) error {
 			app.logger.Warn("shutdown scheduler failed", "component", "scheduler", "error", err)
 		}
 	}()
+	audioQueue := audio.NewQueue(store, app.cfg.Audio, audio.QueueOptions{Logger: app.logger})
+	app.audioQueue = audioQueue
+	defer audioQueue.Shutdown()
+	app.audioService = audio.New(store, app.cfg.Audio, audio.Options{Queue: audioQueue})
 
 	server := &http.Server{
 		Addr: app.cfg.Server.Address(),
@@ -58,6 +63,7 @@ func (app *App) Serve(ctx context.Context) error {
 			EnableSwagger:          app.cfg.Server.Swagger.Enabled,
 			Auth:                   auth.New(store, auth.Options{}),
 			Tasks:                  taskService,
+			Audio:                  app.audioService,
 			Logger:                 app.logger,
 			IncludeTraceInResponse: &app.cfg.Observability.TraceID.IncludeInResponse,
 			HTTPLog:                app.cfg.Logging.HTTP,

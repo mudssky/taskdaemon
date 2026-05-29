@@ -32,6 +32,17 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "LOGGING_HTTP_MAX_BODY_BYTES", "logging.http.maxBodyBytes")
 	applyEnvAlias(values, prefix, "LOGGING_HTTP_REDACT_FIELDS", "logging.http.redactFields")
 	applyEnvAlias(values, prefix, "OBSERVABILITY_TRACE_ID_INCLUDE_IN_RESPONSE", "observability.traceId.includeInResponse")
+	applyEnvAlias(values, prefix, "AUDIO_PLAYBACK_QUEUE_LIMIT", "audio.playback.queueLimit")
+	applyEnvAlias(values, prefix, "AUDIO_INBOUND_TOKEN_HASH", "audio.inbound.tokenHash")
+	applyEnvAlias(values, prefix, "AUDIO_INBOUND_MAX_BYTES", "audio.inbound.maxBytes")
+	applyEnvAlias(values, prefix, "AUDIO_INBOUND_URL_ALLOWED_SCHEMES", "audio.inbound.url.allowedSchemes")
+	applyEnvAlias(values, prefix, "AUDIO_INBOUND_URL_ALLOW_PRIVATE_NETWORKS", "audio.inbound.url.allowPrivateNetworks")
+	applyEnvAlias(values, prefix, "AUDIO_INBOUND_URL_ALLOWED_HOSTS", "audio.inbound.url.allowedHosts")
+	applyEnvAlias(values, prefix, "AUDIO_INBOUND_URL_DOWNLOAD_TIMEOUT_SECONDS", "audio.inbound.url.downloadTimeoutSeconds")
+	applyEnvAlias(values, prefix, "AUDIO_INBOUND_URL_MAX_REDIRECTS", "audio.inbound.url.maxRedirects")
+	applyEnvAlias(values, prefix, "AUDIO_HISTORY_LIMIT", "audio.history.limit")
+	applyEnvAlias(values, prefix, "AUDIO_FFMPEG_PROBE_PATH", "audio.ffmpeg.probePath")
+	applyEnvAlias(values, prefix, "AUDIO_FFMPEG_TRANSCODE_TIMEOUT_SECONDS", "audio.ffmpeg.transcodeTimeoutSeconds")
 	return values
 }
 

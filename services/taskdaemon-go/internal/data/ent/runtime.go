@@ -4,6 +4,7 @@ package ent
 
 import (
 	"taskdaemon/internal/data/ent/admin"
+	"taskdaemon/internal/data/ent/audiorecord"
 	"taskdaemon/internal/data/ent/run"
 	"taskdaemon/internal/data/ent/schema"
 	"taskdaemon/internal/data/ent/session"
@@ -39,6 +40,30 @@ func init() {
 	admin.DefaultUpdatedAt = adminDescUpdatedAt.Default.(func() time.Time)
 	// admin.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	admin.UpdateDefaultUpdatedAt = adminDescUpdatedAt.UpdateDefault.(func() time.Time)
+	audiorecordFields := schema.AudioRecord{}.Fields()
+	_ = audiorecordFields
+	// audiorecordDescStoredPath is the schema descriptor for stored_path field.
+	audiorecordDescStoredPath := audiorecordFields[4].Descriptor()
+	// audiorecord.StoredPathValidator is a validator for the "stored_path" field. It is called by the builders before save.
+	audiorecord.StoredPathValidator = audiorecordDescStoredPath.Validators[0].(func(string) error)
+	// audiorecordDescSizeBytes is the schema descriptor for size_bytes field.
+	audiorecordDescSizeBytes := audiorecordFields[6].Descriptor()
+	// audiorecord.SizeBytesValidator is a validator for the "size_bytes" field. It is called by the builders before save.
+	audiorecord.SizeBytesValidator = audiorecordDescSizeBytes.Validators[0].(func(int64) error)
+	// audiorecordDescSha256 is the schema descriptor for sha256 field.
+	audiorecordDescSha256 := audiorecordFields[7].Descriptor()
+	// audiorecord.Sha256Validator is a validator for the "sha256" field. It is called by the builders before save.
+	audiorecord.Sha256Validator = audiorecordDescSha256.Validators[0].(func(string) error)
+	// audiorecordDescCreatedAt is the schema descriptor for created_at field.
+	audiorecordDescCreatedAt := audiorecordFields[11].Descriptor()
+	// audiorecord.DefaultCreatedAt holds the default value on creation for the created_at field.
+	audiorecord.DefaultCreatedAt = audiorecordDescCreatedAt.Default.(func() time.Time)
+	// audiorecordDescUpdatedAt is the schema descriptor for updated_at field.
+	audiorecordDescUpdatedAt := audiorecordFields[12].Descriptor()
+	// audiorecord.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	audiorecord.DefaultUpdatedAt = audiorecordDescUpdatedAt.Default.(func() time.Time)
+	// audiorecord.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	audiorecord.UpdateDefaultUpdatedAt = audiorecordDescUpdatedAt.UpdateDefault.(func() time.Time)
 	runFields := schema.Run{}.Fields()
 	_ = runFields
 	// runDescStartedAt is the schema descriptor for started_at field.
