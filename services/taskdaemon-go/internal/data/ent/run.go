@@ -36,6 +36,12 @@ type Run struct {
 	Stdout string `json:"stdout,omitempty"`
 	// Stderr holds the value of the "stderr" field.
 	Stderr string `json:"stderr,omitempty"`
+	// LogArchiveStatus holds the value of the "log_archive_status" field.
+	LogArchiveStatus run.LogArchiveStatus `json:"log_archive_status,omitempty"`
+	// LogSizeBytes holds the value of the "log_size_bytes" field.
+	LogSizeBytes *int64 `json:"log_size_bytes,omitempty"`
+	// LogWriteFailed holds the value of the "log_write_failed" field.
+	LogWriteFailed bool `json:"log_write_failed,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt time.Time `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
@@ -72,9 +78,11 @@ func (*Run) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case run.FieldID, run.FieldExitCode, run.FieldDurationMs:
+		case run.FieldLogWriteFailed:
+			values[i] = new(sql.NullBool)
+		case run.FieldID, run.FieldExitCode, run.FieldDurationMs, run.FieldLogSizeBytes:
 			values[i] = new(sql.NullInt64)
-		case run.FieldTrigger, run.FieldStatus, run.FieldErrorSummary, run.FieldStdout, run.FieldStderr:
+		case run.FieldTrigger, run.FieldStatus, run.FieldErrorSummary, run.FieldStdout, run.FieldStderr, run.FieldLogArchiveStatus:
 			values[i] = new(sql.NullString)
 		case run.FieldStartedAt, run.FieldFinishedAt, run.FieldCreatedAt, run.FieldUpdatedAt:
 			values[i] = new(sql.NullTime)
@@ -156,6 +164,25 @@ func (_m *Run) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field stderr", values[i])
 			} else if value.Valid {
 				_m.Stderr = value.String
+			}
+		case run.FieldLogArchiveStatus:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field log_archive_status", values[i])
+			} else if value.Valid {
+				_m.LogArchiveStatus = run.LogArchiveStatus(value.String)
+			}
+		case run.FieldLogSizeBytes:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field log_size_bytes", values[i])
+			} else if value.Valid {
+				_m.LogSizeBytes = new(int64)
+				*_m.LogSizeBytes = value.Int64
+			}
+		case run.FieldLogWriteFailed:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field log_write_failed", values[i])
+			} else if value.Valid {
+				_m.LogWriteFailed = value.Bool
 			}
 		case run.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -247,6 +274,17 @@ func (_m *Run) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("stderr=")
 	builder.WriteString(_m.Stderr)
+	builder.WriteString(", ")
+	builder.WriteString("log_archive_status=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LogArchiveStatus))
+	builder.WriteString(", ")
+	if v := _m.LogSizeBytes; v != nil {
+		builder.WriteString("log_size_bytes=")
+		builder.WriteString(fmt.Sprintf("%v", *v))
+	}
+	builder.WriteString(", ")
+	builder.WriteString("log_write_failed=")
+	builder.WriteString(fmt.Sprintf("%v", _m.LogWriteFailed))
 	builder.WriteString(", ")
 	builder.WriteString("created_at=")
 	builder.WriteString(_m.CreatedAt.Format(time.ANSIC))

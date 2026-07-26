@@ -12,6 +12,7 @@ import (
 	"taskdaemon/internal/data"
 	"taskdaemon/internal/httpapi"
 	"taskdaemon/internal/notify"
+	"taskdaemon/internal/runlog"
 	"taskdaemon/internal/runner"
 	"taskdaemon/internal/scheduler"
 	"taskdaemon/web/embedded"
@@ -45,10 +46,15 @@ func (app *App) Serve(ctx context.Context) error {
 	app.notifyBus = notifyBus
 	app.storeSink = storeSink
 	defer notifyBus.Shutdown()
+	runLogService, err := runlog.New(store, app.cfg.RunLog, runlog.Options{Logger: app.logger})
+	if err != nil {
+		return fmt.Errorf("init runlog service: %w", err)
+	}
 
 	taskService := scheduler.NewService(store, scheduler.Options{
 		Runner:    runner.NewExecutor(),
 		Publisher: notifyBus,
+		RunLog:    runLogService,
 	})
 	if err := taskService.RegisterEnabledTasks(ctx); err != nil {
 		return fmt.Errorf("register enabled tasks: %w", err)
@@ -80,6 +86,8 @@ func (app *App) Serve(ctx context.Context) error {
 			RuntimeConfig:          app.runtimeConfig,
 			ReloadConfig:           app.ReloadRuntimeConfig,
 			FrontendFS:             mustFrontendFS(),
+			// T6
+			RunLog: runLogService,
 		}),
 	}
 

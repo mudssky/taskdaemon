@@ -139,6 +139,27 @@ export const apiClient = {
     return requestJSON<{ runs: TaskRun[] }>(`/api/tasks/${taskId}/runs`);
   },
 
+  /** T6: 下载完整 run 日志（流式 blob） */
+  async downloadRunLog(runId: number): Promise<Blob> {
+    const response = await fetch(`/api/runs/${runId}/log`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      let code = "RUNLOG_READ_FAILED";
+      let message = "下载完整日志失败";
+      try {
+        const body = (await response.json()) as ApiEnvelope<unknown>;
+        code = body.error?.code ?? code;
+        message = body.error?.message ?? message;
+      } catch {
+        // 非 JSON 错误体时保留默认文案
+      }
+      throw new ApiClientError(response.status, code, message, null, null);
+    }
+    return response.blob();
+  },
+
   async listAudioHistory(limit?: number) {
     const query =
       limit === undefined ? "" : `?limit=${encodeURIComponent(limit)}`;

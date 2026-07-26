@@ -12,6 +12,7 @@ import (
 	entrun "taskdaemon/internal/data/ent/run"
 	enttask "taskdaemon/internal/data/ent/task"
 	"taskdaemon/internal/notify"
+	"taskdaemon/internal/runlog"
 	"taskdaemon/internal/runner"
 )
 
@@ -77,11 +78,24 @@ func (service *Service) triggerTaskWithSource(ctx context.Context, taskID int, t
 	if err != nil {
 		return service.finalizeFailed(ctx, taskID, runRecord.ID, started, err.Error())
 	}
+	runID := runRecord.ID
+	archive, openFailed := service.beginRunLog(runID, started)
+	if archive != nil {
+		cfg.StdoutMirror = archive.StdoutWriter()
+		cfg.StderrMirror = archive.StderrWriter()
+	}
 	result, err := service.runner.Execute(runCtx, cfg)
 	if err != nil {
-		return service.finalizeFailed(ctx, taskID, runRecord.ID, started, err.Error())
+		service.finishRunLog(ctx, runID, archive, openFailed)
+		return service.finalizeFailed(ctx, taskID, runID, started, err.Error())
 	}
-	return service.finalizeRun(ctx, taskID, runRecord.ID, started, result)
+	runRecord, err = service.finalizeRun(ctx, taskID, runID, started, result)
+	if err != nil {
+		service.finishRunLog(ctx, runID, archive, openFailed)
+		return nil, err
+	}
+	service.finishRunLog(ctx, runID, archive, openFailed)
+	return runRecord, nil
 }
 
 // CancelTask 取消正在运行的任务。
@@ -389,4 +403,51 @@ func maxInt64(a int64, b int64) int64 {
 		return a
 	}
 	return b
+}
+
+// beginRunLog 打开 run 日志归档；失败不阻断执行。
+//
+// 参数:
+//   - service: 调度服务。
+//   - runID: 执行历史 ID。
+//   - startedAt: 开始时间。
+//
+// 返回值:
+//   - *runlog.Archive: 写入器；未启用或打开失败时为 nil。
+//   - bool: true 表示打开失败，需要标记 log_write_failed。
+func (service *Service) beginRunLog(runID int, startedAt time.Time) (*runlog.Archive, bool) {
+	if service == nil || service.runlog == nil {
+		return nil, false
+	}
+	return service.runlog.Begin(runID, startedAt)
+}
+
+// finishRunLog 关闭归档、回写状态，并异步触发清理。
+//
+// 参数:
+//   - service: 调度服务。
+//   - ctx: 请求上下文。
+//   - runID: 执行历史 ID。
+//   - archive: 归档写入器。
+//   - openFailed: 打开阶段是否失败。
+//
+// 返回值:
+//   - 无。
+func (service *Service) finishRunLog(ctx context.Context, runID int, archive *runlog.Archive, openFailed bool) {
+	if service == nil || service.runlog == nil {
+		return
+	}
+	if openFailed && archive == nil {
+		_ = service.runlog.ApplyArchiveResult(ctx, runID, runlog.StatusAbsent, 0, true)
+		return
+	}
+	status, size, writeFailed := service.runlog.Finish(archive)
+	if openFailed {
+		writeFailed = true
+	}
+	if err := service.runlog.ApplyArchiveResult(ctx, runID, status, size, writeFailed); err != nil {
+		// 落库失败只记进程侧可观测性，不回滚 run 终态
+		return
+	}
+	runlog.SchedulePrune(service.runlog)
 }

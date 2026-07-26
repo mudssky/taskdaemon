@@ -9,6 +9,7 @@ import (
 
 	"taskdaemon/internal/data"
 	"taskdaemon/internal/notify"
+	"taskdaemon/internal/runlog"
 	"taskdaemon/internal/runner"
 )
 
@@ -23,7 +24,8 @@ type Publisher interface {
 type Options struct {
 	Runner    runner.Executor
 	Now       func() time.Time
-	Publisher Publisher // T2a：可选，默认 noop
+	Publisher Publisher       // T2a：可选，默认 noop
+	RunLog    *runlog.Service // T6：可选，默认不落盘
 }
 
 // Service 提供任务定义、手动触发、取消和执行历史写入能力。
@@ -32,6 +34,7 @@ type Service struct {
 	runner    runner.Executor
 	now       func() time.Time
 	publisher Publisher
+	runlog    *runlog.Service
 	mu        sync.Mutex
 	running   map[int]context.CancelFunc
 	scheduler gocron.Scheduler
@@ -55,6 +58,7 @@ func NewService(store *data.Store, opts Options) *Service {
 		runner:    opts.Runner,
 		now:       opts.Now,
 		publisher: opts.Publisher,
+		runlog:    opts.RunLog,
 		running:   make(map[int]context.CancelFunc),
 		jobs:      make(map[int]gocron.Job),
 	}

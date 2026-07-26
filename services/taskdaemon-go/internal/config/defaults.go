@@ -97,6 +97,12 @@ func Default() Config {
 				MinSeverity: "",
 			},
 		},
+		// T6
+		RunLog: RunLogConfig{
+			Enabled:       true,
+			RetainDays:    30,
+			MaxTotalBytes: 2 * 1024 * 1024 * 1024, // 2 GiB
+		},
 	}
 }
 
@@ -149,6 +155,10 @@ func defaultMap() map[string]any {
 		"notify.store.maxRecords":  defaults.Notify.Store.MaxRecords,
 		"notify.store.retainDays":  defaults.Notify.Store.RetainDays,
 		"notify.store.minSeverity": defaults.Notify.Store.MinSeverity,
+		// T6
+		"runlog.enabled":       defaults.RunLog.Enabled,
+		"runlog.retainDays":    defaults.RunLog.RetainDays,
+		"runlog.maxTotalBytes": defaults.RunLog.MaxTotalBytes,
 	}
 }
 

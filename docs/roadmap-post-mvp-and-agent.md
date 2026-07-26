@@ -391,7 +391,7 @@ interface RuntimeCapabilities {
 | T2a | `07-27-t2a-notification-event-bus` | 通知事件总线 + 站内 sink + **契约 C-2 冻结** | — | **done（C-2 已冻结）** |
 | T4 | `07-27-t4-outbound-notification-sink` | Webhook / 邮件出站 sink | T2a | |
 | T5 | `07-27-t5-service-installer` | 系统服务安装器（CLI，纯后端） | — | **done**（真实三平台装机为残留） |
-| T6 | `07-27-t6-run-log-archive` | Run 完整日志归档 | — | |
+| T6 | `07-27-t6-run-log-archive` | Run 完整日志归档 | — | **done（待合入）** |
 | T7a | `07-27-t7a-backup-template-api` | 备份模板后端 API | T1a | |
 | T8 | `07-27-t8-db-migration-tool` | SQLite ↔ PostgreSQL 迁移工具（CLI，纯后端） | T1a | |
 
@@ -720,3 +720,4 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
 | 2026-07-27 | chore | **deps-latest-upgrade 合入**：JS/TS+Go 直接依赖升 latest（TS7/Biome2.5/Wails alpha2.118 等） | mudssky / worker |
 | 2026-07-27 | v5.3 | **C-3 / C-4 冻结（G1）**：落地 `packages/agent-protocol`（types only）与 `docs/agent-contracts/**`；§5.1 AG-UI/Agent Protocol/MCP 锚点补齐；§5.2/§5.4 按 G0 增补 followUp/getMessages/setModel/disposeSession 与 capabilities 扩展字段；§7.5 G1=done；G2/G3/G4 可并行开工 | G1 worker |
+| 2026-07-27 | v5.4 | T6 Run 完整日志归档实现完成（待合入）：`internal/runlog`、RUNLOG_* API、Ent run 三态字段、runs 下载入口 | mudssky / worker |

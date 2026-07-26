@@ -9,6 +9,8 @@ type Config struct {
 	Audio         AudioConfig
 	// T2a: 通知事件总线配置（append-only）
 	Notify NotifyConfig
+	// T6: run 完整日志归档配置（append-only）
+	RunLog RunLogConfig
 }
 
 // ResolvedPaths 保存本次配置加载会使用的文件路径。
@@ -151,6 +153,14 @@ type NotifyStoreConfig struct {
 	MaxRecords  int    // 0 = 不限
 	RetainDays  int    // 0 = 不限
 	MinSeverity string // 最低投递级别；空表示不限
+}
+
+// RunLogConfig 保存 run 完整日志归档配置。
+// T6
+type RunLogConfig struct {
+	Enabled       bool  // 是否启用落盘
+	RetainDays    int   // 保留天数；0 = 不限
+	MaxTotalBytes int64 // 总体积上限；0 = 不限
 }
 
 // LoadOptions 控制配置加载来源和覆盖值。

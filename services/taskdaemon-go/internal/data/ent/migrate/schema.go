@@ -92,6 +92,9 @@ var (
 		{Name: "error_summary", Type: field.TypeString, Nullable: true},
 		{Name: "stdout", Type: field.TypeString, Nullable: true},
 		{Name: "stderr", Type: field.TypeString, Nullable: true},
+		{Name: "log_archive_status", Type: field.TypeEnum, Enums: []string{"absent", "archived", "pruned"}, Default: "absent"},
+		{Name: "log_size_bytes", Type: field.TypeInt64, Nullable: true},
+		{Name: "log_write_failed", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "task_runs", Type: field.TypeInt},
@@ -104,7 +107,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "runs_tasks_runs",
-				Columns:    []*schema.Column{RunsColumns[12]},
+				Columns:    []*schema.Column{RunsColumns[15]},
 				RefColumns: []*schema.Column{TasksColumns[0]},
 				OnDelete:   schema.NoAction,
 			},

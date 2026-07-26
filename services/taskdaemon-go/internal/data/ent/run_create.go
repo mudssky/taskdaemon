@@ -147,6 +147,48 @@ func (_c *RunCreate) SetNillableStderr(v *string) *RunCreate {
 	return _c
 }
 
+// SetLogArchiveStatus sets the "log_archive_status" field.
+func (_c *RunCreate) SetLogArchiveStatus(v run.LogArchiveStatus) *RunCreate {
+	_c.mutation.SetLogArchiveStatus(v)
+	return _c
+}
+
+// SetNillableLogArchiveStatus sets the "log_archive_status" field if the given value is not nil.
+func (_c *RunCreate) SetNillableLogArchiveStatus(v *run.LogArchiveStatus) *RunCreate {
+	if v != nil {
+		_c.SetLogArchiveStatus(*v)
+	}
+	return _c
+}
+
+// SetLogSizeBytes sets the "log_size_bytes" field.
+func (_c *RunCreate) SetLogSizeBytes(v int64) *RunCreate {
+	_c.mutation.SetLogSizeBytes(v)
+	return _c
+}
+
+// SetNillableLogSizeBytes sets the "log_size_bytes" field if the given value is not nil.
+func (_c *RunCreate) SetNillableLogSizeBytes(v *int64) *RunCreate {
+	if v != nil {
+		_c.SetLogSizeBytes(*v)
+	}
+	return _c
+}
+
+// SetLogWriteFailed sets the "log_write_failed" field.
+func (_c *RunCreate) SetLogWriteFailed(v bool) *RunCreate {
+	_c.mutation.SetLogWriteFailed(v)
+	return _c
+}
+
+// SetNillableLogWriteFailed sets the "log_write_failed" field if the given value is not nil.
+func (_c *RunCreate) SetNillableLogWriteFailed(v *bool) *RunCreate {
+	if v != nil {
+		_c.SetLogWriteFailed(*v)
+	}
+	return _c
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (_c *RunCreate) SetCreatedAt(v time.Time) *RunCreate {
 	_c.mutation.SetCreatedAt(v)
@@ -233,6 +275,14 @@ func (_c *RunCreate) defaults() {
 		v := run.DefaultStartedAt()
 		_c.mutation.SetStartedAt(v)
 	}
+	if _, ok := _c.mutation.LogArchiveStatus(); !ok {
+		v := run.DefaultLogArchiveStatus
+		_c.mutation.SetLogArchiveStatus(v)
+	}
+	if _, ok := _c.mutation.LogWriteFailed(); !ok {
+		v := run.DefaultLogWriteFailed
+		_c.mutation.SetLogWriteFailed(v)
+	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		v := run.DefaultCreatedAt()
 		_c.mutation.SetCreatedAt(v)
@@ -263,6 +313,17 @@ func (_c *RunCreate) check() error {
 	}
 	if _, ok := _c.mutation.StartedAt(); !ok {
 		return &ValidationError{Name: "started_at", err: errors.New(`ent: missing required field "Run.started_at"`)}
+	}
+	if _, ok := _c.mutation.LogArchiveStatus(); !ok {
+		return &ValidationError{Name: "log_archive_status", err: errors.New(`ent: missing required field "Run.log_archive_status"`)}
+	}
+	if v, ok := _c.mutation.LogArchiveStatus(); ok {
+		if err := run.LogArchiveStatusValidator(v); err != nil {
+			return &ValidationError{Name: "log_archive_status", err: fmt.Errorf(`ent: validator failed for field "Run.log_archive_status": %w`, err)}
+		}
+	}
+	if _, ok := _c.mutation.LogWriteFailed(); !ok {
+		return &ValidationError{Name: "log_write_failed", err: errors.New(`ent: missing required field "Run.log_write_failed"`)}
 	}
 	if _, ok := _c.mutation.CreatedAt(); !ok {
 		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "Run.created_at"`)}
@@ -334,6 +395,18 @@ func (_c *RunCreate) createSpec() (*Run, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.Stderr(); ok {
 		_spec.SetField(run.FieldStderr, field.TypeString, value)
 		_node.Stderr = value
+	}
+	if value, ok := _c.mutation.LogArchiveStatus(); ok {
+		_spec.SetField(run.FieldLogArchiveStatus, field.TypeEnum, value)
+		_node.LogArchiveStatus = value
+	}
+	if value, ok := _c.mutation.LogSizeBytes(); ok {
+		_spec.SetField(run.FieldLogSizeBytes, field.TypeInt64, value)
+		_node.LogSizeBytes = &value
+	}
+	if value, ok := _c.mutation.LogWriteFailed(); ok {
+		_spec.SetField(run.FieldLogWriteFailed, field.TypeBool, value)
+		_node.LogWriteFailed = value
 	}
 	if value, ok := _c.mutation.CreatedAt(); ok {
 		_spec.SetField(run.FieldCreatedAt, field.TypeTime, value)

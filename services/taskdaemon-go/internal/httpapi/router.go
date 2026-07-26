@@ -42,6 +42,8 @@ type Options struct {
 	RuntimeConfig          *RuntimeConfig
 	ReloadConfig           func(context.Context) (config.ReloadResult, error)
 	FrontendFS             fs.FS
+	// T6
+	RunLog RunLogService
 }
 
 // AuthService 定义 HTTP handler 依赖的认证服务能力。
@@ -97,6 +99,8 @@ func NewRouter(opts Options) http.Handler {
 	registerAudioRoutes(router, opts.Auth, opts.Audio)
 	// T2a
 	registerNotificationRoutes(router, opts.Auth, opts.Notifications, opts.NotifyBus)
+	// T6
+	registerRunLogRoutes(router, opts.Auth, opts.RunLog)
 	if opts.EnableSwagger {
 		router.GET("/swagger/index.html", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Swagger UI is enabled. Generated docs will be mounted here.")

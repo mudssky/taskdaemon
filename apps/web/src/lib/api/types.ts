@@ -69,6 +69,8 @@ export type TaskPayload = {
   };
 };
 
+export type LogArchiveStatus = "absent" | "archived" | "pruned";
+
 export type TaskRun = {
   id: number;
   trigger: TriggerSource;
@@ -80,6 +82,9 @@ export type TaskRun = {
   errorSummary: string;
   stdout: string;
   stderr: string;
+  logArchiveStatus?: LogArchiveStatus;
+  logSizeBytes?: number | null;
+  logWriteFailed?: boolean;
 };
 
 export const audioSourceKinds = ["url", "upload"] as const;
