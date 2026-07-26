@@ -23,15 +23,15 @@
     "prepare": "husky"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.15",
-    "@testing-library/jest-dom": "^6.9.1",
+    "@biomejs/biome": "2.5.5",
+    "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
-    "lint-staged": "^17.0.4",
-    "typescript": "^6.0.3",
-    "vitest": "^4.1.6"
+    "lint-staged": "^17.2.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   },
   "lint-staged": {
     "apps/web/**/*.{ts,tsx,js,jsx,json,css,md}": [
