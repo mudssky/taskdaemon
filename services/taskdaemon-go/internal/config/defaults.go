@@ -124,6 +124,11 @@ func Default() Config {
 					Encryption: "starttls",
 				},
 			},
+			// D2 / T3
+			Desktop: NotifyDesktopConfig{
+				Enabled:     true,
+				MinSeverity: "",
+			},
 		},
 		// T6
 		RunLog: RunLogConfig{
@@ -209,6 +214,9 @@ func defaultMap() map[string]any {
 		"notify.email.smtp.username":          defaults.Notify.Email.SMTP.Username,
 		"notify.email.smtp.password":          defaults.Notify.Email.SMTP.Password,
 		"notify.email.smtp.encryption":        defaults.Notify.Email.SMTP.Encryption,
+		// D2 / T3
+		"notify.desktop.enabled":     defaults.Notify.Desktop.Enabled,
+		"notify.desktop.minSeverity": defaults.Notify.Desktop.MinSeverity,
 	}
 }
 

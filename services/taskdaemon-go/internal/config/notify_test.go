@@ -28,6 +28,9 @@ func TestNotifyDefaultsAndEnv(t *testing.T) {
 	require.False(t, defaults.Notify.Email.Enabled)
 	require.Equal(t, 587, defaults.Notify.Email.SMTP.Port)
 	require.Equal(t, "starttls", defaults.Notify.Email.SMTP.Encryption)
+	// D2 / T3 defaults
+	require.True(t, defaults.Notify.Desktop.Enabled)
+	require.Equal(t, "", defaults.Notify.Desktop.MinSeverity)
 
 	t.Setenv("TASKDAEMON_NOTIFY_BUFFER_SIZE", "64")
 	t.Setenv("TASKDAEMON_NOTIFY_STORE_ENABLED", "false")
@@ -40,6 +43,8 @@ func TestNotifyDefaultsAndEnv(t *testing.T) {
 	t.Setenv("TASKDAEMON_NOTIFY_EMAIL_MIN_SEVERITY", "error")
 	t.Setenv("TASKDAEMON_NOTIFY_EMAIL_SMTP_HOST", "smtp.example.com")
 	t.Setenv("TASKDAEMON_NOTIFY_EMAIL_SMTP_PASSWORD", "should-load-but-not-log")
+	t.Setenv("TASKDAEMON_NOTIFY_DESKTOP_ENABLED", "false")
+	t.Setenv("TASKDAEMON_NOTIFY_DESKTOP_MIN_SEVERITY", "critical")
 
 	cfg, err := Load(LoadOptions{Optional: true})
 	require.NoError(t, err)
@@ -54,6 +59,8 @@ func TestNotifyDefaultsAndEnv(t *testing.T) {
 	require.Equal(t, "error", cfg.Notify.Email.MinSeverity)
 	require.Equal(t, "smtp.example.com", cfg.Notify.Email.SMTP.Host)
 	require.Equal(t, "should-load-but-not-log", cfg.Notify.Email.SMTP.Password)
+	require.False(t, cfg.Notify.Desktop.Enabled)
+	require.Equal(t, "critical", cfg.Notify.Desktop.MinSeverity)
 
 	// 清理，避免影响同进程其他测试的 env 读取顺序（t.Setenv 已自动还原）
 	_ = os.Getenv("TASKDAEMON_NOTIFY_BUFFER_SIZE")

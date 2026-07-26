@@ -3,7 +3,7 @@
   "name": "t3-desktop-notification-sink",
   "title": "T3 Desktop 原生通知 sink",
   "description": "Wails 壳系统通知 adapter，依赖 T2 事件契约",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

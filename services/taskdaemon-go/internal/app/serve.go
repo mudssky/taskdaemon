@@ -47,6 +47,9 @@ func (app *App) Serve(ctx context.Context) error {
 	emailSink := notify.NewEmailSink(app.cfg.Notify.Email, notify.EmailSinkOptions{Logger: app.logger})
 	notifyBus.Register(webhookSink)
 	notifyBus.Register(emailSink)
+	// D2 / T3: Desktop 原生通知 sink（纯 server 无 Bind 时 Enabled=false）
+	desktopSink := notify.NewDesktopSink(app.cfg.Notify.Desktop, notify.DesktopSinkOptions{Logger: app.logger})
+	notifyBus.Register(desktopSink)
 	notifyBus.Start()
 	app.notifyBus = notifyBus
 	app.storeSink = storeSink

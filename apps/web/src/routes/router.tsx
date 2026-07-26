@@ -17,7 +17,10 @@ import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
 import { TaskCreatePage } from "../features/tasks/TaskCreatePage";
 import { TaskEditPage } from "../features/tasks/TaskEditPage";
 import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
-import { DesktopEnvironmentPanel } from "../lib/desktop";
+import {
+  DesktopEnvironmentPanel,
+  DesktopNotificationPanel,
+} from "../lib/desktop";
 
 function ProtectedApp() {
   const authStatus = useAuthStatusQuery();
@@ -115,13 +118,14 @@ const settingsRoute = createRoute({
   component: SettingsPage,
 });
 
-/** 设置页：音频（T0）+ Desktop 环境样板（TD1 append-only）。 */
+/** 设置页：音频（T0）+ Desktop 能力（TD1/TD2 append-only）。 */
 function SettingsPage() {
   return (
     <>
       <AudioSettingsPage />
       <div className="settings-grid">
         <DesktopEnvironmentPanel />
+        <DesktopNotificationPanel />
       </div>
     </>
   );

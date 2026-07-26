@@ -74,6 +74,9 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_USERNAME", "notify.email.smtp.username")
 	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_PASSWORD", "notify.email.smtp.password")
 	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_ENCRYPTION", "notify.email.smtp.encryption")
+	// D2 / T3
+	applyEnvAlias(values, prefix, "NOTIFY_DESKTOP_ENABLED", "notify.desktop.enabled")
+	applyEnvAlias(values, prefix, "NOTIFY_DESKTOP_MIN_SEVERITY", "notify.desktop.minSeverity")
 	return values
 }
 

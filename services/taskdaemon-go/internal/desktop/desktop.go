@@ -15,9 +15,11 @@ import (
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 
 	"taskdaemon/internal/app"
 	"taskdaemon/internal/config"
+	"taskdaemon/internal/notify"
 	"taskdaemon/web/embedded"
 )
 
@@ -41,12 +43,28 @@ type App struct {
 // 返回值:
 //   - *App: 已注册样板能力的 binding 实例。
 func newApp(cfg config.Config) *App {
+	return newAppWithNotification(cfg, nil)
+}
+
+// newAppWithNotification 创建 binding 根对象并可选注册通知能力。
+//
+// 参数:
+//   - cfg: 已加载的应用配置。
+//   - notifCap: 通知 capability；nil 时不注册（测试/无服务场景）。
+//
+// 返回值:
+//   - *App: 已注册能力的 binding 实例。
+func newAppWithNotification(cfg config.Config, notifCap Capability) *App {
 	bindings := &App{
 		cfg:      cfg,
 		registry: NewRegistry(),
 	}
 	// TD1: 注册 Environment 样板能力；D2/D3 在此下方 append-only 追加 Register。
 	bindings.registry.Register(NewEnvironmentCapability(bindings.registry, appVersion))
+	// TD2: Desktop 原生通知能力。
+	if notifCap != nil {
+		bindings.registry.Register(notifCap)
+	}
 	return bindings
 }
 
@@ -81,8 +99,15 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 		return err
 	}
 
-	bindings := newApp(cfg)
-	desktopApp := application.New(application.Options{
+	notificationService := notifications.New()
+	var desktopApp *application.App
+	notifCap := NewNotificationCapability(notificationService, NotificationCapabilityOptions{
+		ActivateMainWindow: func() {
+			activateMainWindow(desktopApp)
+		},
+	})
+	bindings := newAppWithNotification(cfg, notifCap)
+	desktopApp = application.New(application.Options{
 		Name:        "taskdaemon",
 		Description: "Cross-platform task scheduling daemon",
 		Icon:        desktopIcon,
@@ -92,11 +117,18 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 		},
 		Services: []application.Service{
 			application.NewService(bindings),
+			application.NewService(notificationService),
 		},
 	})
+	// 绑定到 notify 总线；壳退出时解除，避免 server 路径误用。
+	notifCap.bindAsDesktopSender()
+	defer notify.UnbindDesktopSender()
+	notificationService.OnNotificationResponse(notifCap.HandleNotificationResponse)
+
 	startURL := desktopStartURL(cfg)
 	desktopApp.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title:           "taskdaemon",
+		Name:            "main",
 		Width:           1200,
 		Height:          760,
 		MinWidth:        960,
@@ -124,6 +156,34 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 		return ctx.Err()
 	}
 	return nil
+}
+
+// activateMainWindow 激活主窗口（通知点击默认动作）。
+//
+// 参数:
+//   - desktopApp: Wails 应用实例；nil 时忽略。
+//
+// 返回值:
+//   - 无。
+func activateMainWindow(desktopApp *application.App) {
+	if desktopApp == nil {
+		return
+	}
+	if window, ok := desktopApp.Window.GetByName("main"); ok && window != nil {
+		window.UnMinimise()
+		window.Show()
+		window.Focus()
+		return
+	}
+	for _, window := range desktopApp.Window.GetAll() {
+		if window == nil {
+			continue
+		}
+		window.UnMinimise()
+		window.Show()
+		window.Focus()
+		return
+	}
 }
 
 // desktopStartURL 返回桌面窗口入口 URL。

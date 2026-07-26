@@ -156,6 +156,11 @@ func Load(opts LoadOptions) (Config, error) {
 					Encryption: k.String("notify.email.smtp.encryption"),
 				},
 			},
+			// D2 / T3
+			Desktop: NotifyDesktopConfig{
+				Enabled:     k.Bool("notify.desktop.enabled"),
+				MinSeverity: k.String("notify.desktop.minSeverity"),
+			},
 		},
 		// T6
 		RunLog: RunLogConfig{
