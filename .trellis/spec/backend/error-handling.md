@@ -103,6 +103,28 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 | `NOTIFY_WEBHOOK_URL_REJECTED` | — | Webhook URL 协议/私网/Host 策略拒绝（sink 层） |
 | `NOTIFY_WEBHOOK_DELIVER_FAILED` | — | Webhook 投递失败（含重试耗尽） |
 | `NOTIFY_EMAIL_DELIVER_FAILED` | — | 邮件 SMTP 投递失败（含重试耗尽） |
+
+### 配置写入错误码（`CONFIG_*`，C-1 / T1a）
+
+| 码 | HTTP | 场景 |
+|---|---:|---|
+| `CONFIG_SECTION_UNKNOWN` | 404 | 未知或未开放写入的 section |
+| `CONFIG_INVALID_JSON` | 400 | body 非法或缺失 |
+| `CONFIG_FIELD_INVALID` | 400 | 字段格式/类型非法 |
+| `CONFIG_FIELD_OUT_OF_RANGE` | 400 | 取值越界 |
+| `CONFIG_FIELD_CONFLICT` | 400 | 字段与其他配置冲突 |
+| `CONFIG_FIELD_NOT_WRITABLE` | 400 | file_only 或未知字段 |
+| `CONFIG_VALIDATION_FAILED` | 400 | 多类字段错误聚合 |
+| `CONFIG_PATH_UNAVAILABLE` | 503 | 无法解析可写路径或 writer 未装配 |
+| `CONFIG_WRITE_FAILED` | 500 | 落盘失败 |
+| `CONFIG_RELOAD_FAILED` | 500 | 写入后重载/Apply 失败（已回滚） |
+
+约束：
+
+* 校验失败**零写入**；`details.fields` 指明路径与原因。
+* 敏感值永不进入响应、错误 details 或写入日志原文。
+* 既有 `config_reload_failed` / `config_reload_unavailable` 保留兼容 `POST /reload`。
+
 ### Desktop capability 错误码（`DESKTOP_*`，D1/C-5）
 
 Desktop Wails binding / capability 调用使用以下稳定码（非 HTTP envelope 的 `error.code` 同名字段，也可出现在 bridge `InvokeResult.code`）：

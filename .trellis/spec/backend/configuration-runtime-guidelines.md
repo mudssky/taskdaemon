@@ -84,8 +84,10 @@ config.local.yml
 3. 在 `Load()` 中从 koanf 读取并填充字段。
 4. 如需 env 支持，更新 `envMap()` alias 和测试。
 5. 更新 `taskdaemon.example.yaml`。
-6. 判断是否支持运行时 reload；不支持时加入 `RestartRequired`。
-7. 更新相关 spec 和前端/CLI 展示类型。
+6. **在 `classification.go` 的 `fieldRegistry` 显式登记三级分类**（缺省不得为 hot）。
+7. 判断是否支持运行时 reload；不支持时加入 `RestartRequired` / `FieldClassRestart`。
+8. 若 section 开放 API 写入，补充 patch/校验与 route 测试。
+9. 更新相关 spec 和前端/CLI 展示类型。
 
 安全默认值优先保证本地开发可用、生产不意外暴露能力。例如 Swagger 默认关闭，HTTP body 日志默认关闭。
 
@@ -216,6 +218,76 @@ cfg, err := config.Load(config.LoadOptions{Overrides: overrides})
 * `serve` 启动 HTTP API，不初始化 Desktop。
 * `desktop` 启动 Wails runtime，并启动本机 HTTP API server。
 * `db migrate` 是 CLI-only 入口，不初始化 Desktop 或 scheduler。
+
+---
+
+## C-1 配置写入 API（T1a 冻结）
+
+> 权威实现：`internal/config/classification.go`、`write.go`、`internal/httpapi/config_routes.go`、`config_dto.go`、`internal/app/config_write.go`。
+
+### 三级分类
+
+| 级别 | 标识 | 页面可编辑 | 语义 |
+|---|---|---|---|
+| 热生效 | `hot` | ✅ | 落盘后 `RuntimeConfig.Apply` + 子系统 Update 立即生效 |
+| 需重启 | `restart` | ✅（须提示） | 落盘；进程重启后生效；响应 `restartRequired` |
+| 仅配置文件 | `file_only` | ❌ | API 拒绝写入，错误 `CONFIG_FIELD_NOT_WRITABLE` |
+
+规则：
+
+* 新增配置字段**必须**在 `fieldRegistry` 显式登记分类；**禁止**默认视为热生效。
+* 完整字段表以 `internal/config/classification.go` 为准（单一事实源）。
+* 首版开放写入的 section：**`audio`**（T0 首个真实用例）。其他 section 分类已登记，PUT 返回 `CONFIG_SECTION_UNKNOWN` 直至后续任务放开。
+
+### audio 字段摘要
+
+| 字段 | 级别 |
+|---|---|
+| `autoplay.*` / `playback.*` / `inbound.maxBytes` / `inbound.url.*` / `history.*` / `inbound.token`（明文→hash） | hot |
+| `ffmpeg.transcodeTimeoutSeconds` | restart |
+| `ffmpeg.path` / `ffmpeg.probePath` / `inbound.tokenHash`（禁止 API 直写） | file_only |
+
+### API 形状
+
+* `GET /api/config/audio` — 安全只读快照（含 `configuration.runtimeEditable|restartRequired|fileOnly`）。
+* `PUT /api/config/:section` — 部分更新；管理员 session；机器 Bearer 不可用。
+* `POST /api/config/reload` — 既有重载入口（兼容旧错误码）。
+
+`PUT` 请求语义：
+
+* 仅提交要改的字段；省略字段保持不变。
+* 敏感值：提交 `inbound.token` 明文，落盘 `tokenHash`（SHA-256 hex）；响应只回 `tokenConfigured`。
+* 校验全部通过后才落盘；失败零写入。
+
+`PUT` 成功响应 `data`：
+
+```json
+{
+  "config": { /* 与 GET 同形的安全 DTO */ },
+  "applied": ["audio.autoplay.enabled"],
+  "restartRequired": ["audio.ffmpeg.transcodeTimeoutSeconds"],
+  "reload": {
+    "applied": ["audio.autoplay.enabled"],
+    "restartRequired": [],
+    "subsystems": [
+      { "name": "runtime", "status": "ok" },
+      { "name": "audio", "status": "ok" }
+    ]
+  }
+}
+```
+
+### 落盘路径与注释限制
+
+* 写入路径：`ResolveWritePath(LoadOptions)` — 显式 `--config` → 该文件；否则存在 local 时写 local；否则写 base `ConfigPath`。
+* 原子写：临时文件 + rename；进程内 mutex 串行。
+* **不保留** YAML 注释与原格式（重写目标文件）。重要注释请维护在 example 或仓库外备份。
+* env / overrides 仍覆盖文件；响应返回 Load 后的**有效配置**。
+
+### 回滚
+
+落盘后 Load 或 Apply 失败：恢复备份文件并重新 Apply 写入前快照，返回 `CONFIG_RELOAD_FAILED`，服务保持可用。
+
 
 ---
 

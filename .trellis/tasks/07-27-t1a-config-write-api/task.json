@@ -3,7 +3,7 @@
   "name": "t1a-config-write-api",
   "title": "T1a 配置写入 API 契约与后端实现",
   "description": "冻结 taskdaemon 配置读写 API 形状（C-1），实现 Go 侧写入、校验、热生效与需重启标记",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

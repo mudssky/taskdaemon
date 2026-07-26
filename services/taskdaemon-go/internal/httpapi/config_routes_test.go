@@ -164,3 +164,247 @@ func containsString(values []string, target string) bool {
 	}
 	return false
 }
+
+// TestPutAudioConfigRequiresSession 验证配置写入需要管理员 session。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestPutAudioConfigRequiresSession(t *testing.T) {
+	router := NewRouter(Options{
+		Auth: &fakeAuthService{authErr: auth.ErrInvalidSession},
+		WriteConfig: DefaultConfigSectionWriter(func(context.Context, config.AudioSectionPatch) (ConfigSectionWriteResponse, error) {
+			t.Fatal("write should not run without session")
+			return ConfigSectionWriteResponse{}, nil
+		}),
+	})
+	req := httptest.NewRequest(http.MethodPut, "/api/config/audio", strings.NewReader(`{"autoplay":{"enabled":true}}`))
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", rec.Code)
+	}
+}
+
+// TestPutAudioConfigPartialUpdate 验证部分更新与响应形状。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestPutAudioConfigPartialUpdate(t *testing.T) {
+	cfg := config.Default()
+	runtime := NewRuntimeConfig(cfg)
+	var gotPatch config.AudioSectionPatch
+	router := NewRouter(Options{
+		Auth:          loggedInAuthService(),
+		RuntimeConfig: runtime,
+		WriteConfig: DefaultConfigSectionWriter(func(_ context.Context, patch config.AudioSectionPatch) (ConfigSectionWriteResponse, error) {
+			gotPatch = patch
+			cfg.Audio.Autoplay.Enabled = true
+			runtime.Apply(cfg)
+			return ConfigSectionWriteResponse{
+				Config:  audioConfigResponseFromConfig(cfg.Audio),
+				Applied: []string{"audio.autoplay.enabled"},
+				Reload: ConfigSectionReloadResponse{
+					Applied: []string{"audio.autoplay.enabled"},
+					Subsystems: []ConfigSubsystemStatusResponse{
+						{Name: "runtime", Status: "ok"},
+						{Name: "audio", Status: "ok"},
+					},
+				},
+			}, nil
+		}),
+	})
+	req := httptest.NewRequest(http.MethodPut, "/api/config/audio", strings.NewReader(`{"autoplay":{"enabled":true}}`))
+	req.AddCookie(&http.Cookie{Name: SessionCookieName, Value: "session"})
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	if gotPatch.Autoplay == nil || gotPatch.Autoplay.Enabled == nil || !*gotPatch.Autoplay.Enabled {
+		t.Fatalf("patch = %#v", gotPatch)
+	}
+	if gotPatch.Playback != nil {
+		t.Fatal("unsubmitted playback should stay nil")
+	}
+	var response ConfigSectionWriteResponse
+	decodeAPIData(t, rec.Body.Bytes(), &response)
+	if len(response.Applied) != 1 || response.Applied[0] != "audio.autoplay.enabled" {
+		t.Fatalf("applied = %#v", response.Applied)
+	}
+	if len(response.Reload.Subsystems) == 0 {
+		t.Fatal("subsystems required")
+	}
+	if !runtime.Audio().Autoplay.Enabled {
+		t.Fatal("runtime should hot-apply")
+	}
+}
+
+// TestPutAudioConfigRejectsFileOnlyField 验证 file_only 字段被拒绝。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestPutAudioConfigRejectsFileOnlyField(t *testing.T) {
+	router := NewRouter(Options{
+		Auth: loggedInAuthService(),
+		WriteConfig: DefaultConfigSectionWriter(func(context.Context, config.AudioSectionPatch) (ConfigSectionWriteResponse, error) {
+			t.Fatal("write should not run")
+			return ConfigSectionWriteResponse{}, nil
+		}),
+	})
+	// 走真实校验：使用 config.Build 路径 — writer 收到 patch 后由业务校验；
+	// 这里直接在 writer 前由 audioPatch + Build 模拟：Default writer 只转 patch，
+	// file_only 在 BuildAudioWritePlan。注入真实 plan 校验：
+	router = NewRouter(Options{
+		Auth: loggedInAuthService(),
+		WriteConfig: DefaultConfigSectionWriter(func(_ context.Context, patch config.AudioSectionPatch) (ConfigSectionWriteResponse, error) {
+			_, err := config.BuildAudioWritePlan(config.Default().Audio, patch)
+			return ConfigSectionWriteResponse{}, err
+		}),
+	})
+	req := httptest.NewRequest(http.MethodPut, "/api/config/audio", strings.NewReader(`{"ffmpeg":{"path":"/secret/ffmpeg"}}`))
+	req.AddCookie(&http.Cookie{Name: SessionCookieName, Value: "session"})
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	if envelope.Error.Code != config.CodeFieldNotWritable {
+		t.Fatalf("code = %s", envelope.Error.Code)
+	}
+	details, _ := json.Marshal(envelope.Error.Details)
+	if !strings.Contains(string(details), "audio.ffmpeg.path") {
+		t.Fatalf("details = %s", details)
+	}
+}
+
+// TestPutAudioConfigRejectsTokenHashDirectWrite 验证不可直接写 tokenHash。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestPutAudioConfigRejectsTokenHashDirectWrite(t *testing.T) {
+	router := NewRouter(Options{
+		Auth: loggedInAuthService(),
+		WriteConfig: DefaultConfigSectionWriter(func(context.Context, config.AudioSectionPatch) (ConfigSectionWriteResponse, error) {
+			t.Fatal("should fail before write")
+			return ConfigSectionWriteResponse{}, nil
+		}),
+	})
+	req := httptest.NewRequest(http.MethodPut, "/api/config/audio", strings.NewReader(`{"inbound":{"tokenHash":"abc"}}`))
+	req.AddCookie(&http.Cookie{Name: SessionCookieName, Value: "session"})
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	if envelope.Error.Code != config.CodeFieldNotWritable {
+		t.Fatalf("code = %s", envelope.Error.Code)
+	}
+}
+
+// TestPutAudioConfigUnknownSection 验证未知 section。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestPutAudioConfigUnknownSection(t *testing.T) {
+	router := NewRouter(Options{
+		Auth: loggedInAuthService(),
+		WriteConfig: DefaultConfigSectionWriter(func(context.Context, config.AudioSectionPatch) (ConfigSectionWriteResponse, error) {
+			t.Fatal("should not write")
+			return ConfigSectionWriteResponse{}, nil
+		}),
+	})
+	req := httptest.NewRequest(http.MethodPut, "/api/config/server", strings.NewReader(`{"host":"0.0.0.0"}`))
+	req.AddCookie(&http.Cookie{Name: SessionCookieName, Value: "session"})
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	if envelope.Error.Code != config.CodeSectionUnknown {
+		t.Fatalf("code = %s", envelope.Error.Code)
+	}
+}
+
+// TestPutAudioConfigInvalidJSON 验证非法 JSON。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestPutAudioConfigInvalidJSON(t *testing.T) {
+	router := NewRouter(Options{
+		Auth:        loggedInAuthService(),
+		WriteConfig: DefaultConfigSectionWriter(nil),
+	})
+	req := httptest.NewRequest(http.MethodPut, "/api/config/audio", strings.NewReader(`{`))
+	req.AddCookie(&http.Cookie{Name: SessionCookieName, Value: "session"})
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d", rec.Code)
+	}
+	envelope := decodeAPIError(t, rec.Body.Bytes())
+	if envelope.Error.Code != config.CodeInvalidJSON {
+		t.Fatalf("code = %s", envelope.Error.Code)
+	}
+}
+
+// TestPutAudioConfigTokenNotLeaked 验证 token 不明文回显。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestPutAudioConfigTokenNotLeaked(t *testing.T) {
+	router := NewRouter(Options{
+		Auth: loggedInAuthService(),
+		WriteConfig: DefaultConfigSectionWriter(func(_ context.Context, patch config.AudioSectionPatch) (ConfigSectionWriteResponse, error) {
+			cfg := config.Default().Audio
+			if patch.Inbound != nil && patch.Inbound.Token != nil {
+				cfg.Inbound.TokenHash = config.HashSecret(*patch.Inbound.Token)
+			}
+			return ConfigSectionWriteResponse{
+				Config:  audioConfigResponseFromConfig(cfg),
+				Applied: []string{"audio.inbound.token"},
+				Reload: ConfigSectionReloadResponse{
+					Applied:    []string{"audio.inbound.token"},
+					Subsystems: []ConfigSubsystemStatusResponse{{Name: "runtime", Status: "ok"}},
+				},
+			}, nil
+		}),
+	})
+	req := httptest.NewRequest(http.MethodPut, "/api/config/audio", strings.NewReader(`{"inbound":{"token":"super-secret-token"}}`))
+	req.AddCookie(&http.Cookie{Name: SessionCookieName, Value: "session"})
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d body=%s", rec.Code, rec.Body.String())
+	}
+	body := rec.Body.String()
+	if strings.Contains(body, "super-secret-token") {
+		t.Fatalf("leaked token: %s", body)
+	}
+	if !strings.Contains(body, `"tokenConfigured":true`) {
+		t.Fatalf("want tokenConfigured true: %s", body)
+	}
+}

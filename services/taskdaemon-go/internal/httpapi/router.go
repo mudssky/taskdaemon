@@ -41,7 +41,9 @@ type Options struct {
 	HTTPLog                config.LoggingHTTPConfig
 	RuntimeConfig          *RuntimeConfig
 	ReloadConfig           func(context.Context) (config.ReloadResult, error)
-	FrontendFS             fs.FS
+	// T1a: 配置 section 写入（管理员 session）
+	WriteConfig ConfigSectionWriteFunc
+	FrontendFS  fs.FS
 	// T6
 	RunLog RunLogService
 	// G6
@@ -97,7 +99,7 @@ func NewRouter(opts Options) http.Handler {
 
 	registerAuthRoutes(router, opts.Auth)
 	registerTaskRoutes(router, opts.Auth, opts.Tasks)
-	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig, runtimeConfigOption(opts))
+	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig, runtimeConfigOption(opts), opts.WriteConfig)
 	registerAudioRoutes(router, opts.Auth, opts.Audio)
 	// T2a
 	registerNotificationRoutes(router, opts.Auth, opts.Notifications, opts.NotifyBus)
