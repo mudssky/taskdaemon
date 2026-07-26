@@ -3,7 +3,7 @@
   "name": "g2-hono-gateway-skeleton",
   "title": "G2 Hono Agent Gateway 骨架",
   "description": "Thread/Run CRUD、SSE stream、cancel、统一错误与 trace、audit/usage 事件产出",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
