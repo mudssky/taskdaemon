@@ -53,6 +53,27 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "RUNLOG_ENABLED", "runlog.enabled")
 	applyEnvAlias(values, prefix, "RUNLOG_RETAIN_DAYS", "runlog.retainDays")
 	applyEnvAlias(values, prefix, "RUNLOG_MAX_TOTAL_BYTES", "runlog.maxTotalBytes")
+	// T4
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_ENABLED", "notify.webhook.enabled")
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_DEFAULT_TIMEOUT_SEC", "notify.webhook.defaultTimeoutSec")
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_DEFAULT_MAX_RETRIES", "notify.webhook.defaultMaxRetries")
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_DEFAULT_BACKOFF_MS", "notify.webhook.defaultBackoffMs")
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_ALLOWED_SCHEMES", "notify.webhook.allowedSchemes")
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_ALLOW_PRIVATE_NETWORKS", "notify.webhook.allowPrivateNetworks")
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_ALLOWED_HOSTS", "notify.webhook.allowedHosts")
+	applyEnvAlias(values, prefix, "NOTIFY_WEBHOOK_MAX_REDIRECTS", "notify.webhook.maxRedirects")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_ENABLED", "notify.email.enabled")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_MIN_SEVERITY", "notify.email.minSeverity")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_FROM", "notify.email.from")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_TO", "notify.email.to")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_TIMEOUT_SECONDS", "notify.email.timeoutSeconds")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_MAX_RETRIES", "notify.email.maxRetries")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_BACKOFF_MS", "notify.email.backoffMs")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_HOST", "notify.email.smtp.host")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_PORT", "notify.email.smtp.port")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_USERNAME", "notify.email.smtp.username")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_PASSWORD", "notify.email.smtp.password")
+	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_ENCRYPTION", "notify.email.smtp.encryption")
 	return values
 }
 

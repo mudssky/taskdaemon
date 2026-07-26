@@ -117,6 +117,8 @@ func TestStoreSinkPruneByMaxRecords(t *testing.T) {
 			Title:      "t",
 		}))
 	}
+	// 等待首轮 Deliver 触发的异步 prune 结束，避免与后续 MaxRecords 配置竞态
+	time.Sleep(200 * time.Millisecond)
 	sink.UpdateConfig(config.NotifyConfig{Store: config.NotifyStoreConfig{Enabled: true, MaxRecords: 2, RetainDays: 0}})
 	require.NoError(t, sink.prune(context.Background()))
 	count, err := store.Client().Notification.Query().Count(context.Background())
@@ -134,6 +136,7 @@ func TestStoreSinkPruneByMaxRecords(t *testing.T) {
 			Title:      "t",
 		}))
 	}
+	time.Sleep(200 * time.Millisecond)
 	require.NoError(t, sink.prune(context.Background()))
 	count, err = store.Client().Notification.Query().Count(context.Background())
 	require.NoError(t, err)
@@ -159,6 +162,7 @@ func TestStoreSinkPruneByRetainDays(t *testing.T) {
 		ID: "new", Name: NameTaskRunSucceeded, Severity: SeverityInfo,
 		OccurredAt: now.AddDate(0, 0, -1), Title: "new",
 	}))
+	time.Sleep(200 * time.Millisecond)
 	require.NoError(t, sink.prune(context.Background()))
 	ids, err := store.Client().Notification.Query().IDs(context.Background())
 	require.NoError(t, err)
@@ -173,6 +177,7 @@ func TestStoreSinkPruneByRetainDays(t *testing.T) {
 		ID: "ancient", Name: NameTaskRunSucceeded, Severity: SeverityInfo,
 		OccurredAt: now.AddDate(-1, 0, 0), Title: "ancient",
 	}))
+	time.Sleep(200 * time.Millisecond)
 	require.NoError(t, sink.prune(context.Background()))
 	count, err := store.Client().Notification.Query().Count(context.Background())
 	require.NoError(t, err)

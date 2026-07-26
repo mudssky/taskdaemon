@@ -103,7 +103,17 @@ func TestBusSingleSinkErrorDoesNotAffectOthers(t *testing.T) {
 	bus.Register(ok)
 
 	bus.Publish(context.Background(), testEvent("e2"))
-	require.Eventually(t, func() bool { return ok.delivered.Load() == 1 }, time.Second, 10*time.Millisecond)
+	require.Eventually(t, func() bool {
+		if ok.delivered.Load() != 1 {
+			return false
+		}
+		for _, status := range bus.SinkStatuses() {
+			if status.Name == "fail" && status.FailureCount >= 1 {
+				return true
+			}
+		}
+		return false
+	}, time.Second, 10*time.Millisecond)
 
 	statuses := bus.SinkStatuses()
 	require.Len(t, statuses, 2)

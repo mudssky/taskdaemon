@@ -42,6 +42,11 @@ func (app *App) Serve(ctx context.Context) error {
 	notifyBus := notify.NewBus(app.cfg.Notify, notify.BusOptions{Logger: app.logger})
 	storeSink := notify.NewStoreSink(store, app.cfg.Notify.Store, notify.StoreSinkOptions{Logger: app.logger})
 	notifyBus.Register(storeSink)
+	// T4: Webhook / 邮件出站 sink
+	webhookSink := notify.NewWebhookSink(app.cfg.Notify.Webhook, notify.WebhookSinkOptions{Logger: app.logger})
+	emailSink := notify.NewEmailSink(app.cfg.Notify.Email, notify.EmailSinkOptions{Logger: app.logger})
+	notifyBus.Register(webhookSink)
+	notifyBus.Register(emailSink)
 	notifyBus.Start()
 	app.notifyBus = notifyBus
 	app.storeSink = storeSink

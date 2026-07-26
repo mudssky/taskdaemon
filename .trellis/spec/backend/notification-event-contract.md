@@ -150,6 +150,22 @@ func (b *Bus) Shutdown()
 | `notify.store.maxRecords` | 200 | 是 |
 | `notify.store.retainDays` | 30 | 是 |
 | `notify.store.minSeverity` | `""`（不限） | 是 |
+| `notify.webhook.enabled` | false | 是 |
+| `notify.webhook.defaultTimeoutSec` | 10 | 是 |
+| `notify.webhook.defaultMaxRetries` | 2 | 是 |
+| `notify.webhook.defaultBackoffMs` | 200 | 是 |
+| `notify.webhook.allowedSchemes` | `[https]` | 是 |
+| `notify.webhook.allowPrivateNetworks` | false | 是 |
+| `notify.webhook.allowedHosts` | `[]` | 是 |
+| `notify.webhook.maxRedirects` | 3 | 是 |
+| `notify.webhook.targets` | `[]` | 是 |
+| `notify.email.enabled` | false | 是 |
+| `notify.email.minSeverity` | `""` | 是 |
+| `notify.email.from` / `to` | 空 | 是 |
+| `notify.email.timeoutSeconds` | 15 | 是 |
+| `notify.email.maxRetries` | 2 | 是 |
+| `notify.email.backoffMs` | 200 | 是 |
+| `notify.email.smtp.*` | host 空 / port 587 / encryption starttls | 是（敏感字段不明文回显） |
 
 环境变量别名：`TASKDAEMON_NOTIFY_*`（见 `config/env.go`）。
 
@@ -163,6 +179,8 @@ func (b *Bus) Shutdown()
 | Sink / 状态 | `internal/notify/sink.go` |
 | Bus | `internal/notify/bus.go` |
 | 站内 sink | `internal/notify/sink_store.go` |
+| Webhook sink（T4） | `internal/notify/sink_webhook*.go` |
+| Email sink（T4） | `internal/notify/sink_email*.go` |
 | 安全构造 | `internal/notify/builders.go` |
 | 调度发布 | `internal/scheduler/run_lifecycle.go` |
 | HTTP API | `internal/httpapi/notification_routes.go` |
