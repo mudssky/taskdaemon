@@ -24,6 +24,9 @@ go test ./...
 go run ./cmd/taskdaemon serve
 go run ./cmd/taskdaemon serve --config ./taskdaemon.yaml
 go run ./cmd/taskdaemon db migrate
+go run ./cmd/taskdaemon service install --dry-run
+go run ./cmd/taskdaemon service status
+
 ```
 
 ## 项目结构
@@ -51,6 +54,53 @@ scripts/                          # 本地开发与构建脚本
 配置示例位于 `services/taskdaemon-go/taskdaemon.example.yaml`。开发时可复制为 `services/taskdaemon-go/taskdaemon.yaml` 后在 Go service 目录启动；发布部署时建议复制到用户配置目录，或通过 `--config` 显式指定。
 
 Swagger route 默认关闭，打开 `server.swagger.enabled` 后注册 `/swagger/index.html`。
+
+## 系统服务（T5）
+
+CLI 可将 taskdaemon 注册为操作系统服务，实现开机自启与崩溃重启：
+
+```bash
+# 预览将写入的单元（零副作用）
+taskdaemon service install --dry-run --config /abs/path/config.yaml
+
+# 安装 / 状态 / 卸载
+taskdaemon service install --config /abs/path/config.yaml
+taskdaemon service status
+taskdaemon service uninstall
+```
+
+### 作用域与权限
+
+| 平台 | 默认作用域 | 备选 | 权限 |
+|---|---|---|---|
+| macOS | 用户级 LaunchAgent（`~/Library/LaunchAgents/`） | `--scope system` LaunchDaemon | 系统级需 root |
+| Linux | 用户级 systemd（`~/.config/systemd/user/`） | `--scope system` | 系统级需 root；用户级注销后默认停止，需 `loginctl enable-linger $USER` |
+| Windows | 系统 SCM 服务 `TaskDaemon` | 无用户级服务 | **始终需要管理员** |
+
+规则：
+
+- 单元内配置路径与可执行文件均为**绝对路径**，避免装完读到另一份配置。
+- 重复 `install` 默认拒绝；加 `--force` 显式覆盖。
+- 中途失败会逆序回滚，不留半装状态。
+- 单元内容不含 token/密码；用户级文件权限 `0644`。
+- 这与 Desktop「登录自启动」（Track D / D3）是不同能力，勿混用。
+
+### 手动清理
+
+```bash
+# macOS user
+launchctl bootout gui/$(id -u)/com.taskdaemon.daemon
+rm -f ~/Library/LaunchAgents/com.taskdaemon.daemon.plist
+
+# Linux user
+systemctl --user disable --now taskdaemon.service
+rm -f ~/.config/systemd/user/taskdaemon.service
+systemctl --user daemon-reload
+
+# Windows (elevated)
+sc stop TaskDaemon
+sc delete TaskDaemon
+```
 
 ## 前端嵌入
 

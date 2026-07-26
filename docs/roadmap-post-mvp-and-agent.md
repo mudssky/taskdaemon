@@ -377,7 +377,7 @@ interface RuntimeCapabilities {
 | T1a | `07-27-t1a-config-write-api` | 配置写入 API + **契约 C-1 冻结** | T0 |
 | T2a | `07-27-t2a-notification-event-bus` | 通知事件总线 + 站内 sink + **契约 C-2 冻结** | — |
 | T4 | `07-27-t4-outbound-notification-sink` | Webhook / 邮件出站 sink | T2a |
-| T5 | `07-27-t5-service-installer` | 系统服务安装器（CLI，纯后端） | — |
+| T5 | `07-27-t5-service-installer` | 系统服务安装器（CLI，纯后端）**[impl done · 待真实三平台装机验收]** | — |
 | T6 | `07-27-t6-run-log-archive` | Run 完整日志归档 | — |
 | T7a | `07-27-t7a-backup-template-api` | 备份模板后端 API | T1a |
 | T8 | `07-27-t8-db-migration-tool` | SQLite ↔ PostgreSQL 迁移工具（CLI，纯后端） | T1a |

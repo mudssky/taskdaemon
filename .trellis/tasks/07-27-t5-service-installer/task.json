@@ -3,7 +3,7 @@
   "name": "t5-service-installer",
   "title": "T5 系统服务安装器",
   "description": "CLI install/uninstall service，覆盖 launchd/systemd/Windows 服务",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
