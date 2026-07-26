@@ -74,6 +74,15 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_USERNAME", "notify.email.smtp.username")
 	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_PASSWORD", "notify.email.smtp.password")
 	applyEnvAlias(values, prefix, "NOTIFY_EMAIL_SMTP_ENCRYPTION", "notify.email.smtp.encryption")
+	// G6
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_ENABLED", "agentBridge.enabled")
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_GATEWAY_BASE_URL", "agentBridge.gatewayBaseUrl")
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_GATEWAY_SUBJECT", "agentBridge.gatewaySubject")
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_GATEWAY_TENANT_ID", "agentBridge.gatewayTenantId")
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_INBOUND_TOKEN_HASH", "agentBridge.inboundTokenHash")
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_ALLOWED_TASK_IDS", "agentBridge.allowedTaskIds")
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_MAX_LOOP_DEPTH", "agentBridge.maxLoopDepth")
+	applyEnvAlias(values, prefix, "AGENT_BRIDGE_REQUEST_TIMEOUT_SECONDS", "agentBridge.requestTimeoutSeconds")
 	return values
 }
 

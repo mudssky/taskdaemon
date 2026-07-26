@@ -5,6 +5,7 @@
 import { createApp } from "../src/app.js";
 import type { GatewayConfig } from "../src/config.js";
 import { loadConfig } from "../src/config.js";
+import { McpCatalog } from "../src/mcp/catalog.js";
 import {
   createDefaultMockRuntimes,
   MockAgentRuntime,
@@ -25,6 +26,7 @@ export type TestContext = {
   registry: RuntimeRegistry;
   config: GatewayConfig;
   runtimes: MockAgentRuntime[];
+  mcpCatalog: McpCatalog;
 };
 
 /**
@@ -77,6 +79,7 @@ export function createTestContext(
   const store = new MemoryThreadRunStore();
   const streams = new StreamHub(100, 60_000);
   const emitter = new MemoryTrustEventEmitter();
+  const mcpCatalog = new McpCatalog(config.mcp);
   const orchestrator = new Orchestrator({
     config,
     registry,
@@ -84,6 +87,7 @@ export function createTestContext(
     store,
     streams,
     emitter,
+    mcpCatalog,
   });
   // 测试不启 idle timer，避免干扰
 
@@ -92,13 +96,24 @@ export function createTestContext(
     orchestrator,
     principalResolver: createPrincipalResolver(config.principalResolverMode),
     emitter,
+    mcpCatalog,
   });
 
-  return { app, orchestrator, emitter, registry, config, runtimes };
+  return { app, orchestrator, emitter, registry, config, runtimes, mcpCatalog };
 }
 
 /**
  * 发送 JSON 请求。
+ *
+ * 参数:
+ *   - app: Hono app。
+ *   - method: HTTP 方法。
+ *   - path: 路径。
+ *   - body: 可选 JSON body。
+ *   - headers: 可选头。
+ *
+ * 返回值:
+ *   - status / json / headers。
  */
 export async function jsonRequest(
   app: TestContext["app"],

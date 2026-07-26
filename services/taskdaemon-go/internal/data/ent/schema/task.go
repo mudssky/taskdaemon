@@ -27,7 +27,7 @@ func (Task) Fields() []ent.Field {
 		field.Bool("enabled").Default(true),
 		field.String("cron_expression").Optional(),
 		field.String("timezone").Default("Local"),
-		field.Enum("runner_type").Values("shell", "bash", "pwsh", "python", "node", "typescript").Default("shell"),
+		field.Enum("runner_type").Values("shell", "bash", "pwsh", "python", "node", "typescript", "agent").Default("shell"),
 		field.JSON("runner_config", map[string]any{}).Optional(),
 		field.Int("timeout_seconds").Default(3600).Positive(),
 		field.Enum("overlap_policy").Values("skip").Default("skip"),

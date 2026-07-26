@@ -20,7 +20,10 @@ import {
 } from "@taskdaemon/agent-protocol";
 import type { GatewayConfig, PoolConfig } from "../config.js";
 import { AgentHttpError } from "../errors.js";
-import { assertToolAllowed, resolveWorkspaceRoot } from "../policy/policy.js";
+import { emptyMcpCatalog, type McpCatalog } from "../mcp/catalog.js";
+import { assertGatewayToolAllowed } from "../mcp/policy.js";
+import { redactToolArgs } from "../mcp/redaction.js";
+import { resolveWorkspaceRoot } from "../policy/policy.js";
 import type {
   MemoryThreadRunStore,
   RunRecord,
@@ -39,6 +42,8 @@ export type OrchestratorDeps = {
   store: MemoryThreadRunStore;
   streams: StreamHub;
   emitter: TrustEventEmitter;
+  /** MCP 目录；缺省空目录。 */
+  mcpCatalog?: McpCatalog;
 };
 
 /** 核心编排服务。 */
@@ -49,6 +54,7 @@ export class Orchestrator {
   private readonly store: MemoryThreadRunStore;
   private readonly streams: StreamHub;
   private readonly emitter: TrustEventEmitter;
+  private readonly mcpCatalog: McpCatalog;
   private idleTimer: ReturnType<typeof setInterval> | undefined;
   private closed = false;
 
@@ -63,6 +69,7 @@ export class Orchestrator {
     this.store = deps.store;
     this.streams = deps.streams;
     this.emitter = deps.emitter;
+    this.mcpCatalog = deps.mcpCatalog ?? emptyMcpCatalog();
   }
 
   /** 启动空闲扫描。 */
@@ -129,11 +136,17 @@ export class Orchestrator {
       throw err;
     }
 
-    // tools 策略：会话级 + gateway allowlist 在 tool 调用时再检
+    // tools 策略：会话级 + gateway allowlist（MCP 走 MCP_TOOL_NOT_ALLOWED）
     if (body.tools && body.tools !== "none" && Array.isArray(body.tools)) {
       for (const tool of body.tools) {
         try {
-          assertToolAllowed(tool, this.config.toolAllowlist, body.tools);
+          assertGatewayToolAllowed(
+            tool,
+            this.config.toolAllowlist,
+            body.tools,
+            this.mcpCatalog,
+            principal.tenantId,
+          );
         } catch (err) {
           await this.audit(principal, {
             action: "thread.create",
@@ -573,13 +586,18 @@ export class Orchestrator {
       }
 
       for await (const event of runtime.prompt(thread.sessionId, input)) {
-        // 策略：tool 调用时检查 allowlist
+        // 策略：gateway 侧拦截 tool（不依赖 runtime 自觉）
         if (event.type === "tool_call_start") {
           try {
-            assertToolAllowed(
+            assertGatewayToolAllowed(
               event.toolName,
               this.config.toolAllowlist,
               thread.tools,
+              this.mcpCatalog,
+              principal.tenantId,
+            );
+            const argsSummary = redactToolArgs(
+              "args" in event ? event.args : undefined,
             );
             await this.audit(principal, {
               action: "tool.invoke",
@@ -588,8 +606,18 @@ export class Orchestrator {
               runId: run.runId,
               resource: event.toolName,
               workspaceRoot: thread.workspaceRoot,
+              metadata: {
+                server: event.toolName.includes("/")
+                  ? event.toolName.split("/")[0]
+                  : undefined,
+                tool: event.toolName,
+                argsSummary,
+                status: "allowed",
+              },
             });
           } catch (err) {
+            const code =
+              err instanceof AgentHttpError ? err.code : "AGENT_FORBIDDEN";
             await this.audit(principal, {
               action: "tool.invoke",
               outcome: "denied",
@@ -597,6 +625,11 @@ export class Orchestrator {
               runId: run.runId,
               resource: event.toolName,
               message: err instanceof Error ? err.message : "denied",
+              metadata: {
+                tool: event.toolName,
+                status: "denied",
+                code,
+              },
             });
             // 策略拒绝：中止并错误结束
             await runtime.abort(thread.sessionId);
@@ -605,7 +638,7 @@ export class Orchestrator {
                 type: "run_error",
                 sessionId: thread.sessionId,
                 message: err instanceof Error ? err.message : "tool denied",
-                code: "AGENT_FORBIDDEN",
+                code,
               },
               {
                 threadId: thread.threadId,

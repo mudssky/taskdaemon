@@ -147,6 +147,19 @@ notify:
       password: ""
       encryption: starttls
 
+
+# G6: 双引擎桥接（默认关闭；allowedTaskIds 空 = 拒绝一切 agent 触发）
+agentBridge:
+  enabled: false
+  gatewayBaseUrl: http://127.0.0.1:8787
+  gatewaySubject: taskdaemon-service
+  gatewayTenantId: system
+  # inboundTokenHash: <sha256 of machine bearer>
+  inboundTokenHash: ""
+  allowedTaskIds: []
+  maxLoopDepth: 1
+  requestTimeoutSeconds: 120
+
 # 环境变量覆盖示例：
 # TASKDAEMON_SERVER_HOST=127.0.0.1
 # TASKDAEMON_SERVER_PORT=39245

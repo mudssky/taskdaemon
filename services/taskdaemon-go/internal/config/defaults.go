@@ -131,6 +131,17 @@ func Default() Config {
 			RetainDays:    30,
 			MaxTotalBytes: 2 * 1024 * 1024 * 1024, // 2 GiB
 		},
+		// G6
+		AgentBridge: AgentBridgeConfig{
+			Enabled:               false,
+			GatewayBaseURL:        "http://127.0.0.1:8787",
+			GatewaySubject:        "taskdaemon-service",
+			GatewayTenantID:       "system",
+			InboundTokenHash:      "",
+			AllowedTaskIDs:        []int{},
+			MaxLoopDepth:          1,
+			RequestTimeoutSeconds: 120,
+		},
 	}
 }
 
@@ -202,13 +213,20 @@ func defaultMap() map[string]any {
 		"notify.email.from":                   defaults.Notify.Email.From,
 		"notify.email.to":                     defaults.Notify.Email.To,
 		"notify.email.timeoutSeconds":         defaults.Notify.Email.TimeoutSeconds,
-		"notify.email.maxRetries":             defaults.Notify.Email.MaxRetries,
-		"notify.email.backoffMs":              defaults.Notify.Email.BackoffMs,
 		"notify.email.smtp.host":              defaults.Notify.Email.SMTP.Host,
 		"notify.email.smtp.port":              defaults.Notify.Email.SMTP.Port,
 		"notify.email.smtp.username":          defaults.Notify.Email.SMTP.Username,
 		"notify.email.smtp.password":          defaults.Notify.Email.SMTP.Password,
 		"notify.email.smtp.encryption":        defaults.Notify.Email.SMTP.Encryption,
+		// G6
+		"agentBridge.enabled":               defaults.AgentBridge.Enabled,
+		"agentBridge.gatewayBaseUrl":        defaults.AgentBridge.GatewayBaseURL,
+		"agentBridge.gatewaySubject":        defaults.AgentBridge.GatewaySubject,
+		"agentBridge.gatewayTenantId":       defaults.AgentBridge.GatewayTenantID,
+		"agentBridge.inboundTokenHash":      defaults.AgentBridge.InboundTokenHash,
+		"agentBridge.allowedTaskIds":        defaults.AgentBridge.AllowedTaskIDs,
+		"agentBridge.maxLoopDepth":          defaults.AgentBridge.MaxLoopDepth,
+		"agentBridge.requestTimeoutSeconds": defaults.AgentBridge.RequestTimeoutSeconds,
 	}
 }
 

@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"math"
+	"strconv"
 	"time"
 
 	"taskdaemon/internal/data/ent"
@@ -16,7 +17,7 @@ import (
 // 返回值:
 //   - map[string]any: JSON 友好的 runner 配置。
 func runnerConfigToJSON(cfg runner.Config) map[string]any {
-	return map[string]any{
+	out := map[string]any{
 		"type":             string(cfg.Type),
 		"inline":           cfg.Inline,
 		"scriptPath":       cfg.ScriptPath,
@@ -26,6 +27,13 @@ func runnerConfigToJSON(cfg runner.Config) map[string]any {
 		"timeoutSeconds":   int(math.Ceil(cfg.Timeout.Seconds())),
 		"outputLimitBytes": cfg.OutputLimitBytes,
 	}
+	if cfg.Type == runner.TypeAgent {
+		out["runtimeId"] = cfg.AgentRuntimeID
+		out["profile"] = cfg.AgentProfile
+		out["inputText"] = cfg.AgentInputText
+		out["threadId"] = cfg.AgentThreadID
+	}
+	return out
 }
 
 // withCronWarnings 在 runner JSON 中附加 cron 软警告，便于后续展示和排查。
@@ -73,6 +81,29 @@ func runnerConfigFromTask(taskRecord *ent.Task) (runner.Config, error) {
 	}
 	if env, ok := stringMapValue(taskRecord.RunnerConfig, "env"); ok {
 		cfg.Env = env
+	}
+	if value, ok := stringValue(taskRecord.RunnerConfig, "runtimeId"); ok {
+		cfg.AgentRuntimeID = value
+	}
+	if value, ok := stringValue(taskRecord.RunnerConfig, "profile"); ok {
+		cfg.AgentProfile = value
+	}
+	if value, ok := stringValue(taskRecord.RunnerConfig, "inputText"); ok {
+		cfg.AgentInputText = value
+	}
+	if value, ok := stringValue(taskRecord.RunnerConfig, "threadId"); ok {
+		cfg.AgentThreadID = value
+	}
+	// 环路深度可从 env 注入（agent 触发的任务）
+	if cfg.Env != nil {
+		if depthRaw, ok := cfg.Env["TASKDAEMON_AGENT_LOOP_DEPTH"]; ok {
+			if n, err := strconv.Atoi(depthRaw); err == nil {
+				cfg.AgentLoopDepth = n
+			}
+		}
+		if tr, ok := cfg.Env["TASKDAEMON_TRACE_ID"]; ok {
+			cfg.AgentTraceID = tr
+		}
 	}
 	return cfg, nil
 }

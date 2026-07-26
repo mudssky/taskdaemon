@@ -44,6 +44,8 @@ type Options struct {
 	FrontendFS             fs.FS
 	// T6
 	RunLog RunLogService
+	// G6
+	AgentBridgeConfig func() config.AgentBridgeConfig
 }
 
 // AuthService 定义 HTTP handler 依赖的认证服务能力。
@@ -101,6 +103,12 @@ func NewRouter(opts Options) http.Handler {
 	registerNotificationRoutes(router, opts.Auth, opts.Notifications, opts.NotifyBus)
 	// T6
 	registerRunLogRoutes(router, opts.Auth, opts.RunLog)
+	// G6
+	registerAgentBridgeRoutes(router, AgentBridgeOptions{
+		Config: opts.AgentBridgeConfig,
+		Tasks:  opts.Tasks,
+		Audio:  opts.Audio,
+	})
 	if opts.EnableSwagger {
 		router.GET("/swagger/index.html", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Swagger UI is enabled. Generated docs will be mounted here.")

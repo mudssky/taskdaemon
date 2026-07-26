@@ -11,6 +11,8 @@ type Config struct {
 	Notify NotifyConfig
 	// T6: run 完整日志归档配置（append-only）
 	RunLog RunLogConfig
+	// G6: agent-gateway 双向桥接配置（append-only）
+	AgentBridge AgentBridgeConfig
 }
 
 // ResolvedPaths 保存本次配置加载会使用的文件路径。
@@ -222,4 +224,26 @@ type LoadOptions struct {
 	ConfigPath string
 	Optional   bool
 	Overrides  map[string]any
+}
+
+// AgentBridgeConfig 保存 G6 双引擎互调配置。
+// 分级：outbound 连接需重启；allowedTaskIDs / maxLoopDepth 热更新（经 RuntimeConfig 若扩展）。
+// 默认保守：未启用、无允许任务、环路深度 1。
+type AgentBridgeConfig struct {
+	// Enabled 总开关；false 时 agent runner 与 inbound 均拒绝。
+	Enabled bool
+	// GatewayBaseURL agent-gateway 根地址，如 http://127.0.0.1:8787。
+	GatewayBaseURL string
+	// GatewaySubject 调用 gateway 时注入的 x-auth-subject（机器身份，非管理员 cookie）。
+	GatewaySubject string
+	// GatewayTenantID 调用 gateway 时注入的 x-tenant-id。
+	GatewayTenantID string
+	// InboundTokenHash agent→taskdaemon Bearer Token 的 SHA-256 hex；空 = 拒绝一切入站。
+	InboundTokenHash string
+	// AllowedTaskIDs agent 可触发的任务 ID 白名单；空 = 全部拒绝。
+	AllowedTaskIDs []int
+	// MaxLoopDepth 环路深度上限；请求 depth >= 此值则拒绝。默认 1。
+	MaxLoopDepth int
+	// RequestTimeoutSeconds 出站 HTTP 超时秒数。
+	RequestTimeoutSeconds int
 }

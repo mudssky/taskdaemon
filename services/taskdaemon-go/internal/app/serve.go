@@ -7,8 +7,10 @@ import (
 	"io/fs"
 	"net/http"
 
+	"taskdaemon/internal/agentbridge"
 	"taskdaemon/internal/audio"
 	"taskdaemon/internal/auth"
+	"taskdaemon/internal/config"
 	"taskdaemon/internal/data"
 	"taskdaemon/internal/httpapi"
 	"taskdaemon/internal/notify"
@@ -55,9 +57,10 @@ func (app *App) Serve(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("init runlog service: %w", err)
 	}
-
+	agentClient := agentbridge.NewClient(app.cfg.AgentBridge)
+	exec := runner.NewExecutor().WithAgentRunner(agentbridge.NewRunnerAdapter(agentClient))
 	taskService := scheduler.NewService(store, scheduler.Options{
-		Runner:    runner.NewExecutor(),
+		Runner:    exec,
 		Publisher: notifyBus,
 		RunLog:    runLogService,
 	})
@@ -75,6 +78,7 @@ func (app *App) Serve(ctx context.Context) error {
 	defer audioQueue.Shutdown()
 	app.audioService = audio.New(store, app.cfg.Audio, audio.Options{Queue: audioQueue})
 
+	bridgeCfg := app.cfg.AgentBridge
 	server := &http.Server{
 		Addr: app.cfg.Server.Address(),
 		Handler: httpapi.NewRouter(httpapi.Options{
@@ -93,6 +97,8 @@ func (app *App) Serve(ctx context.Context) error {
 			FrontendFS:             mustFrontendFS(),
 			// T6
 			RunLog: runLogService,
+			// G6
+			AgentBridgeConfig: func() config.AgentBridgeConfig { return bridgeCfg },
 		}),
 	}
 

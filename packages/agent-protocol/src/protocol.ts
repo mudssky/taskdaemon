@@ -200,7 +200,7 @@ export type AgentErrorBody = {
   };
 };
 
-/** G1 冻结的错误码子集；G2 可 append-only 扩展。 */
+/** G1 冻结的错误码子集；G2/G6 可 append-only 扩展。 */
 export type AgentErrorCode =
   | "AGENT_VALIDATION_FAILED"
   | "AGENT_UNAUTHORIZED"
@@ -212,7 +212,13 @@ export type AgentErrorCode =
   | "AGENT_RUNTIME_UNAVAILABLE"
   | "AGENT_CAPABILITY_UNSUPPORTED"
   | "AGENT_STREAM_CURSOR_INVALID"
-  | "AGENT_INTERNAL_ERROR";
+  | "AGENT_INTERNAL_ERROR"
+  // G6 MCP / 双引擎
+  | "MCP_TOOL_NOT_ALLOWED"
+  | "MCP_SERVER_UNAVAILABLE"
+  | "MCP_VALIDATION_FAILED"
+  | "MCP_LOOP_DETECTED"
+  | "MCP_TASK_NOT_ALLOWED";
 
 /** HTTP 状态与错误码建议映射（实现侧参考，非运行时代码）。 */
 export const AGENT_ERROR_HTTP_STATUS: Record<AgentErrorCode, number> = {
@@ -227,4 +233,9 @@ export const AGENT_ERROR_HTTP_STATUS: Record<AgentErrorCode, number> = {
   AGENT_CAPABILITY_UNSUPPORTED: 400,
   AGENT_STREAM_CURSOR_INVALID: 400,
   AGENT_INTERNAL_ERROR: 500,
+  MCP_TOOL_NOT_ALLOWED: 403,
+  MCP_SERVER_UNAVAILABLE: 503,
+  MCP_VALIDATION_FAILED: 422,
+  MCP_LOOP_DETECTED: 409,
+  MCP_TASK_NOT_ALLOWED: 403,
 };

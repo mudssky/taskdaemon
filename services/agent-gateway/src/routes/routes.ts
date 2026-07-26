@@ -12,12 +12,15 @@ import {
 import type { Context } from "hono";
 import { Hono } from "hono";
 import { errorBody, toAgentHttpError } from "../errors.js";
+import type { McpCatalog } from "../mcp/catalog.js";
+import { mountMcpRoutes } from "../mcp/routes.js";
 import type { Orchestrator } from "../runtime/orchestrator.js";
 import type { PrincipalVariables } from "../trust/middleware.js";
 
 export type AppEnv = {
   Variables: PrincipalVariables & {
     orchestrator: Orchestrator;
+    mcpCatalog: McpCatalog;
   };
 };
 
@@ -27,10 +30,12 @@ export type AppEnv = {
  * 参数:
  *   - app: Hono 实例。
  *   - getOrchestrator: 取编排器。
+ *   - getMcpCatalog: 取 MCP 目录。
  */
 export function mountRoutes(
   app: Hono<AppEnv>,
   getOrchestrator: () => Orchestrator,
+  getMcpCatalog: () => McpCatalog,
 ): void {
   const v1 = new Hono<AppEnv>();
 
@@ -250,6 +255,9 @@ export function mountRoutes(
       return respondError(c, err);
     }
   });
+
+  // G6: MCP 目录查询
+  mountMcpRoutes(v1 as never, getMcpCatalog);
 
   app.route(AGENT_API_PREFIX, v1);
 }

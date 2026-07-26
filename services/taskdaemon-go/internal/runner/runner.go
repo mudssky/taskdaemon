@@ -44,6 +44,8 @@ const (
 	TypeNode Type = "node"
 	// TypeTypeScript 使用 tsx 执行 TypeScript 脚本。
 	TypeTypeScript Type = "typescript"
+	// TypeAgent 通过 agent-gateway 创建并执行 agent run（G6）。
+	TypeAgent Type = "agent"
 )
 
 // Status 表示 runner 执行后的业务状态。
@@ -73,6 +75,15 @@ type Config struct {
 	// StdoutMirror / StderrMirror 可选镜像完整输出（如 runlog）；写失败不得影响执行。
 	StdoutMirror io.Writer
 	StderrMirror io.Writer
+	// Agent* 仅 TypeAgent 使用。
+	AgentRuntimeID string
+	AgentProfile   string
+	AgentInputText string
+	AgentThreadID  string
+	// AgentTraceID 由调度层注入，透传给 gateway，禁止 runner 自行生成。
+	AgentTraceID string
+	// AgentLoopDepth 环路深度，写入出站头。
+	AgentLoopDepth int
 }
 
 // Command 是从结构化 runner 配置构造出的进程命令摘要。
@@ -93,8 +104,24 @@ type Result struct {
 	StderrTruncated bool
 }
 
+// AgentRunner 是 TypeAgent 的出站执行面（由 agentbridge 实现）。
+type AgentRunner interface {
+	// CreateAndWaitRun 创建并等待 agent run 终态。
+	//
+	// 参数:
+	//   - ctx: 上下文。
+	//   - cfg: runner 配置（含 TraceID）。
+	//
+	// 返回值:
+	//   - Result: 业务结果。
+	//   - error: 配置或传输错误。
+	CreateAndWaitRun(ctx context.Context, cfg Config) (Result, error)
+}
+
 // Executor 执行结构化 runner 配置。
-type Executor struct{}
+type Executor struct {
+	agent AgentRunner
+}
 
 // NewExecutor 创建 runner 执行器。
 //
@@ -105,6 +132,18 @@ type Executor struct{}
 //   - Executor: 可执行结构化 runner 配置的执行器。
 func NewExecutor() Executor {
 	return Executor{}
+}
+
+// WithAgentRunner 注入 agent 出站执行器（G6）。
+//
+// 参数:
+//   - agent: AgentRunner 实现；可为 nil。
+//
+// 返回值:
+//   - Executor: 带 agent 能力的执行器。
+func (executor Executor) WithAgentRunner(agent AgentRunner) Executor {
+	executor.agent = agent
+	return executor
 }
 
 // Validate 校验 runner 配置是否可保存和执行。
@@ -120,6 +159,12 @@ func Validate(cfg Config) error {
 	}
 	if normalizeTimeout(cfg.Timeout) <= 0 {
 		return ErrInvalidTimeout
+	}
+	if cfg.Type == TypeAgent {
+		if strings.TrimSpace(cfg.AgentInputText) == "" && strings.TrimSpace(cfg.Inline) == "" {
+			return fmt.Errorf("%w: agent input text required", ErrMissingCommand)
+		}
+		return nil
 	}
 	if strings.TrimSpace(cfg.Inline) == "" && strings.TrimSpace(cfg.ScriptPath) == "" {
 		return ErrMissingCommand
@@ -174,6 +219,9 @@ func BuildCommand(cfg Config) (Command, error) {
 //   - Result: 执行状态、退出码、耗时、错误摘要和截断输出。
 //   - error: 配置非法时返回错误；进程非零退出映射到 Result，不作为 error 返回。
 func (executor Executor) Execute(ctx context.Context, cfg Config) (Result, error) {
+	if cfg.Type == TypeAgent {
+		return executor.executeAgent(ctx, cfg)
+	}
 	command, err := BuildCommand(cfg)
 	if err != nil {
 		return Result{}, err
@@ -229,6 +277,32 @@ func (executor Executor) Execute(ctx context.Context, cfg Config) (Result, error
 	return result, nil
 }
 
+// executeAgent 通过注入的 AgentRunner 触发 gateway run。
+//
+// 参数:
+//   - executor: 执行器。
+//   - ctx: 上下文。
+//   - cfg: runner 配置。
+//
+// 返回值:
+//   - Result: 业务结果。
+//   - error: 未注入 agent 或执行失败。
+func (executor Executor) executeAgent(ctx context.Context, cfg Config) (Result, error) {
+	if err := Validate(cfg); err != nil {
+		return Result{}, err
+	}
+	if executor.agent == nil {
+		return Result{
+			Status:       StatusFailed,
+			ErrorSummary: "agent runner is not configured",
+		}, nil
+	}
+	if strings.TrimSpace(cfg.AgentInputText) == "" {
+		cfg.AgentInputText = cfg.Inline
+	}
+	return executor.agent.CreateAndWaitRun(ctx, cfg)
+}
+
 // supportedTypes 返回第一版允许保存和执行的内置 runner 类型。
 //
 // 参数:
@@ -237,7 +311,7 @@ func (executor Executor) Execute(ctx context.Context, cfg Config) (Result, error
 // 返回值:
 //   - []Type: 内置 runner 类型列表。
 func supportedTypes() []Type {
-	return []Type{TypeShell, TypeBash, TypePwsh, TypePython, TypeNode, TypeTypeScript}
+	return []Type{TypeShell, TypeBash, TypePwsh, TypePython, TypeNode, TypeTypeScript, TypeAgent}
 }
 
 // normalizeTimeout 返回 runner timeout，未配置时使用默认 1 小时。

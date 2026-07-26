@@ -109,6 +109,7 @@ const (
 	RunnerTypePython     RunnerType = "python"
 	RunnerTypeNode       RunnerType = "node"
 	RunnerTypeTypescript RunnerType = "typescript"
+	RunnerTypeAgent      RunnerType = "agent"
 )
 
 func (rt RunnerType) String() string {
@@ -118,7 +119,7 @@ func (rt RunnerType) String() string {
 // RunnerTypeValidator is a validator for the "runner_type" field enum values. It is called by the builders before save.
 func RunnerTypeValidator(rt RunnerType) error {
 	switch rt {
-	case RunnerTypeShell, RunnerTypeBash, RunnerTypePwsh, RunnerTypePython, RunnerTypeNode, RunnerTypeTypescript:
+	case RunnerTypeShell, RunnerTypeBash, RunnerTypePwsh, RunnerTypePython, RunnerTypeNode, RunnerTypeTypescript, RunnerTypeAgent:
 		return nil
 	default:
 		return fmt.Errorf("task: invalid enum value for runner_type field: %q", rt)
