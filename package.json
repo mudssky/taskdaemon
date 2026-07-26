@@ -4,6 +4,7 @@
   "packageManager": "pnpm@11.1.2+sha512.415a1cc25974731e75455c1468371be74c5aa5fb7621b50d4056d222451609f11412f23fd602e6169f1e060466641f798597e1be961a10688836a67b16569499",
   "scripts": {
     "dev:web": "pnpm --filter @taskdaemon/web dev",
+    "dev:agent-web": "pnpm --filter @taskdaemon/agent-web dev",
     "build:web": "pnpm --filter @taskdaemon/web build",
     "build:backend": "pnpm --filter @taskdaemon/service-go build",
     "dev:backend": "pnpm --filter @taskdaemon/service-go dev",
@@ -13,8 +14,8 @@
     "desktop": "pnpm --filter @taskdaemon/service-go desktop",
     "migrate": "pnpm --filter @taskdaemon/service-go migrate",
     "sync:web-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-web-assets.ps1",
-    "typecheck": "pnpm --filter @taskdaemon/web typecheck && pnpm --filter @taskdaemon/agent-protocol typecheck",
-    "lint": "pnpm --filter @taskdaemon/web lint && pnpm --filter @taskdaemon/agent-protocol lint",
+    "typecheck": "pnpm --filter @taskdaemon/web typecheck && pnpm --filter @taskdaemon/agent-protocol typecheck && pnpm --filter @taskdaemon/agent-web typecheck",
+    "lint": "pnpm --filter @taskdaemon/web lint && pnpm --filter @taskdaemon/agent-protocol lint && pnpm --filter @taskdaemon/agent-web lint",
     "test": "pnpm typecheck && pnpm lint && pnpm test:go",
     "test:go": "pnpm --filter @taskdaemon/service-go test",
     "test:go:integration": "pnpm --filter @taskdaemon/service-go test:integration",
@@ -39,6 +40,9 @@
     ],
     "packages/agent-protocol/**/*.{ts,json}": [
       "pnpm --filter @taskdaemon/agent-protocol lint"
+    ],
+    "apps/agent-web/**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "pnpm --filter @taskdaemon/agent-web lint"
     ],
     "**/*.go": [
       "gofmt -w"
