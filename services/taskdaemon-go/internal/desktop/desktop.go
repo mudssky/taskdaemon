@@ -29,7 +29,25 @@ var desktopIcon []byte
 
 // App 是暴露给 Wails 前端的桌面绑定根对象。
 type App struct {
-	cfg config.Config
+	cfg      config.Config
+	registry *Registry
+}
+
+// newApp 创建带 capability 注册表的 Desktop binding 根对象。
+//
+// 参数:
+//   - cfg: 已加载的应用配置。
+//
+// 返回值:
+//   - *App: 已注册样板能力的 binding 实例。
+func newApp(cfg config.Config) *App {
+	bindings := &App{
+		cfg:      cfg,
+		registry: NewRegistry(),
+	}
+	// TD1: 注册 Environment 样板能力；D2/D3 在此下方 append-only 追加 Register。
+	bindings.registry.Register(NewEnvironmentCapability(bindings.registry, appVersion))
+	return bindings
 }
 
 // Run 启动 Desktop 壳。
@@ -63,7 +81,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 		return err
 	}
 
-	bindings := &App{cfg: cfg}
+	bindings := newApp(cfg)
 	desktopApp := application.New(application.Options{
 		Name:        "taskdaemon",
 		Description: "Cross-platform task scheduling daemon",
@@ -194,6 +212,40 @@ func desktopClientAddress(server config.ServerConfig) string {
 //   - string: host:port 格式 API 地址。
 func (app *App) APIAddress() string {
 	return app.cfg.Server.Address()
+}
+
+// ListCapabilities 返回已注册 Desktop 能力清单（供前端缓存）。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - []CapabilityDescriptor: 能力名、可用性与不可用原因。
+func (app *App) ListCapabilities() []CapabilityDescriptor {
+	if app == nil || app.registry == nil {
+		return nil
+	}
+	return app.registry.List()
+}
+
+// InvokeCapability 按名称调用 Desktop capability。
+// 始终返回结构化 InvokeResult；panic 由 Registry 消化为 DESKTOP_INVOKE_FAILED。
+//
+// 参数:
+//   - name: capability 具名常量，例如 desktop.environment。
+//   - payloadJSON: JSON 字符串负载；无参时传空字符串。
+//
+// 返回值:
+//   - InvokeResult: ok/data 或 code/message。
+func (app *App) InvokeCapability(name string, payloadJSON string) InvokeResult {
+	if app == nil || app.registry == nil {
+		return InvokeResult{
+			OK:      false,
+			Code:    ErrCodeCapabilityNotFound,
+			Message: "desktop registry is not initialized",
+		}
+	}
+	return invokeAsResult(context.Background(), app.registry, name, payloadJSON)
 }
 
 // waitForProcessResult 等待桌面子进程退出，避免关闭时留下孤儿进程。

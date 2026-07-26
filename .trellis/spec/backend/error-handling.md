@@ -100,6 +100,21 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 | `NOTIFY_MARK_READ_FAILED` | 500 | 标记已读失败 |
 | `NOTIFY_CLEAR_READ_FAILED` | 500 | 清空已读失败 |
 | `NOTIFY_OPERATION_FAILED` | 500 | 其他通知操作失败 |
+### Desktop capability 错误码（`DESKTOP_*`，D1/C-5）
+
+Desktop Wails binding / capability 调用使用以下稳定码（非 HTTP envelope 的 `error.code` 同名字段，也可出现在 bridge `InvokeResult.code`）：
+
+| 码 | 场景 |
+|---|---|
+| `DESKTOP_CAPABILITY_UNAVAILABLE` | 能力在当前平台不可用（`Available() == false` 且非权限） |
+| `DESKTOP_CAPABILITY_NOT_FOUND` | 请求了未注册的 capability 名 |
+| `DESKTOP_PERMISSION_DENIED` | 能力存在但权限未授予 |
+| `DESKTOP_INVOKE_FAILED` | 调用本体失败，或 capability panic 被 Registry recover |
+
+约束：
+
+* Wails binding 路径**不得 panic**；`Registry.Invoke` 外层统一 `recover` 并映射为 `DESKTOP_INVOKE_FAILED`。
+* 前端 `useDesktopCapability` 的 `invoke` 将上述码放入结构化结果，不抛异常。
 
 ---
 

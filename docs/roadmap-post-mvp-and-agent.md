@@ -394,11 +394,11 @@ interface RuntimeCapabilities {
 
 ### 7.4 Track D · Desktop
 
-| ID | 任务目录 | 主题 | 依赖 |
-|---|---|---|---|
-| D1 | `07-27-td1-desktop-platform-bridge` | **平台能力边界层落地**（`src/lib/desktop`） | — |
-| D2 | `07-27-t3-desktop-notification-sink` | Desktop 原生通知 sink | D1 + C-2 冻结 |
-| D3 | `07-27-td2-desktop-native-features` | 托盘 / 自启动 / 单实例 / 窗口状态 | D1 |
+| ID | 任务目录 | 主题 | 依赖 | 状态 |
+|---|---|---|---|---|
+| D1 | `07-27-td1-desktop-platform-bridge` | **平台能力边界层落地**（`src/lib/desktop`） | — | **done**（C-5 已冻结） |
+| D2 | `07-27-t3-desktop-notification-sink` | Desktop 原生通知 sink | D1 + C-2 冻结 | pending |
+| D3 | `07-27-td2-desktop-native-features` | 托盘 / 自启动 / 单实例 / 窗口状态 | D1 | pending |
 
 ### 7.5 Track G · Agent Gateway
 
@@ -538,7 +538,7 @@ T2a ─────────────────────────�
 | C-2 | **通知事件 schema**（事件名空间、payload 字段、`Sink`/`Bus` 接口、sink 注册与失败语义、已读状态模型） | **T2a** | `services/taskdaemon-go/internal/notify/event.go` + `.trellis/spec/backend/notification-event-contract.md` + `api-contracts.md`/`error-handling.md` 增补 | **W2**、T4、D2、G6 |
 | C-3 | **Agent 对外契约**（Agent Protocol 子集 + AG-UI 事件映射表 + `AgentRuntime` 接口 + **`RuntimeCapabilities` 能力协商** + 共享 TS 类型包） | **G1** | `packages/agent-protocol/`、`docs/agent-contracts/` | G2、G3、**G4**、G5、G6 |
 | C-4 | **信任边界契约**（注入头名称与语义、`PrincipalResolver` 接口、audit/usage 事件 schema） | **G1** | `docs/agent-contracts/trust-boundary.md` | G2、G6、未来 Java 网关 |
-| C-5 | **Desktop capability 契约**（capability 命名、`useDesktopCapability` 返回形状、Web fallback 语义、Wails binding 注册模式） | **D1** | `apps/web/src/lib/desktop/index.ts` + spec 增补 | D2、D3、W 轨全部任务 |
+| C-5 | **Desktop capability 契约**（capability 命名、`useDesktopCapability` 返回形状、Web fallback 语义、Wails binding 注册模式） | **D1** | `apps/web/src/lib/desktop/index.ts` + `.trellis/spec/frontend/routing-platform-guidelines.md`（C-5 节）+ `.trellis/spec/backend/error-handling.md`（`DESKTOP_*`）+ `services/taskdaemon-go/internal/desktop/bridge.go` | D2、D3、W 轨全部任务 |
 | C-6 | **错误码前缀分配** | **本父任务（下表）** | 本文 §9.1 | 全部 |
 
 ### 9.1 错误码前缀分配（立即生效，避免撞码）
@@ -700,4 +700,5 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v3 | 前后端按层拆任务（T1/T2/T7 → a/b）；新增 Track W 与 Track D；D1 平台边界层立项；补 §4.2 Web/Desktop 架构决策、C-5 capability 契约、query key 分配；子任务总数 21 | mudssky |
 | 2026-07-27 | v4 | **多 Runtime Adapter 转向**：撤销「第二 adapter 后置」，初版即 Pi + OMP 并存；新增 §5.3 两个正交维度（接入方式 × profile）、§5.4 `RuntimeCapabilities` 能力协商、§5.5 非 coding 场景；gateway 职责增至七项；G3 改为「Runtime Adapter 层 + Pi/OMP 实现」 | mudssky |
 | 2026-07-27 | v5 | **C-2 冻结**：T2a 交付通知事件总线 + 站内 sink；产物 `internal/notify/*` + `.trellis/spec/backend/notification-event-contract.md`；W2/T4/D2 可开工 | mudssky |
+| 2026-07-27 | v5.1 | **C-5 冻结**：D1 落地 `src/lib/desktop` + Go Registry + Environment 样板；§7.4 D1=done | mudssky / worker |
 | 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
