@@ -4,13 +4,13 @@
 
 export const DesktopCapability = {
   Environment: "desktop.environment",
-  /** D2 占位，本任务不实现。 */
+  /** D2 占位：原生通知 sink（本任务不实现）。 */
   Notification: "desktop.notification",
-  /** D3 占位，本任务不实现。 */
+  /** TD2/D3：系统托盘。 */
   Tray: "desktop.tray",
-  /** D3 占位，本任务不实现。 */
+  /** TD2/D3：Desktop 应用登录项自启动（非 T5 系统服务）。 */
   Autostart: "desktop.autostart",
-  /** D3 占位，本任务不实现。 */
+  /** TD2/D3：窗口几何持久化。 */
   WindowState: "desktop.window-state",
 } as const;
 
@@ -51,6 +51,32 @@ export type EnvironmentInfo = {
   osVersion: string;
   appVersion: string;
   capabilities: string[];
+};
+
+/** Tray status action 返回形状。 */
+export type TrayStatusInfo = {
+  serviceStatus: "running" | "stopped" | "error" | string;
+  minimizeToTray: boolean;
+  label: string;
+};
+
+/** Autostart status 返回形状。 */
+export type AutostartStatusInfo = {
+  enabled: boolean;
+  strategy?: string;
+  path?: string;
+  note: string;
+};
+
+/** Window-state get 返回形状。 */
+export type WindowStateInfo = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  maximised: boolean;
+  path: string;
+  enabled: boolean;
 };
 
 /**

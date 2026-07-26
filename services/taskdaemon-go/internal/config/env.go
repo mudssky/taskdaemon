@@ -83,6 +83,12 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "AGENT_BRIDGE_ALLOWED_TASK_IDS", "agentBridge.allowedTaskIds")
 	applyEnvAlias(values, prefix, "AGENT_BRIDGE_MAX_LOOP_DEPTH", "agentBridge.maxLoopDepth")
 	applyEnvAlias(values, prefix, "AGENT_BRIDGE_REQUEST_TIMEOUT_SECONDS", "agentBridge.requestTimeoutSeconds")
+	// TD2/D3
+	applyEnvAlias(values, prefix, "DESKTOP_TRAY_ENABLED", "desktop.trayEnabled")
+	applyEnvAlias(values, prefix, "DESKTOP_MINIMIZE_TO_TRAY", "desktop.minimizeToTray")
+	applyEnvAlias(values, prefix, "DESKTOP_AUTOSTART_ENABLED", "desktop.autostartEnabled")
+	applyEnvAlias(values, prefix, "DESKTOP_SINGLE_INSTANCE", "desktop.singleInstance")
+	applyEnvAlias(values, prefix, "DESKTOP_WINDOW_STATE_ENABLED", "desktop.windowStateEnabled")
 	return values
 }
 

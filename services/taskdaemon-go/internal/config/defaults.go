@@ -142,6 +142,14 @@ func Default() Config {
 			MaxLoopDepth:          1,
 			RequestTimeoutSeconds: 120,
 		},
+		// TD2/D3
+		Desktop: DesktopConfig{
+			TrayEnabled:        true,
+			MinimizeToTray:     true,
+			AutostartEnabled:   false,
+			SingleInstance:     true,
+			WindowStateEnabled: true,
+		},
 	}
 }
 
@@ -227,6 +235,12 @@ func defaultMap() map[string]any {
 		"agentBridge.allowedTaskIds":        defaults.AgentBridge.AllowedTaskIDs,
 		"agentBridge.maxLoopDepth":          defaults.AgentBridge.MaxLoopDepth,
 		"agentBridge.requestTimeoutSeconds": defaults.AgentBridge.RequestTimeoutSeconds,
+		// TD2/D3
+		"desktop.trayEnabled":        defaults.Desktop.TrayEnabled,
+		"desktop.minimizeToTray":     defaults.Desktop.MinimizeToTray,
+		"desktop.autostartEnabled":   defaults.Desktop.AutostartEnabled,
+		"desktop.singleInstance":     defaults.Desktop.SingleInstance,
+		"desktop.windowStateEnabled": defaults.Desktop.WindowStateEnabled,
 	}
 }
 

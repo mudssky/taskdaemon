@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 
 	"taskdaemon/internal/app"
 	"taskdaemon/internal/config"
@@ -29,8 +30,11 @@ var desktopIcon []byte
 
 // App 是暴露给 Wails 前端的桌面绑定根对象。
 type App struct {
-	cfg      config.Config
-	registry *Registry
+	cfg           config.Config
+	registry      *Registry
+	trayHost      *trayHost
+	autostartHost *autostartHost
+	windowHost    *windowStateHost
 }
 
 // newApp 创建带 capability 注册表的 Desktop binding 根对象。
@@ -39,14 +43,31 @@ type App struct {
 //   - cfg: 已加载的应用配置。
 //
 // 返回值:
-//   - *App: 已注册样板能力的 binding 实例。
+//   - *App: 已注册样板与 TD2 能力的 binding 实例。
 func newApp(cfg config.Config) *App {
+	healthURL := (&url.URL{
+		Scheme: "http",
+		Host:   desktopClientAddress(cfg.Server),
+		Path:   "/api/health",
+	}).String()
+
+	trayHost := newTrayHost(healthURL, cfg.Desktop.MinimizeToTray, cfg.Desktop.TrayEnabled)
+	autostartHost := newAutostartHost()
+	windowHost := newWindowStateHost(cfg.Desktop.WindowStateEnabled, WindowStatePath())
+
 	bindings := &App{
-		cfg:      cfg,
-		registry: NewRegistry(),
+		cfg:           cfg,
+		registry:      NewRegistry(),
+		trayHost:      trayHost,
+		autostartHost: autostartHost,
+		windowHost:    windowHost,
 	}
 	// TD1: 注册 Environment 样板能力；D2/D3 在此下方 append-only 追加 Register。
 	bindings.registry.Register(NewEnvironmentCapability(bindings.registry, appVersion))
+	// TD2: 托盘 / 自启动 / 窗口状态
+	bindings.registry.Register(NewTrayCapability(trayHost))
+	bindings.registry.Register(NewAutostartCapability(autostartHost))
+	bindings.registry.Register(NewWindowStateCapability(windowHost))
 	return bindings
 }
 
@@ -82,7 +103,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 	}
 
 	bindings := newApp(cfg)
-	desktopApp := application.New(application.Options{
+	opts := application.Options{
 		Name:        "taskdaemon",
 		Description: "Cross-platform task scheduling daemon",
 		Icon:        desktopIcon,
@@ -93,22 +114,69 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 		Services: []application.Service{
 			application.NewService(bindings),
 		},
-	})
+	}
+	if cfg.Desktop.SingleInstance {
+		opts.SingleInstance = &application.SingleInstanceOptions{
+			UniqueID: SingleInstanceUniqueID,
+			ExitCode: SingleInstanceExitCode,
+			OnSecondInstanceLaunch: func(_ application.SecondInstanceData) {
+				if bindings.trayHost != nil {
+					bindings.trayHost.ShowMainWindow()
+				}
+			},
+		}
+	}
+
+	desktopApp := application.New(opts)
+	bindings.autostartHost.Attach(desktopApp)
+
+	// 启动时对齐配置中的期望自启动状态（失败仅记日志，不阻塞）。
+	if cfg.Desktop.AutostartEnabled {
+		if err := bindings.autostartHost.Enable(); err != nil {
+			logger.Warn("desktop autostart enable on startup failed", "err", err)
+		}
+	}
+
 	startURL := desktopStartURL(cfg)
-	desktopApp.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:           "taskdaemon",
-		Width:           1200,
-		Height:          760,
-		MinWidth:        960,
-		MinHeight:       600,
-		URL:             startURL,
-		InitialPosition: application.WindowCentered,
+	windowState, useCenter := bindings.windowHost.LoadForStartup(nil)
+	windowOpts := application.WebviewWindowOptions{
+		Title:     "taskdaemon",
+		Width:     windowState.Width,
+		Height:    windowState.Height,
+		MinWidth:  defaultMinWidth,
+		MinHeight: defaultMinHeight,
+		URL:       startURL,
+	}
+	if useCenter {
+		windowOpts.InitialPosition = application.WindowCentered
+	} else {
+		windowOpts.InitialPosition = application.WindowXY
+		windowOpts.X = windowState.X
+		windowOpts.Y = windowState.Y
+	}
+	if windowState.Maximised {
+		windowOpts.StartState = application.WindowStateMaximised
+	}
+
+	mainWindow := desktopApp.Window.NewWithOptions(windowOpts)
+	bindings.windowHost.Attach(mainWindow)
+	if err := bindings.trayHost.Attach(desktopApp, mainWindow, desktopIcon); err != nil {
+		logger.Warn("desktop tray attach failed; continuing without tray", "err", err)
+	}
+
+	// 关窗：可配置为最小化到托盘。
+	mainWindow.RegisterHook(events.Common.WindowClosing, func(event *application.WindowEvent) {
+		if bindings.trayHost != nil && bindings.trayHost.MinimizeToTrayEnabled() {
+			event.Cancel()
+			mainWindow.Hide()
+		}
 	})
 
 	stopQuit := context.AfterFunc(runCtx, desktopApp.Quit)
 	defer stopQuit()
 
 	desktopErr := desktopApp.Run()
+	_ = bindings.windowHost.CaptureAndSave()
 	cancel()
 	apiErr := waitForProcessResult("desktop api", apiErrCh)
 	if desktopErr != nil {

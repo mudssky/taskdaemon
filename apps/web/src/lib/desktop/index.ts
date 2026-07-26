@@ -9,15 +9,19 @@ export {
   listDesktopCapabilities,
 } from "./bridge";
 export {
+  type AutostartStatusInfo,
   type CapabilityState,
   DesktopCapability,
   type DesktopCapabilityName,
   type EnvironmentInfo,
   type InvokeOutcome,
   mapUnavailableReason,
+  type TrayStatusInfo,
   type UnavailableReason,
+  type WindowStateInfo,
 } from "./capabilities";
 export { DesktopEnvironmentPanel } from "./DesktopEnvironmentPanel";
+export { DesktopNativeFeaturesPanel } from "./DesktopNativeFeaturesPanel";
 export {
   getPlatformInfo,
   isDesktopRuntime,

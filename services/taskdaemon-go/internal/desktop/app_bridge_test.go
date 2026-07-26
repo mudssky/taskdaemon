@@ -17,11 +17,29 @@ import (
 func TestAppListAndInvokeEnvironment(t *testing.T) {
 	bindings := newApp(config.Default())
 	list := bindings.ListCapabilities()
-	if len(list) != 1 {
-		t.Fatalf("list len = %d, want 1", len(list))
+	// TD1 Environment + TD2 Tray/Autostart/WindowState
+	if len(list) != 4 {
+		t.Fatalf("list len = %d, want 4 (%v)", len(list), list)
 	}
 	if list[0].Name != CapabilityEnvironment || !list[0].Available {
 		t.Fatalf("list[0] = %+v, want available environment", list[0])
+	}
+	wantNames := map[string]bool{
+		CapabilityEnvironment: false,
+		CapabilityTray:        false,
+		CapabilityAutostart:   false,
+		CapabilityWindowState: false,
+	}
+	for _, item := range list {
+		if _, ok := wantNames[item.Name]; !ok {
+			t.Fatalf("unexpected capability %q", item.Name)
+		}
+		wantNames[item.Name] = true
+	}
+	for name, seen := range wantNames {
+		if !seen {
+			t.Fatalf("missing capability %q", name)
+		}
 	}
 
 	result := bindings.InvokeCapability(CapabilityEnvironment, "")
