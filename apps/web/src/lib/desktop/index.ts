@@ -18,6 +18,7 @@ export {
   type UnavailableReason,
 } from "./capabilities";
 export { DesktopEnvironmentPanel } from "./DesktopEnvironmentPanel";
+export { DesktopNotificationPanel } from "./DesktopNotificationPanel";
 export {
   getPlatformInfo,
   isDesktopRuntime,

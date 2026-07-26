@@ -147,7 +147,15 @@ type NotifyConfig struct {
 	// T4
 	Webhook NotifyWebhookConfig // Webhook 出站 sink
 	Email   NotifyEmailConfig   // 邮件出站 sink
-	// D2 追加 Desktop
+	// D2 / T3
+	Desktop NotifyDesktopConfig // Desktop 原生通知 sink
+}
+
+// NotifyDesktopConfig 保存 Desktop 原生通知 sink 配置。
+// D2 / T3
+type NotifyDesktopConfig struct {
+	Enabled     bool
+	MinSeverity string // 最低投递级别；空表示不限
 }
 
 // NotifyStoreConfig 保存站内通知 sink 配置。

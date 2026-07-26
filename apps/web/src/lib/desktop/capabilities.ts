@@ -4,7 +4,7 @@
 
 export const DesktopCapability = {
   Environment: "desktop.environment",
-  /** D2 占位，本任务不实现。 */
+  /** D2 / T3：系统原生通知。 */
   Notification: "desktop.notification",
   /** D3 占位，本任务不实现。 */
   Tray: "desktop.tray",

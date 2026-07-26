@@ -124,6 +124,11 @@ func Default() Config {
 					Encryption: "starttls",
 				},
 			},
+			// D2 / T3
+			Desktop: NotifyDesktopConfig{
+				Enabled:     true,
+				MinSeverity: "",
+			},
 		},
 		// T6
 		RunLog: RunLogConfig{
@@ -227,6 +232,9 @@ func defaultMap() map[string]any {
 		"agentBridge.allowedTaskIds":        defaults.AgentBridge.AllowedTaskIDs,
 		"agentBridge.maxLoopDepth":          defaults.AgentBridge.MaxLoopDepth,
 		"agentBridge.requestTimeoutSeconds": defaults.AgentBridge.RequestTimeoutSeconds,
+		// D2 / T3
+		"notify.desktop.enabled":     defaults.Notify.Desktop.Enabled,
+		"notify.desktop.minSeverity": defaults.Notify.Desktop.MinSeverity,
 	}
 }
 

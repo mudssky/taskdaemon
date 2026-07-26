@@ -83,6 +83,9 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "AGENT_BRIDGE_ALLOWED_TASK_IDS", "agentBridge.allowedTaskIds")
 	applyEnvAlias(values, prefix, "AGENT_BRIDGE_MAX_LOOP_DEPTH", "agentBridge.maxLoopDepth")
 	applyEnvAlias(values, prefix, "AGENT_BRIDGE_REQUEST_TIMEOUT_SECONDS", "agentBridge.requestTimeoutSeconds")
+	// D2 / T3
+	applyEnvAlias(values, prefix, "NOTIFY_DESKTOP_ENABLED", "notify.desktop.enabled")
+	applyEnvAlias(values, prefix, "NOTIFY_DESKTOP_MIN_SEVERITY", "notify.desktop.minSeverity")
 	return values
 }
 
