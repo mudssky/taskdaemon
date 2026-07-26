@@ -163,6 +163,17 @@ func Load(opts LoadOptions) (Config, error) {
 			RetainDays:    k.Int("runlog.retainDays"),
 			MaxTotalBytes: int64Value(k.Get("runlog.maxTotalBytes")),
 		},
+		// G6
+		AgentBridge: AgentBridgeConfig{
+			Enabled:               k.Bool("agentBridge.enabled"),
+			GatewayBaseURL:        k.String("agentBridge.gatewayBaseUrl"),
+			GatewaySubject:        k.String("agentBridge.gatewaySubject"),
+			GatewayTenantID:       k.String("agentBridge.gatewayTenantId"),
+			InboundTokenHash:      k.String("agentBridge.inboundTokenHash"),
+			AllowedTaskIDs:        intSliceValue(k.Get("agentBridge.allowedTaskIds")),
+			MaxLoopDepth:          k.Int("agentBridge.maxLoopDepth"),
+			RequestTimeoutSeconds: k.Int("agentBridge.requestTimeoutSeconds"),
+		},
 	}, nil
 }
 
@@ -289,6 +300,45 @@ func int64Value(value any) int64 {
 		return int64(typed)
 	default:
 		return 0
+	}
+}
+
+// intSliceValue 将任意配置值转为 int 切片。
+//
+// 参数:
+//   - value: koanf 读取到的值。
+//
+// 返回值:
+//   - []int: 整数切片；无法解析时返回空切片。
+func intSliceValue(value any) []int {
+	switch typed := value.(type) {
+	case []int:
+		return append([]int(nil), typed...)
+	case []any:
+		out := make([]int, 0, len(typed))
+		for _, item := range typed {
+			out = append(out, int(int64Value(item)))
+		}
+		return out
+	case []string:
+		out := make([]int, 0, len(typed))
+		for _, item := range typed {
+			if n, err := strconv.Atoi(strings.TrimSpace(item)); err == nil {
+				out = append(out, n)
+			}
+		}
+		return out
+	case string:
+		parts := strings.Split(typed, ",")
+		out := make([]int, 0, len(parts))
+		for _, part := range parts {
+			if n, err := strconv.Atoi(strings.TrimSpace(part)); err == nil {
+				out = append(out, n)
+			}
+		}
+		return out
+	default:
+		return []int{}
 	}
 }
 

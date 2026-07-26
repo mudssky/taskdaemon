@@ -3,6 +3,7 @@
  */
 
 import type { PrincipalResolverMode } from "@taskdaemon/agent-protocol";
+import type { McpCatalogConfig, McpServerConfig } from "./mcp/types.js";
 
 /** 单 adapter 池参数。 */
 export type PoolConfig = {
@@ -40,7 +41,7 @@ export type GatewayConfig = {
   };
   /** 按 runtimeId 覆盖 maxConcurrency 等。 */
   runtimePoolOverrides: Record<string, Partial<PoolConfig>>;
-  /** tool allowlist；空数组 = 禁止一切具名 tool（保守）。 */
+  /** tool allowlist；空数组 = 禁止一切具名 tool（保守）。支持 server/tool、server/*。 */
   toolAllowlist: string[];
   /** workspace 沙箱根；会话 cwd 必须落在其下。 */
   workspaceSandboxRoot: string;
@@ -48,6 +49,8 @@ export type GatewayConfig = {
   streamBufferSize: number;
   /** run 结束后环缓保留。 */
   streamRetentionMs: number;
+  /** MCP 目录（G6）；启动期加载，restart 生效。 */
+  mcp: McpCatalogConfig;
 };
 
 /**
@@ -111,5 +114,44 @@ export function loadConfig(
     streamRetentionMs: Number(
       env.AGENT_STREAM_RETENTION_MS ?? String(10 * 60_000),
     ),
+    mcp: {
+      reloadMode: "restart",
+      servers: parseMcpServersJson(env.AGENT_MCP_SERVERS_JSON),
+    },
   };
+}
+
+/**
+ * 解析 AGENT_MCP_SERVERS_JSON。
+ *
+ * 参数:
+ *   - raw: JSON 字符串；空则 []。
+ *
+ * 返回值:
+ *   - McpServerConfig 列表；非法 JSON 时返回空数组并打日志。
+ */
+function parseMcpServersJson(raw: string | undefined): McpServerConfig[] {
+  if (!raw || raw.trim() === "") {
+    return [];
+  }
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      console.error("[agent-gateway] AGENT_MCP_SERVERS_JSON must be array");
+      return [];
+    }
+    return parsed.filter(
+      (item): item is McpServerConfig =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as McpServerConfig).id === "string" &&
+        typeof (item as McpServerConfig).transport === "string",
+    );
+  } catch (err) {
+    console.error(
+      "[agent-gateway] failed to parse AGENT_MCP_SERVERS_JSON",
+      err,
+    );
+    return [];
+  }
 }

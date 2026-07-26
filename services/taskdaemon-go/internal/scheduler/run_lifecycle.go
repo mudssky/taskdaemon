@@ -7,7 +7,9 @@ import (
 	"time"
 
 	entsql "entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 
+	"taskdaemon/internal/agentbridge"
 	"taskdaemon/internal/data/ent"
 	entrun "taskdaemon/internal/data/ent/run"
 	enttask "taskdaemon/internal/data/ent/task"
@@ -77,6 +79,13 @@ func (service *Service) triggerTaskWithSource(ctx context.Context, taskID int, t
 	cfg, err := runnerConfigFromTask(taskRecord)
 	if err != nil {
 		return service.finalizeFailed(ctx, taskID, runRecord.ID, started, err.Error())
+	}
+	// G6: agent runner 必须携带 taskdaemon 侧 traceId（本 run 生成一次，透传不覆盖）
+	if cfg.Type == runner.TypeAgent && cfg.AgentTraceID == "" {
+		cfg.AgentTraceID = uuid.NewString()
+	}
+	if depth, ok := agentbridge.LoopDepthFromContext(runCtx); ok {
+		cfg.AgentLoopDepth = depth
 	}
 	runID := runRecord.ID
 	archive, openFailed := service.beginRunLog(runID, started)

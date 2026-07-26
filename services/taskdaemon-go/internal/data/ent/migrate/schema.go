@@ -147,7 +147,7 @@ var (
 		{Name: "enabled", Type: field.TypeBool, Default: true},
 		{Name: "cron_expression", Type: field.TypeString, Nullable: true},
 		{Name: "timezone", Type: field.TypeString, Default: "Local"},
-		{Name: "runner_type", Type: field.TypeEnum, Enums: []string{"shell", "bash", "pwsh", "python", "node", "typescript"}, Default: "shell"},
+		{Name: "runner_type", Type: field.TypeEnum, Enums: []string{"shell", "bash", "pwsh", "python", "node", "typescript", "agent"}, Default: "shell"},
 		{Name: "runner_config", Type: field.TypeJSON, Nullable: true},
 		{Name: "timeout_seconds", Type: field.TypeInt, Default: 3600},
 		{Name: "overlap_policy", Type: field.TypeEnum, Enums: []string{"skip"}, Default: "skip"},
