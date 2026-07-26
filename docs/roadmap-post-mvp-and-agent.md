@@ -197,8 +197,8 @@
 | AG-UI | *待 G1 填* | *待 G1 填* | *待 G1 填* |
 | Agent Protocol | *待 G1 填* | *待 G1 填* | *待 G1 填* |
 | MCP | *待 G1 填* | *待 G1 填* | *待 G1 填* |
-| Pi RPC / SDK | *待 G0 填* | *待 G0 填* | *待 G0 填* |
-| OMP | *待 G0 填* | *待 G0 填* | *待 G0 填* |
+| Pi RPC / SDK | `@earendil-works/pi-coding-agent` **0.82.0**（CLI `pi`；RPC JSONL + `createAgentSession` SDK） | 2026-07-27 | Adapter 内部：CLI `--mode rpc` 与可选 sdk-inprocess；事件子集见 G0 `research/samples/pi/` |
+| OMP | `@oh-my-pi/pi-coding-agent` / CLI `omp` **17.1.3**（Oh My Pi，MIT，https://github.com/can1357/oh-my-pi） | 2026-07-27 | Adapter 内部：CLI `--mode rpc`（与 Pi 同构 JSONL）；能力超集与裁剪见 G0 `research/omp-capability-matrix.md` |
 
 ### 5.2 对内 Runtime 抽象（G1 冻结）
 
@@ -275,19 +275,20 @@ interface RuntimeCapabilities {
 
 `workspaceBinding: false` 的会话必须能正常工作，这是 G2/G3 的硬要求，也是 G4/G5 的 UI 分支依据。
 
-### 5.6 Pi 接入要点（**均为待验证假设，G0 负责证伪或确认**）
+### 5.6 Pi 接入要点（**G0 已实测确认**）
 
-- 启动：`pi --mode rpc`（JSONL，仅 `\n` 分帧）。
-- 假设 TS 优先：`@earendil-works/pi-coding-agent` 的 `AgentSession`（进程内、低延迟）；隔离场景再 spawn CLI。
-- 参考形态：`pi-for-vscode`（薄 UI + broker + Pi）；另有开源 Pi WebUI（**G0 核实名称与仓库地址**）可作为 G4/G5 的参考或起点。
-- 密钥出口策略：由外部网关或统一 LLM 出口（如 Bifrost）承担，**不在 agent-gateway 内实现密钥管理**。
+- 启动：`pi --mode rpc`（JSONL，仅 `\n` 分帧）—— **确认**。
+- TS 优先：`@earendil-works/pi-coding-agent` 的 `createAgentSession` / `AgentSession`（进程内、更低创建延迟）—— **确认可用**；隔离场景 spawn CLI —— **确认**，CLI 冷启动 median ~3.1s（`xh/grok-4.5`）。
+- 参考形态：开源 Pi WebUI 主参考 **`agegr/pi-web`**（`@agegr/pi-web`，MIT）—— G0 已拆解；另有 `pi-for-vscode` 等。
+- 密钥出口策略：由外部网关或统一 LLM 出口（如 Bifrost）承担，**不在 agent-gateway 内实现密钥管理**（不变）。
 
-### 5.7 OMP 接入要点（**全部待 G0 核实**）
+### 5.7 OMP 接入要点（**G0 已核实**）
 
-- 核实全称、仓库地址、许可证、是否提供非交互/RPC 模式
-- 是否提供 SDK（决定 `attachMode` 与 `coldStartCost`）
-- 事件流形态与 Pi 的差异 —— **差异越大，越能检验 `AgentRuntime` 抽象是否真的中立**
-- 是否支持 general profile（无 workspace 会话）
+- 全称 Oh My Pi；仓库 https://github.com/can1357/oh-my-pi；许可证 MIT；活跃维护（测时 17.1.3）。
+- **提供**非交互/RPC：`omp --mode rpc` / `-p`；**可被程序驱动**（阶段 0 门通过）。
+- SDK/RpcClient 存在；生产 adapter 建议 **CLI RPC**（包 exports 偏 TS 源；冷启动 high；RSS 显著高于 Pi）。
+- 事件流与 Pi **同构超集**；差异可用 `RuntimeCapabilities` + 归一化抹平；须 **sanitize** `get_state` 中可能出现的密钥头。
+- general profile：可对话，但默认仍易注入全局 agent 配置/MCP —— adapter 必须强制裁剪。
 
 ### 5.8 gateway 的最小必要规模（关键判断）
 
@@ -404,7 +405,7 @@ interface RuntimeCapabilities {
 
 | ID | 任务目录 | 主题 | 依赖 |
 |---|---|---|---|
-| G0 | `07-27-g0-agent-runtime-spike` | 技术 spike + **Pi/OMP 能力盘点与 gateway 规模判定** | — |
+| G0 | `07-27-g0-agent-runtime-spike` | 技术 spike + **Pi/OMP 能力盘点与 gateway 规模判定**（**done**，见任务 `research/`） | — |
 | G1 | `07-27-g1-agent-contract-freeze` | **契约 C-3 / C-4 冻结** + `packages/` 落地 | G0 |
 | G2 | `07-27-g2-hono-gateway-skeleton` | Hono gateway 骨架（**规模由 G0 判定**）+ 多 adapter 编排 + 信任边界钩子 | G1 |
 | G3 | `07-27-g3-runtime-adapters` | **Runtime Adapter 层 + Pi/OMP 两个实现** | G1（与 G2 并行；联调需 G2） |
@@ -701,4 +702,5 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v4 | **多 Runtime Adapter 转向**：撤销「第二 adapter 后置」，初版即 Pi + OMP 并存；新增 §5.3 两个正交维度（接入方式 × profile）、§5.4 `RuntimeCapabilities` 能力协商、§5.5 非 coding 场景；gateway 职责增至七项；G3 改为「Runtime Adapter 层 + Pi/OMP 实现」 | mudssky |
 | 2026-07-27 | v5 | **C-2 冻结**：T2a 交付通知事件总线 + 站内 sink；产物 `internal/notify/*` + `.trellis/spec/backend/notification-event-contract.md`；W2/T4/D2 可开工 | mudssky |
 | 2026-07-27 | v5.1 | **C-5 冻结**：D1 落地 `src/lib/desktop` + Go Registry + Environment 样板；§7.4 D1=done | mudssky / worker |
+| 2026-07-27 | v5.2 | G0 实测回写：§5.1 填入 Pi 0.82.0 / OMP 17.1.3；确认 OMP 可 RPC 程序驱动、双 adapter 可抽象；CLI 冷启动均为 high（需预热池）；gateway 薄索引持久化；§7.5 G0=done。详情 `.trellis/tasks/07-27-g0-agent-runtime-spike/research/HANDOFF.md` | G0 worker |
 | 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
