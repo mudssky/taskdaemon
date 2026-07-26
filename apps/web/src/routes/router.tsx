@@ -15,6 +15,7 @@ import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
 import { TaskCreatePage } from "../features/tasks/TaskCreatePage";
 import { TaskEditPage } from "../features/tasks/TaskEditPage";
 import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
+import { DesktopEnvironmentPanel } from "../lib/desktop";
 
 function ProtectedApp() {
   const authStatus = useAuthStatusQuery();
@@ -101,8 +102,20 @@ const runsRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  component: AudioSettingsPage,
+  component: SettingsPage,
 });
+
+/** 设置页：音频（T0）+ Desktop 环境样板（TD1 append-only）。 */
+function SettingsPage() {
+  return (
+    <>
+      <AudioSettingsPage />
+      <div className="settings-grid">
+        <DesktopEnvironmentPanel />
+      </div>
+    </>
+  );
+}
 
 export const routeTree = rootRoute.addChildren([
   indexRoute,
