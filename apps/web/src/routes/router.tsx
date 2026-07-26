@@ -6,22 +6,17 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 import { AppShell } from "../components/layout/AppShell";
-import { AudioSettingsPage } from "../features/audio/AudioSettingsPage";
 import { AdminSetupPanel } from "../features/auth/AdminSetupPanel";
 import { useAuthStatusQuery } from "../features/auth/auth.queries";
 import { LoginPanel } from "../features/auth/LoginPanel";
 import { NotificationListPage } from "../features/notifications/NotificationListPage";
 import { parseNotificationSearch } from "../features/notifications/notification.schema";
 import { RunHistoryPage } from "../features/runs/RunHistoryPage";
+import { SettingsPage } from "../features/settings/SettingsPage";
 import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
 import { TaskCreatePage } from "../features/tasks/TaskCreatePage";
 import { TaskEditPage } from "../features/tasks/TaskEditPage";
 import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
-import {
-  DesktopEnvironmentPanel,
-  DesktopNativeFeaturesPanel,
-  DesktopNotificationPanel,
-} from "../lib/desktop";
 
 function ProtectedApp() {
   const authStatus = useAuthStatusQuery();
@@ -118,20 +113,6 @@ const settingsRoute = createRoute({
   path: "/settings",
   component: SettingsPage,
 });
-
-/** 设置页：音频（T0）+ Desktop 能力（TD1/TD2 append-only）。 */
-function SettingsPage() {
-  return (
-    <>
-      <AudioSettingsPage />
-      <div className="settings-grid">
-        <DesktopEnvironmentPanel />
-        <DesktopNotificationPanel />
-        <DesktopNativeFeaturesPanel />
-      </div>
-    </>
-  );
-}
 
 export const routeTree = rootRoute.addChildren([
   indexRoute,

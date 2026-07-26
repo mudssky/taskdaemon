@@ -399,11 +399,11 @@ interface RuntimeCapabilities {
 
 ### 7.3 Track W · Web 前端
 
-| ID | 任务目录 | 主题 | 依赖 |
-|---|---|---|---|
-| W1 | `07-27-t1b-settings-page-web` | 完整设置页 | **C-1 冻结**（非 T1a 完整交付） |
-| W2 | `07-27-t2b-notification-center-web` | 通知中心 | **C-2 冻结** |
-| W3 | `07-27-t7b-backup-template-wizard-web` | 备份模板向导 | T7a 契约 |
+| ID | 任务目录 | 主题 | 依赖 | 状态 |
+|---|---|---|---|---|
+| W1 | `07-27-t1b-settings-page-web` | 完整设置页 | **C-1 冻结**（非 T1a 完整交付） | **done（待合入）** |
+| W2 | `07-27-t2b-notification-center-web` | 通知中心 | **C-2 冻结** | pending |
+| W3 | `07-27-t7b-backup-template-wizard-web` | 备份模板向导 | T7a 契约 | pending |
 
 > **关键**：Track W 依赖的是**契约冻结**，不是后端交付完成。契约冻结后前端可用 MSW / 手写 mock 并行开发，联调在后端交付后进行。这是前后端拆任务的全部意义。
 

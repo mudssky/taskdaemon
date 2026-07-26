@@ -779,6 +779,74 @@ tr[data-selected="true"] {
   color: #9b2d24;
 }
 
+.settings-page {
+  display: grid;
+  gap: 16px;
+}
+
+.restart-required-banner {
+  border: 1px solid #e2a15b;
+  border-radius: 8px;
+  background: #fff4e8;
+  color: #6a3b0c;
+  padding: 14px 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.restart-required-banner strong {
+  font-size: 15px;
+}
+
+.restart-fieldset {
+  border-color: #e2c778;
+  background: #fffdf5;
+}
+
+.token-once-box {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid #9bc3d4;
+  border-radius: 8px;
+  background: #eef7fb;
+  padding: 12px;
+}
+
+.token-once-value {
+  margin: 6px 0;
+  word-break: break-all;
+  color: #162027;
+  font-weight: 600;
+}
+
+.save-result-box {
+  border: 1px solid #b7d7c2;
+  border-radius: 8px;
+  background: #f1faf4;
+  color: #1f5a36;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.form-error-box {
+  border: 1px solid #efc0bd;
+  border-radius: 8px;
+  background: #fff5f4;
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.subsystem-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #33424d;
+}
+
 details summary {
   cursor: pointer;
   color: #185a72;
