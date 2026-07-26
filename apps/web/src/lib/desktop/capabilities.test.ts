@@ -9,6 +9,9 @@ describe("capabilities contract", () => {
   it("exposes named constants including Environment sample", () => {
     expect(DesktopCapability.Environment).toBe("desktop.environment");
     expect(DesktopCapability.Notification).toBe("desktop.notification");
+    expect(DesktopCapability.Tray).toBe("desktop.tray");
+    expect(DesktopCapability.Autostart).toBe("desktop.autostart");
+    expect(DesktopCapability.WindowState).toBe("desktop.window-state");
   });
 
   it("maps unknown unavailable reasons to error", () => {

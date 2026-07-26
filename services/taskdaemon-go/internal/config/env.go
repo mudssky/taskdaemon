@@ -86,6 +86,12 @@ func envMap(prefix string) map[string]any {
 	// D2 / T3
 	applyEnvAlias(values, prefix, "NOTIFY_DESKTOP_ENABLED", "notify.desktop.enabled")
 	applyEnvAlias(values, prefix, "NOTIFY_DESKTOP_MIN_SEVERITY", "notify.desktop.minSeverity")
+	// TD2/D3
+	applyEnvAlias(values, prefix, "DESKTOP_TRAY_ENABLED", "desktop.trayEnabled")
+	applyEnvAlias(values, prefix, "DESKTOP_MINIMIZE_TO_TRAY", "desktop.minimizeToTray")
+	applyEnvAlias(values, prefix, "DESKTOP_AUTOSTART_ENABLED", "desktop.autostartEnabled")
+	applyEnvAlias(values, prefix, "DESKTOP_SINGLE_INSTANCE", "desktop.singleInstance")
+	applyEnvAlias(values, prefix, "DESKTOP_WINDOW_STATE_ENABLED", "desktop.windowStateEnabled")
 	return values
 }
 

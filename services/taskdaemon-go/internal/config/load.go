@@ -179,6 +179,14 @@ func Load(opts LoadOptions) (Config, error) {
 			MaxLoopDepth:          k.Int("agentBridge.maxLoopDepth"),
 			RequestTimeoutSeconds: k.Int("agentBridge.requestTimeoutSeconds"),
 		},
+		// TD2/D3
+		Desktop: DesktopConfig{
+			TrayEnabled:        k.Bool("desktop.trayEnabled"),
+			MinimizeToTray:     k.Bool("desktop.minimizeToTray"),
+			AutostartEnabled:   k.Bool("desktop.autostartEnabled"),
+			SingleInstance:     k.Bool("desktop.singleInstance"),
+			WindowStateEnabled: k.Bool("desktop.windowStateEnabled"),
+		},
 	}, nil
 }
 

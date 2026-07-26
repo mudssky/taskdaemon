@@ -3,7 +3,7 @@
   "name": "td2-desktop-native-features",
   "title": "TD2 Desktop 原生增量能力",
   "description": "托盘、开机自启、单实例、窗口状态持久化等 Web 套壳之上的增量",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

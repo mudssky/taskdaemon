@@ -19,6 +19,7 @@ import { TaskEditPage } from "../features/tasks/TaskEditPage";
 import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
 import {
   DesktopEnvironmentPanel,
+  DesktopNativeFeaturesPanel,
   DesktopNotificationPanel,
 } from "../lib/desktop";
 
@@ -126,6 +127,7 @@ function SettingsPage() {
       <div className="settings-grid">
         <DesktopEnvironmentPanel />
         <DesktopNotificationPanel />
+        <DesktopNativeFeaturesPanel />
       </div>
     </>
   );

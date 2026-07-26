@@ -13,6 +13,8 @@ type Config struct {
 	RunLog RunLogConfig
 	// G6: agent-gateway 双向桥接配置（append-only）
 	AgentBridge AgentBridgeConfig
+	// TD2/D3: Desktop 壳增量能力配置（append-only）
+	Desktop DesktopConfig
 }
 
 // ResolvedPaths 保存本次配置加载会使用的文件路径。
@@ -254,4 +256,26 @@ type AgentBridgeConfig struct {
 	MaxLoopDepth int
 	// RequestTimeoutSeconds 出站 HTTP 超时秒数。
 	RequestTimeoutSeconds int
+}
+
+// DesktopConfig 保存 Desktop 壳原生增量能力配置。
+// TD2/D3
+//
+// 分级：
+//   - trayEnabled / singleInstance / windowStateEnabled：进程启动时读取，改后需重启
+//   - minimizeToTray：运行时 host 可即时生效
+//   - autostartEnabled：期望状态；实际登录项经 desktop.autostart capability 写系统
+//
+// 与 T5 系统服务安装无关：本结构只控制 Desktop GUI 应用行为。
+type DesktopConfig struct {
+	// TrayEnabled 是否创建系统托盘。
+	TrayEnabled bool
+	// MinimizeToTray 关闭主窗口时隐藏到托盘而非退出。
+	MinimizeToTray bool
+	// AutostartEnabled 是否期望登录时启动 Desktop 应用（非系统服务）。
+	AutostartEnabled bool
+	// SingleInstance 是否启用单实例（第二进程激活已有窗口）。
+	SingleInstance bool
+	// WindowStateEnabled 是否持久化窗口位置/大小/最大化。
+	WindowStateEnabled bool
 }

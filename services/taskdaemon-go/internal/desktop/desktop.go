@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 	"github.com/wailsapp/wails/v3/pkg/services/notifications"
 
 	"taskdaemon/internal/app"
@@ -31,8 +32,11 @@ var desktopIcon []byte
 
 // App 是暴露给 Wails 前端的桌面绑定根对象。
 type App struct {
-	cfg      config.Config
-	registry *Registry
+	cfg           config.Config
+	registry      *Registry
+	trayHost      *trayHost
+	autostartHost *autostartHost
+	windowHost    *windowStateHost
 }
 
 // newApp 创建带 capability 注册表的 Desktop binding 根对象。
@@ -41,30 +45,31 @@ type App struct {
 //   - cfg: 已加载的应用配置。
 //
 // 返回值:
-//   - *App: 已注册样板能力的 binding 实例。
+//   - *App: 已注册样板与 TD2 能力的 binding 实例。
 func newApp(cfg config.Config) *App {
-	return newAppWithNotification(cfg, nil)
-}
+	healthURL := (&url.URL{
+		Scheme: "http",
+		Host:   desktopClientAddress(cfg.Server),
+		Path:   "/api/health",
+	}).String()
 
-// newAppWithNotification 创建 binding 根对象并可选注册通知能力。
-//
-// 参数:
-//   - cfg: 已加载的应用配置。
-//   - notifCap: 通知 capability；nil 时不注册（测试/无服务场景）。
-//
-// 返回值:
-//   - *App: 已注册能力的 binding 实例。
-func newAppWithNotification(cfg config.Config, notifCap Capability) *App {
+	trayHost := newTrayHost(healthURL, cfg.Desktop.MinimizeToTray, cfg.Desktop.TrayEnabled)
+	autostartHost := newAutostartHost()
+	windowHost := newWindowStateHost(cfg.Desktop.WindowStateEnabled, WindowStatePath())
+
 	bindings := &App{
-		cfg:      cfg,
-		registry: NewRegistry(),
+		cfg:           cfg,
+		registry:      NewRegistry(),
+		trayHost:      trayHost,
+		autostartHost: autostartHost,
+		windowHost:    windowHost,
 	}
 	// TD1: 注册 Environment 样板能力；D2/D3 在此下方 append-only 追加 Register。
 	bindings.registry.Register(NewEnvironmentCapability(bindings.registry, appVersion))
-	// TD2: Desktop 原生通知能力。
-	if notifCap != nil {
-		bindings.registry.Register(notifCap)
-	}
+	// TD2: 托盘 / 自启动 / 窗口状态
+	bindings.registry.Register(NewTrayCapability(trayHost))
+	bindings.registry.Register(NewAutostartCapability(autostartHost))
+	bindings.registry.Register(NewWindowStateCapability(windowHost))
 	return bindings
 }
 
@@ -106,8 +111,10 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 			activateMainWindow(desktopApp)
 		},
 	})
-	bindings := newAppWithNotification(cfg, notifCap)
-	desktopApp = application.New(application.Options{
+	bindings := newApp(cfg)
+	bindings.registry.Register(notifCap)
+
+	opts := application.Options{
 		Name:        "taskdaemon",
 		Description: "Cross-platform task scheduling daemon",
 		Icon:        desktopIcon,
@@ -119,28 +126,72 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 			application.NewService(bindings),
 			application.NewService(notificationService),
 		},
-	})
-	// 绑定到 notify 总线；壳退出时解除，避免 server 路径误用。
+	}
+	if cfg.Desktop.SingleInstance {
+		opts.SingleInstance = &application.SingleInstanceOptions{
+			UniqueID: SingleInstanceUniqueID,
+			ExitCode: SingleInstanceExitCode,
+			OnSecondInstanceLaunch: func(_ application.SecondInstanceData) {
+				if bindings.trayHost != nil {
+					bindings.trayHost.ShowMainWindow()
+				}
+			},
+		}
+	}
+
+	desktopApp = application.New(opts)
 	notifCap.bindAsDesktopSender()
 	defer notify.UnbindDesktopSender()
 	notificationService.OnNotificationResponse(notifCap.HandleNotificationResponse)
+	bindings.autostartHost.Attach(desktopApp)
+
+	// 启动时对齐配置中的期望自启动状态（失败仅记日志，不阻塞）。
+	if cfg.Desktop.AutostartEnabled {
+		if err := bindings.autostartHost.Enable(); err != nil {
+			logger.Warn("desktop autostart enable on startup failed", "err", err)
+		}
+	}
 
 	startURL := desktopStartURL(cfg)
-	desktopApp.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title:           "taskdaemon",
-		Name:            "main",
-		Width:           1200,
-		Height:          760,
-		MinWidth:        960,
-		MinHeight:       600,
-		URL:             startURL,
-		InitialPosition: application.WindowCentered,
+	windowState, useCenter := bindings.windowHost.LoadForStartup(nil)
+	windowOpts := application.WebviewWindowOptions{
+		Title:     "taskdaemon",
+		Width:     windowState.Width,
+		Height:    windowState.Height,
+		MinWidth:  defaultMinWidth,
+		MinHeight: defaultMinHeight,
+		URL:       startURL,
+	}
+	if useCenter {
+		windowOpts.InitialPosition = application.WindowCentered
+	} else {
+		windowOpts.InitialPosition = application.WindowXY
+		windowOpts.X = windowState.X
+		windowOpts.Y = windowState.Y
+	}
+	if windowState.Maximised {
+		windowOpts.StartState = application.WindowStateMaximised
+	}
+
+	mainWindow := desktopApp.Window.NewWithOptions(windowOpts)
+	bindings.windowHost.Attach(mainWindow)
+	if err := bindings.trayHost.Attach(desktopApp, mainWindow, desktopIcon); err != nil {
+		logger.Warn("desktop tray attach failed; continuing without tray", "err", err)
+	}
+
+	// 关窗：可配置为最小化到托盘。
+	mainWindow.RegisterHook(events.Common.WindowClosing, func(event *application.WindowEvent) {
+		if bindings.trayHost != nil && bindings.trayHost.MinimizeToTrayEnabled() {
+			event.Cancel()
+			mainWindow.Hide()
+		}
 	})
 
 	stopQuit := context.AfterFunc(runCtx, desktopApp.Quit)
 	defer stopQuit()
 
 	desktopErr := desktopApp.Run()
+	_ = bindings.windowHost.CaptureAndSave()
 	cancel()
 	apiErr := waitForProcessResult("desktop api", apiErrCh)
 	if desktopErr != nil {
@@ -156,34 +207,6 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 		return ctx.Err()
 	}
 	return nil
-}
-
-// activateMainWindow 激活主窗口（通知点击默认动作）。
-//
-// 参数:
-//   - desktopApp: Wails 应用实例；nil 时忽略。
-//
-// 返回值:
-//   - 无。
-func activateMainWindow(desktopApp *application.App) {
-	if desktopApp == nil {
-		return
-	}
-	if window, ok := desktopApp.Window.GetByName("main"); ok && window != nil {
-		window.UnMinimise()
-		window.Show()
-		window.Focus()
-		return
-	}
-	for _, window := range desktopApp.Window.GetAll() {
-		if window == nil {
-			continue
-		}
-		window.UnMinimise()
-		window.Show()
-		window.Focus()
-		return
-	}
 }
 
 // desktopStartURL 返回桌面窗口入口 URL。
@@ -322,5 +345,33 @@ func waitForProcessResult(name string, errCh <-chan error) error {
 		return err
 	case <-time.After(shutdownTimeout):
 		return fmt.Errorf("%s did not stop within %s", name, shutdownTimeout)
+	}
+}
+
+// activateMainWindow 激活主窗口（通知点击默认动作）。
+//
+// 参数:
+//   - desktopApp: Wails 应用实例；nil 时忽略。
+//
+// 返回值:
+//   - 无。
+func activateMainWindow(desktopApp *application.App) {
+	if desktopApp == nil {
+		return
+	}
+	if window, ok := desktopApp.Window.GetByName("main"); ok && window != nil {
+		window.UnMinimise()
+		window.Show()
+		window.Focus()
+		return
+	}
+	for _, window := range desktopApp.Window.GetAll() {
+		if window == nil {
+			continue
+		}
+		window.UnMinimise()
+		window.Show()
+		window.Focus()
+		return
 	}
 }
