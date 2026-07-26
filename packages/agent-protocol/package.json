@@ -1,0 +1,27 @@
+{
+  "name": "@taskdaemon/agent-protocol",
+  "private": true,
+  "version": "0.1.0",
+  "description": "C-3/C-4 frozen types: Agent Protocol subset DTOs, AG-UI events, AgentRuntime, trust boundary",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "types": "./src/index.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check .",
+    "format": "biome check --write ."
+  },
+  "devDependencies": {
+    "typescript": "^6.0.3"
+  },
+  "peerDependencies": {},
+  "dependencies": {}
+}

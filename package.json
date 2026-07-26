@@ -13,8 +13,8 @@
     "desktop": "pnpm --filter @taskdaemon/service-go desktop",
     "migrate": "pnpm --filter @taskdaemon/service-go migrate",
     "sync:web-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-web-assets.ps1",
-    "typecheck": "pnpm --filter @taskdaemon/web typecheck",
-    "lint": "pnpm --filter @taskdaemon/web lint",
+    "typecheck": "pnpm --filter @taskdaemon/web typecheck && pnpm --filter @taskdaemon/agent-protocol typecheck",
+    "lint": "pnpm --filter @taskdaemon/web lint && pnpm --filter @taskdaemon/agent-protocol lint",
     "test": "pnpm typecheck && pnpm lint && pnpm test:go",
     "test:go": "pnpm --filter @taskdaemon/service-go test",
     "test:go:integration": "pnpm --filter @taskdaemon/service-go test:integration",
@@ -36,6 +36,9 @@
   "lint-staged": {
     "apps/web/**/*.{ts,tsx,js,jsx,json,css,md}": [
       "pnpm --filter @taskdaemon/web lint"
+    ],
+    "packages/agent-protocol/**/*.{ts,json}": [
+      "pnpm --filter @taskdaemon/agent-protocol lint"
     ],
     "**/*.go": [
       "gofmt -w"
