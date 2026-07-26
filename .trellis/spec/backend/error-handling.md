@@ -125,6 +125,25 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 * 敏感值永不进入响应、错误 details 或写入日志原文。
 * 既有 `config_reload_failed` / `config_reload_unavailable` 保留兼容 `POST /reload`。
 
+### 数据迁移错误码（`DBXFER_*`，T8）
+
+| 码 | 场景 |
+|---|---|
+| `DBXFER_SCHEMA_MISMATCH` | 源/目标/导出文件 schema fingerprint 不一致 |
+| `DBXFER_TARGET_NOT_EMPTY` | 目标业务表非空且未 `--force` |
+| `DBXFER_CONNECT_FAILED` | 打开或 ping 数据库失败 |
+| `DBXFER_PERMISSION` | 缺 migrate/insert/setval 等权限 |
+| `DBXFER_INVALID_INPUT` | flag、文件格式或 format version 非法 |
+| `DBXFER_IMPORT_FAILED` | 导入事务/插入失败 |
+| `DBXFER_VERIFY_FAILED` | 迁移后计数或抽样校验失败 |
+| `DBXFER_CHECKPOINT_INVALID` | 断点文件损坏或状态不可续 |
+
+约束：
+
+* CLI 错误信息带稳定 code 前缀；**不得**把数据库密码/完整 DSN 写入错误或进度日志。
+* 操作步骤与类型映射见 `docs/db-migration.md`。
+
+
 ### Desktop capability 错误码（`DESKTOP_*`，D1/C-5）
 
 Desktop Wails binding / capability 调用使用以下稳定码（非 HTTP envelope 的 `error.code` 同名字段，也可出现在 bridge `InvokeResult.code`）：
