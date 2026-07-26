@@ -49,6 +49,10 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "NOTIFY_STORE_MAX_RECORDS", "notify.store.maxRecords")
 	applyEnvAlias(values, prefix, "NOTIFY_STORE_RETAIN_DAYS", "notify.store.retainDays")
 	applyEnvAlias(values, prefix, "NOTIFY_STORE_MIN_SEVERITY", "notify.store.minSeverity")
+	// T6
+	applyEnvAlias(values, prefix, "RUNLOG_ENABLED", "runlog.enabled")
+	applyEnvAlias(values, prefix, "RUNLOG_RETAIN_DAYS", "runlog.retainDays")
+	applyEnvAlias(values, prefix, "RUNLOG_MAX_TOTAL_BYTES", "runlog.maxTotalBytes")
 	return values
 }
 

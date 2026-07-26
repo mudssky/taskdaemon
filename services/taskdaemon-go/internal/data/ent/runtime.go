@@ -89,12 +89,16 @@ func init() {
 	runDescStartedAt := runFields[3].Descriptor()
 	// run.DefaultStartedAt holds the default value on creation for the started_at field.
 	run.DefaultStartedAt = runDescStartedAt.Default.(func() time.Time)
+	// runDescLogWriteFailed is the schema descriptor for log_write_failed field.
+	runDescLogWriteFailed := runFields[11].Descriptor()
+	// run.DefaultLogWriteFailed holds the default value on creation for the log_write_failed field.
+	run.DefaultLogWriteFailed = runDescLogWriteFailed.Default.(bool)
 	// runDescCreatedAt is the schema descriptor for created_at field.
-	runDescCreatedAt := runFields[9].Descriptor()
+	runDescCreatedAt := runFields[12].Descriptor()
 	// run.DefaultCreatedAt holds the default value on creation for the created_at field.
 	run.DefaultCreatedAt = runDescCreatedAt.Default.(func() time.Time)
 	// runDescUpdatedAt is the schema descriptor for updated_at field.
-	runDescUpdatedAt := runFields[10].Descriptor()
+	runDescUpdatedAt := runFields[13].Descriptor()
 	// run.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	run.DefaultUpdatedAt = runDescUpdatedAt.Default.(func() time.Time)
 	// run.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

@@ -90,6 +90,16 @@ func Stderr(v string) predicate.Run {
 	return predicate.Run(sql.FieldEQ(FieldStderr, v))
 }
 
+// LogSizeBytes applies equality check predicate on the "log_size_bytes" field. It's identical to LogSizeBytesEQ.
+func LogSizeBytes(v int64) predicate.Run {
+	return predicate.Run(sql.FieldEQ(FieldLogSizeBytes, v))
+}
+
+// LogWriteFailed applies equality check predicate on the "log_write_failed" field. It's identical to LogWriteFailedEQ.
+func LogWriteFailed(v bool) predicate.Run {
+	return predicate.Run(sql.FieldEQ(FieldLogWriteFailed, v))
+}
+
 // CreatedAt applies equality check predicate on the "created_at" field. It's identical to CreatedAtEQ.
 func CreatedAt(v time.Time) predicate.Run {
 	return predicate.Run(sql.FieldEQ(FieldCreatedAt, v))
@@ -553,6 +563,86 @@ func StderrEqualFold(v string) predicate.Run {
 // StderrContainsFold applies the ContainsFold predicate on the "stderr" field.
 func StderrContainsFold(v string) predicate.Run {
 	return predicate.Run(sql.FieldContainsFold(FieldStderr, v))
+}
+
+// LogArchiveStatusEQ applies the EQ predicate on the "log_archive_status" field.
+func LogArchiveStatusEQ(v LogArchiveStatus) predicate.Run {
+	return predicate.Run(sql.FieldEQ(FieldLogArchiveStatus, v))
+}
+
+// LogArchiveStatusNEQ applies the NEQ predicate on the "log_archive_status" field.
+func LogArchiveStatusNEQ(v LogArchiveStatus) predicate.Run {
+	return predicate.Run(sql.FieldNEQ(FieldLogArchiveStatus, v))
+}
+
+// LogArchiveStatusIn applies the In predicate on the "log_archive_status" field.
+func LogArchiveStatusIn(vs ...LogArchiveStatus) predicate.Run {
+	return predicate.Run(sql.FieldIn(FieldLogArchiveStatus, vs...))
+}
+
+// LogArchiveStatusNotIn applies the NotIn predicate on the "log_archive_status" field.
+func LogArchiveStatusNotIn(vs ...LogArchiveStatus) predicate.Run {
+	return predicate.Run(sql.FieldNotIn(FieldLogArchiveStatus, vs...))
+}
+
+// LogSizeBytesEQ applies the EQ predicate on the "log_size_bytes" field.
+func LogSizeBytesEQ(v int64) predicate.Run {
+	return predicate.Run(sql.FieldEQ(FieldLogSizeBytes, v))
+}
+
+// LogSizeBytesNEQ applies the NEQ predicate on the "log_size_bytes" field.
+func LogSizeBytesNEQ(v int64) predicate.Run {
+	return predicate.Run(sql.FieldNEQ(FieldLogSizeBytes, v))
+}
+
+// LogSizeBytesIn applies the In predicate on the "log_size_bytes" field.
+func LogSizeBytesIn(vs ...int64) predicate.Run {
+	return predicate.Run(sql.FieldIn(FieldLogSizeBytes, vs...))
+}
+
+// LogSizeBytesNotIn applies the NotIn predicate on the "log_size_bytes" field.
+func LogSizeBytesNotIn(vs ...int64) predicate.Run {
+	return predicate.Run(sql.FieldNotIn(FieldLogSizeBytes, vs...))
+}
+
+// LogSizeBytesGT applies the GT predicate on the "log_size_bytes" field.
+func LogSizeBytesGT(v int64) predicate.Run {
+	return predicate.Run(sql.FieldGT(FieldLogSizeBytes, v))
+}
+
+// LogSizeBytesGTE applies the GTE predicate on the "log_size_bytes" field.
+func LogSizeBytesGTE(v int64) predicate.Run {
+	return predicate.Run(sql.FieldGTE(FieldLogSizeBytes, v))
+}
+
+// LogSizeBytesLT applies the LT predicate on the "log_size_bytes" field.
+func LogSizeBytesLT(v int64) predicate.Run {
+	return predicate.Run(sql.FieldLT(FieldLogSizeBytes, v))
+}
+
+// LogSizeBytesLTE applies the LTE predicate on the "log_size_bytes" field.
+func LogSizeBytesLTE(v int64) predicate.Run {
+	return predicate.Run(sql.FieldLTE(FieldLogSizeBytes, v))
+}
+
+// LogSizeBytesIsNil applies the IsNil predicate on the "log_size_bytes" field.
+func LogSizeBytesIsNil() predicate.Run {
+	return predicate.Run(sql.FieldIsNull(FieldLogSizeBytes))
+}
+
+// LogSizeBytesNotNil applies the NotNil predicate on the "log_size_bytes" field.
+func LogSizeBytesNotNil() predicate.Run {
+	return predicate.Run(sql.FieldNotNull(FieldLogSizeBytes))
+}
+
+// LogWriteFailedEQ applies the EQ predicate on the "log_write_failed" field.
+func LogWriteFailedEQ(v bool) predicate.Run {
+	return predicate.Run(sql.FieldEQ(FieldLogWriteFailed, v))
+}
+
+// LogWriteFailedNEQ applies the NEQ predicate on the "log_write_failed" field.
+func LogWriteFailedNEQ(v bool) predicate.Run {
+	return predicate.Run(sql.FieldNEQ(FieldLogWriteFailed, v))
 }
 
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.

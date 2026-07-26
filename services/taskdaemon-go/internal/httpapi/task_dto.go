@@ -59,6 +59,10 @@ type runResponse struct {
 	ErrorSummary string        `json:"errorSummary"`
 	Stdout       string        `json:"stdout"`
 	Stderr       string        `json:"stderr"`
+	// T6
+	LogArchiveStatus string `json:"logArchiveStatus"`
+	LogSizeBytes     *int64 `json:"logSizeBytes"`
+	LogWriteFailed   bool   `json:"logWriteFailed"`
 }
 
 // taskResponseFromEnt 将任务 Ent 实体转换为 API 响应。
@@ -107,15 +111,18 @@ func runResponseFromEnt(runRecord *ent.Run) runResponse {
 		exitCode = &value
 	}
 	return runResponse{
-		ID:           runRecord.ID,
-		Trigger:      string(runRecord.Trigger),
-		Status:       runRecord.Status,
-		ExitCode:     exitCode,
-		StartedAt:    runRecord.StartedAt,
-		FinishedAt:   runRecord.FinishedAt,
-		DurationMs:   runRecord.DurationMs,
-		ErrorSummary: runRecord.ErrorSummary,
-		Stdout:       runRecord.Stdout,
-		Stderr:       runRecord.Stderr,
+		ID:               runRecord.ID,
+		Trigger:          string(runRecord.Trigger),
+		Status:           runRecord.Status,
+		ExitCode:         exitCode,
+		StartedAt:        runRecord.StartedAt,
+		FinishedAt:       runRecord.FinishedAt,
+		DurationMs:       runRecord.DurationMs,
+		ErrorSummary:     runRecord.ErrorSummary,
+		Stdout:           runRecord.Stdout,
+		Stderr:           runRecord.Stderr,
+		LogArchiveStatus: string(runRecord.LogArchiveStatus),
+		LogSizeBytes:     runRecord.LogSizeBytes,
+		LogWriteFailed:   runRecord.LogWriteFailed,
 	}
 }

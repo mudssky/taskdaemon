@@ -128,6 +128,12 @@ func Load(opts LoadOptions) (Config, error) {
 				MinSeverity: k.String("notify.store.minSeverity"),
 			},
 		},
+		// T6
+		RunLog: RunLogConfig{
+			Enabled:       k.Bool("runlog.enabled"),
+			RetainDays:    k.Int("runlog.retainDays"),
+			MaxTotalBytes: int64Value(k.Get("runlog.maxTotalBytes")),
+		},
 	}, nil
 }
 

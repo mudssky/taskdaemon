@@ -379,7 +379,7 @@ interface RuntimeCapabilities {
 | T2a | `07-27-t2a-notification-event-bus` | 通知事件总线 + 站内 sink + **契约 C-2 冻结** | — | **done（C-2 已冻结）** |
 | T4 | `07-27-t4-outbound-notification-sink` | Webhook / 邮件出站 sink | T2a | |
 | T5 | `07-27-t5-service-installer` | 系统服务安装器（CLI，纯后端） | — | **done**（真实三平台装机为残留） |
-| T6 | `07-27-t6-run-log-archive` | Run 完整日志归档 | — | |
+| T6 | `07-27-t6-run-log-archive` | Run 完整日志归档 | — | **done（待合入）** |
 | T7a | `07-27-t7a-backup-template-api` | 备份模板后端 API | T1a | |
 | T8 | `07-27-t8-db-migration-tool` | SQLite ↔ PostgreSQL 迁移工具（CLI，纯后端） | T1a | |
 
@@ -705,3 +705,4 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v5.2 | G0 实测回写：§5.1 填入 Pi 0.82.0 / OMP 17.1.3；确认 OMP 可 RPC 程序驱动、双 adapter 可抽象；CLI 冷启动均为 high（需预热池）；gateway 薄索引持久化；§7.5 G0=done。详情 `.trellis/tasks/07-27-g0-agent-runtime-spike/research/HANDOFF.md` | G0 worker |
 | 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
 | 2026-07-27 | v5.3 | T5 系统服务安装器合入（launchd/systemd/SCM；真实三平台装机残留） | mudssky / worker |
+| 2026-07-27 | v5.4 | T6 Run 完整日志归档实现完成（待合入）：`internal/runlog`、RUNLOG_* API、Ent run 三态字段、runs 下载入口 | mudssky / worker |

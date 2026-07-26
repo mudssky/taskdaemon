@@ -2820,28 +2820,32 @@ func (m *NotificationMutation) ResetEdge(name string) error {
 // RunMutation represents an operation that mutates the Run nodes in the graph.
 type RunMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	trigger        *run.Trigger
-	status         *run.Status
-	exit_code      *int
-	addexit_code   *int
-	started_at     *time.Time
-	finished_at    *time.Time
-	duration_ms    *int64
-	addduration_ms *int64
-	error_summary  *string
-	stdout         *string
-	stderr         *string
-	created_at     *time.Time
-	updated_at     *time.Time
-	clearedFields  map[string]struct{}
-	task           *int
-	clearedtask    bool
-	done           bool
-	oldValue       func(context.Context) (*Run, error)
-	predicates     []predicate.Run
+	op                 Op
+	typ                string
+	id                 *int
+	trigger            *run.Trigger
+	status             *run.Status
+	exit_code          *int
+	addexit_code       *int
+	started_at         *time.Time
+	finished_at        *time.Time
+	duration_ms        *int64
+	addduration_ms     *int64
+	error_summary      *string
+	stdout             *string
+	stderr             *string
+	log_archive_status *run.LogArchiveStatus
+	log_size_bytes     *int64
+	addlog_size_bytes  *int64
+	log_write_failed   *bool
+	created_at         *time.Time
+	updated_at         *time.Time
+	clearedFields      map[string]struct{}
+	task               *int
+	clearedtask        bool
+	done               bool
+	oldValue           func(context.Context) (*Run, error)
+	predicates         []predicate.Run
 }
 
 var _ ent.Mutation = (*RunMutation)(nil)
@@ -3386,6 +3390,148 @@ func (m *RunMutation) ResetStderr() {
 	delete(m.clearedFields, run.FieldStderr)
 }
 
+// SetLogArchiveStatus sets the "log_archive_status" field.
+func (m *RunMutation) SetLogArchiveStatus(ras run.LogArchiveStatus) {
+	m.log_archive_status = &ras
+}
+
+// LogArchiveStatus returns the value of the "log_archive_status" field in the mutation.
+func (m *RunMutation) LogArchiveStatus() (r run.LogArchiveStatus, exists bool) {
+	v := m.log_archive_status
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogArchiveStatus returns the old "log_archive_status" field's value of the Run entity.
+// If the Run object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunMutation) OldLogArchiveStatus(ctx context.Context) (v run.LogArchiveStatus, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLogArchiveStatus is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLogArchiveStatus requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogArchiveStatus: %w", err)
+	}
+	return oldValue.LogArchiveStatus, nil
+}
+
+// ResetLogArchiveStatus resets all changes to the "log_archive_status" field.
+func (m *RunMutation) ResetLogArchiveStatus() {
+	m.log_archive_status = nil
+}
+
+// SetLogSizeBytes sets the "log_size_bytes" field.
+func (m *RunMutation) SetLogSizeBytes(i int64) {
+	m.log_size_bytes = &i
+	m.addlog_size_bytes = nil
+}
+
+// LogSizeBytes returns the value of the "log_size_bytes" field in the mutation.
+func (m *RunMutation) LogSizeBytes() (r int64, exists bool) {
+	v := m.log_size_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogSizeBytes returns the old "log_size_bytes" field's value of the Run entity.
+// If the Run object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunMutation) OldLogSizeBytes(ctx context.Context) (v *int64, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLogSizeBytes is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLogSizeBytes requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogSizeBytes: %w", err)
+	}
+	return oldValue.LogSizeBytes, nil
+}
+
+// AddLogSizeBytes adds i to the "log_size_bytes" field.
+func (m *RunMutation) AddLogSizeBytes(i int64) {
+	if m.addlog_size_bytes != nil {
+		*m.addlog_size_bytes += i
+	} else {
+		m.addlog_size_bytes = &i
+	}
+}
+
+// AddedLogSizeBytes returns the value that was added to the "log_size_bytes" field in this mutation.
+func (m *RunMutation) AddedLogSizeBytes() (r int64, exists bool) {
+	v := m.addlog_size_bytes
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLogSizeBytes clears the value of the "log_size_bytes" field.
+func (m *RunMutation) ClearLogSizeBytes() {
+	m.log_size_bytes = nil
+	m.addlog_size_bytes = nil
+	m.clearedFields[run.FieldLogSizeBytes] = struct{}{}
+}
+
+// LogSizeBytesCleared returns if the "log_size_bytes" field was cleared in this mutation.
+func (m *RunMutation) LogSizeBytesCleared() bool {
+	_, ok := m.clearedFields[run.FieldLogSizeBytes]
+	return ok
+}
+
+// ResetLogSizeBytes resets all changes to the "log_size_bytes" field.
+func (m *RunMutation) ResetLogSizeBytes() {
+	m.log_size_bytes = nil
+	m.addlog_size_bytes = nil
+	delete(m.clearedFields, run.FieldLogSizeBytes)
+}
+
+// SetLogWriteFailed sets the "log_write_failed" field.
+func (m *RunMutation) SetLogWriteFailed(b bool) {
+	m.log_write_failed = &b
+}
+
+// LogWriteFailed returns the value of the "log_write_failed" field in the mutation.
+func (m *RunMutation) LogWriteFailed() (r bool, exists bool) {
+	v := m.log_write_failed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLogWriteFailed returns the old "log_write_failed" field's value of the Run entity.
+// If the Run object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *RunMutation) OldLogWriteFailed(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLogWriteFailed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLogWriteFailed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLogWriteFailed: %w", err)
+	}
+	return oldValue.LogWriteFailed, nil
+}
+
+// ResetLogWriteFailed resets all changes to the "log_write_failed" field.
+func (m *RunMutation) ResetLogWriteFailed() {
+	m.log_write_failed = nil
+}
+
 // SetCreatedAt sets the "created_at" field.
 func (m *RunMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
@@ -3531,7 +3677,7 @@ func (m *RunMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *RunMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 14)
 	if m.trigger != nil {
 		fields = append(fields, run.FieldTrigger)
 	}
@@ -3558,6 +3704,15 @@ func (m *RunMutation) Fields() []string {
 	}
 	if m.stderr != nil {
 		fields = append(fields, run.FieldStderr)
+	}
+	if m.log_archive_status != nil {
+		fields = append(fields, run.FieldLogArchiveStatus)
+	}
+	if m.log_size_bytes != nil {
+		fields = append(fields, run.FieldLogSizeBytes)
+	}
+	if m.log_write_failed != nil {
+		fields = append(fields, run.FieldLogWriteFailed)
 	}
 	if m.created_at != nil {
 		fields = append(fields, run.FieldCreatedAt)
@@ -3591,6 +3746,12 @@ func (m *RunMutation) Field(name string) (ent.Value, bool) {
 		return m.Stdout()
 	case run.FieldStderr:
 		return m.Stderr()
+	case run.FieldLogArchiveStatus:
+		return m.LogArchiveStatus()
+	case run.FieldLogSizeBytes:
+		return m.LogSizeBytes()
+	case run.FieldLogWriteFailed:
+		return m.LogWriteFailed()
 	case run.FieldCreatedAt:
 		return m.CreatedAt()
 	case run.FieldUpdatedAt:
@@ -3622,6 +3783,12 @@ func (m *RunMutation) OldField(ctx context.Context, name string) (ent.Value, err
 		return m.OldStdout(ctx)
 	case run.FieldStderr:
 		return m.OldStderr(ctx)
+	case run.FieldLogArchiveStatus:
+		return m.OldLogArchiveStatus(ctx)
+	case run.FieldLogSizeBytes:
+		return m.OldLogSizeBytes(ctx)
+	case run.FieldLogWriteFailed:
+		return m.OldLogWriteFailed(ctx)
 	case run.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
 	case run.FieldUpdatedAt:
@@ -3698,6 +3865,27 @@ func (m *RunMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetStderr(v)
 		return nil
+	case run.FieldLogArchiveStatus:
+		v, ok := value.(run.LogArchiveStatus)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogArchiveStatus(v)
+		return nil
+	case run.FieldLogSizeBytes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogSizeBytes(v)
+		return nil
+	case run.FieldLogWriteFailed:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLogWriteFailed(v)
+		return nil
 	case run.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -3726,6 +3914,9 @@ func (m *RunMutation) AddedFields() []string {
 	if m.addduration_ms != nil {
 		fields = append(fields, run.FieldDurationMs)
 	}
+	if m.addlog_size_bytes != nil {
+		fields = append(fields, run.FieldLogSizeBytes)
+	}
 	return fields
 }
 
@@ -3738,6 +3929,8 @@ func (m *RunMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedExitCode()
 	case run.FieldDurationMs:
 		return m.AddedDurationMs()
+	case run.FieldLogSizeBytes:
+		return m.AddedLogSizeBytes()
 	}
 	return nil, false
 }
@@ -3760,6 +3953,13 @@ func (m *RunMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddDurationMs(v)
+		return nil
+	case run.FieldLogSizeBytes:
+		v, ok := value.(int64)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLogSizeBytes(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Run numeric field %s", name)
@@ -3786,6 +3986,9 @@ func (m *RunMutation) ClearedFields() []string {
 	}
 	if m.FieldCleared(run.FieldStderr) {
 		fields = append(fields, run.FieldStderr)
+	}
+	if m.FieldCleared(run.FieldLogSizeBytes) {
+		fields = append(fields, run.FieldLogSizeBytes)
 	}
 	return fields
 }
@@ -3818,6 +4021,9 @@ func (m *RunMutation) ClearField(name string) error {
 		return nil
 	case run.FieldStderr:
 		m.ClearStderr()
+		return nil
+	case run.FieldLogSizeBytes:
+		m.ClearLogSizeBytes()
 		return nil
 	}
 	return fmt.Errorf("unknown Run nullable field %s", name)
@@ -3853,6 +4059,15 @@ func (m *RunMutation) ResetField(name string) error {
 		return nil
 	case run.FieldStderr:
 		m.ResetStderr()
+		return nil
+	case run.FieldLogArchiveStatus:
+		m.ResetLogArchiveStatus()
+		return nil
+	case run.FieldLogSizeBytes:
+		m.ResetLogSizeBytes()
+		return nil
+	case run.FieldLogWriteFailed:
+		m.ResetLogWriteFailed()
 		return nil
 	case run.FieldCreatedAt:
 		m.ResetCreatedAt()

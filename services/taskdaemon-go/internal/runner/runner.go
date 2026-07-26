@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
@@ -69,6 +70,9 @@ type Config struct {
 	Env              map[string]string
 	Timeout          time.Duration
 	OutputLimitBytes int
+	// StdoutMirror / StderrMirror 可选镜像完整输出（如 runlog）；写失败不得影响执行。
+	StdoutMirror io.Writer
+	StderrMirror io.Writer
 }
 
 // Command 是从结构化 runner 配置构造出的进程命令摘要。
@@ -186,8 +190,8 @@ func (executor Executor) Execute(ctx context.Context, cfg Config) (Result, error
 	limit := normalizeOutputLimit(cfg.OutputLimitBytes)
 	stdout.limit = limit
 	stderr.limit = limit
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
+	cmd.Stdout = attachMirror(&stdout, cfg.StdoutMirror)
+	cmd.Stderr = attachMirror(&stderr, cfg.StderrMirror)
 
 	started := time.Now()
 	err = cmd.Run()
@@ -413,4 +417,19 @@ func (buffer *limitedBuffer) Write(p []byte) (int, error) {
 //   - string: 未超过限制部分的输出内容。
 func (buffer *limitedBuffer) String() string {
 	return buffer.buf.String()
+}
+
+// attachMirror 在有镜像 writer 时用 MultiWriter 并联截断缓冲；镜像写失败由镜像自身吞掉。
+//
+// 参数:
+//   - primary: 截断输出缓冲。
+//   - mirror: 可选镜像 writer。
+//
+// 返回值:
+//   - io.Writer: 交给 exec.Cmd 的输出目标。
+func attachMirror(primary *limitedBuffer, mirror io.Writer) io.Writer {
+	if mirror == nil {
+		return primary
+	}
+	return io.MultiWriter(primary, mirror)
 }
