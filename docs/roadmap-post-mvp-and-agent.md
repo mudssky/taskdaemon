@@ -734,3 +734,4 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v5.4 | T6 Run 完整日志归档实现完成（待合入）：`internal/runlog`、RUNLOG_* API、Ent run 三态字段、runs 下载入口 | mudssky / worker |
 | 2026-07-27 | v5.5 | T4 Webhook/邮件出站 sink 合入 | mudssky / worker |
 | 2026-07-27 | coord | 协调波次：可并行任务（G0–G6、T2a/T2b/T3–T6、TD1/TD2、deps）均已合入并 Trellis 归档；剩余 T0 用户进行中及其阻塞链 T1a/T1b/T7a/T7b/T8 | mudssky / coordinator |
+| 2026-07-27 | coord | 路线图子任务全部收口并 Trellis 归档（含 T0–T8、W1–W3、D1–D3、G0–G6、deps） | mudssky / coordinator |
