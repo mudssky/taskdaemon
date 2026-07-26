@@ -1,0 +1,37 @@
+{
+  "name": "@taskdaemon/agent-gateway",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Agent gateway runtime adapters (G3): registry, Pi/OMP CLI adapters, JSONL RPC",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./runtime": {
+      "types": "./src/runtime/index.ts",
+      "default": "./src/runtime/index.ts"
+    }
+  },
+  "types": "./src/index.ts",
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "AGENT_RUNTIME_INTEGRATION=1 vitest run test/integration"
+  },
+  "dependencies": {
+    "@taskdaemon/agent-protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
+  }
+}
