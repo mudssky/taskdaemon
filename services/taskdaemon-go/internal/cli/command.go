@@ -150,6 +150,7 @@ func NewRootCommand(ctx context.Context, opts Options) *cobra.Command {
 	root.AddCommand(db)
 	root.AddCommand(newConfigCommand(ctx, opts, load, loadOptions, &sessionToken))
 	root.AddCommand(newTaskCommand(ctx, opts, load, &sessionToken))
+	root.AddCommand(newServiceCommand(ctx, opts, loadOptions))
 
 	return root
 }
