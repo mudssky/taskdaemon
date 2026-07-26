@@ -17,6 +17,7 @@ import (
 	"taskdaemon/internal/runlog"
 	"taskdaemon/internal/runner"
 	"taskdaemon/internal/scheduler"
+	"taskdaemon/internal/template"
 	"taskdaemon/web/embedded"
 )
 
@@ -125,6 +126,8 @@ func (app *App) Serve(ctx context.Context) error {
 			FrontendFS:             mustFrontendFS(),
 			// T6
 			RunLog: runLogService,
+			// T7a
+			Templates: &template.Service{Registry: template.DefaultRegistry(), Logger: app.logger},
 			// G6
 			AgentBridgeConfig: func() config.AgentBridgeConfig { return bridgeCfg },
 		}),

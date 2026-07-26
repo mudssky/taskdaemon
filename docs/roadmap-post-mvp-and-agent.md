@@ -392,7 +392,7 @@ interface RuntimeCapabilities {
 | T4 | `07-27-t4-outbound-notification-sink` | Webhook / 邮件出站 sink | T2a | **done** |
 | T5 | `07-27-t5-service-installer` | 系统服务安装器（CLI，纯后端） | — | **done**（真实三平台装机为残留） |
 | T6 | `07-27-t6-run-log-archive` | Run 完整日志归档 | — | **done（待合入）** |
-| T7a | `07-27-t7a-backup-template-api` | 备份模板后端 API | T1a | |
+| T7a | `07-27-t7a-backup-template-api` | 备份模板后端 API | T1a | **done（待合入）** |
 | T8 | `07-27-t8-db-migration-tool` | SQLite ↔ PostgreSQL 迁移工具（CLI，纯后端） | T1a | |
 
 ### 7.3 Track W · Web 前端

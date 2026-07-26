@@ -18,6 +18,7 @@ import (
 	"taskdaemon/internal/data/ent"
 	"taskdaemon/internal/notify"
 	"taskdaemon/internal/scheduler"
+	"taskdaemon/internal/template"
 )
 
 var errPanicRecovered = errors.New("panic recovered")
@@ -46,6 +47,8 @@ type Options struct {
 	FrontendFS  fs.FS
 	// T6
 	RunLog RunLogService
+	// T7a
+	Templates *template.Service
 	// G6
 	AgentBridgeConfig func() config.AgentBridgeConfig
 }
@@ -105,6 +108,8 @@ func NewRouter(opts Options) http.Handler {
 	registerNotificationRoutes(router, opts.Auth, opts.Notifications, opts.NotifyBus)
 	// T6
 	registerRunLogRoutes(router, opts.Auth, opts.RunLog)
+	// T7a
+	registerTemplateRoutes(router, opts.Auth, opts.Templates)
 	// G6
 	registerAgentBridgeRoutes(router, AgentBridgeOptions{
 		Config: opts.AgentBridgeConfig,

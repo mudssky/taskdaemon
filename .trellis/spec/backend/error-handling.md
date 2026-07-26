@@ -125,6 +125,27 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 * 敏感值永不进入响应、错误 details 或写入日志原文。
 * 既有 `config_reload_failed` / `config_reload_unavailable` 保留兼容 `POST /reload`。
 
+### 备份模板错误码（`TEMPLATE_*`，T7a）
+
+| 码 | HTTP | 场景 |
+|---|---:|---|
+| `TEMPLATE_NOT_FOUND` | 404 | 未知模板 id |
+| `TEMPLATE_INVALID_JSON` | 400 | body 非法 |
+| `TEMPLATE_FIELD_INVALID` | 400 | 参数类型/格式/路径非法 |
+| `TEMPLATE_FIELD_REQUIRED` | 400 | 缺必填参数 |
+| `TEMPLATE_FIELD_OUT_OF_RANGE` | 400 | 数值越界 |
+| `TEMPLATE_VALIDATION_FAILED` | 400 | 多类字段错误聚合 |
+| `TEMPLATE_RUNNER_UNSUPPORTED` | 400 | runner 越界白名单（注册或渲染后） |
+| `TEMPLATE_RENDER_FAILED` | 500 | 未预期渲染失败 |
+| `TEMPLATE_UNAVAILABLE` | 503 | 模板服务未装配 |
+| `TEMPLATE_REGISTER_REJECTED` | — | 注册期定义非法（进程内/测试） |
+
+约束：
+
+* 字段级错误 `error.details.fields[]` 形状与 C-1 一致：`{ path, reason, code }`，`path` 使用 `params.<name>`。
+* 渲染**不落库**；敏感参数（`secret_ref`）不明文进入任务草稿或日志。
+* 用户参数进入 shell 时必须经单引号字面量转义；注入载荷不得构造额外命令。
+
 ### Desktop capability 错误码（`DESKTOP_*`，D1/C-5）
 
 Desktop Wails binding / capability 调用使用以下稳定码（非 HTTP envelope 的 `error.code` 同名字段，也可出现在 bridge `InvokeResult.code`）：
