@@ -7,6 +7,8 @@ type Config struct {
 	Logging       LoggingConfig
 	Observability ObservabilityConfig
 	Audio         AudioConfig
+	// T2a: 通知事件总线配置（append-only）
+	Notify NotifyConfig
 }
 
 // ResolvedPaths 保存本次配置加载会使用的文件路径。
@@ -131,6 +133,24 @@ type AudioFFmpegConfig struct {
 	Path                    string
 	ProbePath               string
 	TranscodeTimeoutSeconds int
+}
+
+// NotifyConfig 保存通知事件总线配置。
+// T2a
+type NotifyConfig struct {
+	BufferSize int               // 事件缓冲区大小；需重启生效
+	Store      NotifyStoreConfig // 站内 sink
+	// T4 追加 Webhook / Email
+	// D2 追加 Desktop
+}
+
+// NotifyStoreConfig 保存站内通知 sink 配置。
+// T2a
+type NotifyStoreConfig struct {
+	Enabled     bool
+	MaxRecords  int    // 0 = 不限
+	RetainDays  int    // 0 = 不限
+	MinSeverity string // 最低投递级别；空表示不限
 }
 
 // LoadOptions 控制配置加载来源和覆盖值。

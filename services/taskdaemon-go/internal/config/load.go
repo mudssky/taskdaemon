@@ -118,6 +118,16 @@ func Load(opts LoadOptions) (Config, error) {
 				TranscodeTimeoutSeconds: k.Int("audio.ffmpeg.transcodeTimeoutSeconds"),
 			},
 		},
+		// T2a
+		Notify: NotifyConfig{
+			BufferSize: k.Int("notify.bufferSize"),
+			Store: NotifyStoreConfig{
+				Enabled:     k.Bool("notify.store.enabled"),
+				MaxRecords:  k.Int("notify.store.maxRecords"),
+				RetainDays:  k.Int("notify.store.retainDays"),
+				MinSeverity: k.String("notify.store.minSeverity"),
+			},
+		},
 	}, nil
 }
 

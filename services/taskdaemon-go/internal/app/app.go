@@ -6,6 +6,7 @@ import (
 	"taskdaemon/internal/audio"
 	"taskdaemon/internal/config"
 	"taskdaemon/internal/httpapi"
+	"taskdaemon/internal/notify"
 )
 
 // App 组合 taskdaemon 的共享后端能力。
@@ -17,6 +18,9 @@ type App struct {
 	runtimeConfig *httpapi.RuntimeConfig
 	audioService  *audio.Service
 	audioQueue    *audio.Queue
+	// T2a
+	notifyBus *notify.Bus
+	storeSink *notify.StoreSink
 }
 
 // New 创建应用装配实例。

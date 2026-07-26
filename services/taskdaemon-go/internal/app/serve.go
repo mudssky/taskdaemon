@@ -11,6 +11,7 @@ import (
 	"taskdaemon/internal/auth"
 	"taskdaemon/internal/data"
 	"taskdaemon/internal/httpapi"
+	"taskdaemon/internal/notify"
 	"taskdaemon/internal/runner"
 	"taskdaemon/internal/scheduler"
 	"taskdaemon/web/embedded"
@@ -29,17 +30,25 @@ func (app *App) Serve(ctx context.Context) error {
 		return fmt.Errorf("open data store: %w", err)
 	}
 	defer func() {
-		if err := store.Close(); err != nil {
-			app.logger.Warn("close data store failed", "component", "data", "error", err)
-		}
+		_ = store.Close()
 	}()
 
 	if err := app.migrateStore(ctx, store); err != nil {
 		return err
 	}
 
+	// T2a: 通知总线与站内 sink 装配（与 audio service 同层）
+	notifyBus := notify.NewBus(app.cfg.Notify, notify.BusOptions{Logger: app.logger})
+	storeSink := notify.NewStoreSink(store, app.cfg.Notify.Store, notify.StoreSinkOptions{Logger: app.logger})
+	notifyBus.Register(storeSink)
+	notifyBus.Start()
+	app.notifyBus = notifyBus
+	app.storeSink = storeSink
+	defer notifyBus.Shutdown()
+
 	taskService := scheduler.NewService(store, scheduler.Options{
-		Runner: runner.NewExecutor(),
+		Runner:    runner.NewExecutor(),
+		Publisher: notifyBus,
 	})
 	if err := taskService.RegisterEnabledTasks(ctx); err != nil {
 		return fmt.Errorf("register enabled tasks: %w", err)
@@ -48,9 +57,7 @@ func (app *App) Serve(ctx context.Context) error {
 		return fmt.Errorf("start scheduler: %w", err)
 	}
 	defer func() {
-		if err := taskService.Shutdown(); err != nil {
-			app.logger.Warn("shutdown scheduler failed", "component", "scheduler", "error", err)
-		}
+		_ = taskService.Shutdown()
 	}()
 	audioQueue := audio.NewQueue(store, app.cfg.Audio, audio.QueueOptions{Logger: app.logger})
 	app.audioQueue = audioQueue
@@ -60,10 +67,13 @@ func (app *App) Serve(ctx context.Context) error {
 	server := &http.Server{
 		Addr: app.cfg.Server.Address(),
 		Handler: httpapi.NewRouter(httpapi.Options{
-			EnableSwagger:          app.cfg.Server.Swagger.Enabled,
-			Auth:                   auth.New(store, auth.Options{}),
-			Tasks:                  taskService,
-			Audio:                  app.audioService,
+			EnableSwagger: app.cfg.Server.Swagger.Enabled,
+			Auth:          auth.New(store, auth.Options{}),
+			Tasks:         taskService,
+			Audio:         app.audioService,
+			// T2a
+			Notifications:          storeSink,
+			NotifyBus:              notifyBus,
 			Logger:                 app.logger,
 			IncludeTraceInResponse: &app.cfg.Observability.TraceID.IncludeInResponse,
 			HTTPLog:                app.cfg.Logging.HTTP,

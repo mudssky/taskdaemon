@@ -23,6 +23,7 @@
 | [数据库规范](./database-guidelines.md) | Ent、迁移、查询边界、事务 | 当前代码事实 |
 | [错误处理](./error-handling.md) | sentinel/typed error、API envelope、敏感信息 | 当前代码事实 |
 | [Scheduler 与 Runner 生命周期](./scheduler-runner-guidelines.md) | cron 校验、运行态、执行历史、timeout/cancel、runner JSON | 当前代码事实 |
+| [通知事件总线契约 C-2](./notification-event-contract.md) | 事件名、payload、Sink/Bus、站内已读模型、配置键 | **C-2 已冻结** |
 | [质量规范](./quality-guidelines.md) | 后端测试、行为质量、评审清单 | 当前代码事实 |
 | [日志规范](./logging-guidelines.md) | slog、HTTP 日志、脱敏、运行时重载 | 当前代码事实 |
 

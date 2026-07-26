@@ -180,6 +180,38 @@ ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 writeAPIError(ctx, http.StatusBadRequest, "task_invalid", "Task definition is invalid", gin.H{"field": "cronExpression"})
 ```
 
+
+---
+
+## 通知 API（C-2 / T2a）
+
+全部端点走管理员 session 认证。实现：`notification_routes.go` + `notification_dto.go`。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/notifications` | 分页列表；query: `page`/`pageSize`/`read`/`severity` |
+| GET | `/api/notifications/unread-count` | 未读计数 `{ count }` |
+| POST | `/api/notifications/{id}/read` | 单条已读 |
+| POST | `/api/notifications/read` | 批量已读；body `{ ids: number[] }` |
+| POST | `/api/notifications/read-all` | 全部已读 |
+| DELETE | `/api/notifications/{id}` | 删除单条 |
+| DELETE | `/api/notifications/read` | 清空已读 |
+| GET | `/api/notifications/sinks` | sink 状态列表 |
+
+列表响应：
+
+```json
+{
+  "notifications": [/* notificationResponse */],
+  "total": 0,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+`notificationResponse` 字段：`id`、`eventId`、`name`、`severity`、`subjectKind`、`subjectId`、`title`、`body`、`detail`、`readAt`、`occurredAt`、`createdAt`。
+
+错误码见 [错误处理](./error-handling.md) 中 `NOTIFY_*` 表。事件模型与 Sink 契约见 [通知事件总线契约 C-2](./notification-event-contract.md)。
 ---
 
 ## 前后端联动清单

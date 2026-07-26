@@ -87,6 +87,16 @@ func Default() Config {
 				TranscodeTimeoutSeconds: 120,
 			},
 		},
+		// T2a
+		Notify: NotifyConfig{
+			BufferSize: 256,
+			Store: NotifyStoreConfig{
+				Enabled:     true,
+				MaxRecords:  200,
+				RetainDays:  30,
+				MinSeverity: "",
+			},
+		},
 	}
 }
 
@@ -133,6 +143,12 @@ func defaultMap() map[string]any {
 		"audio.ffmpeg.path":                        defaults.Audio.FFmpeg.Path,
 		"audio.ffmpeg.probePath":                   defaults.Audio.FFmpeg.ProbePath,
 		"audio.ffmpeg.transcodeTimeoutSeconds":     defaults.Audio.FFmpeg.TranscodeTimeoutSeconds,
+		// T2a
+		"notify.bufferSize":        defaults.Notify.BufferSize,
+		"notify.store.enabled":     defaults.Notify.Store.Enabled,
+		"notify.store.maxRecords":  defaults.Notify.Store.MaxRecords,
+		"notify.store.retainDays":  defaults.Notify.Store.RetainDays,
+		"notify.store.minSeverity": defaults.Notify.Store.MinSeverity,
 	}
 }
 

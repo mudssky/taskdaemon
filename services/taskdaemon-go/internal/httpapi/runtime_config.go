@@ -94,7 +94,16 @@ func (runtime *RuntimeConfig) Apply(cfg config.Config) config.ReloadResult {
 	runtime.audio = cfg.Audio
 	runtime.mu.Unlock()
 	return config.ReloadResult{
-		Applied:         []string{"logging.http", "observability.traceId", "audio.autoplay", "audio.playback", "audio.inbound", "audio.history"},
-		RestartRequired: []string{"server", "database", "audio.ffmpeg"},
+		Applied: []string{
+			"logging.http",
+			"observability.traceId",
+			"audio.autoplay",
+			"audio.playback",
+			"audio.inbound",
+			"audio.history",
+			// T2a
+			"notify.store",
+		},
+		RestartRequired: []string{"server", "database", "audio.ffmpeg", "notify.bufferSize"},
 	}
 }

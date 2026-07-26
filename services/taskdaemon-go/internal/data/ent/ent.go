@@ -10,6 +10,7 @@ import (
 	"sync"
 	"taskdaemon/internal/data/ent/admin"
 	"taskdaemon/internal/data/ent/audiorecord"
+	"taskdaemon/internal/data/ent/notification"
 	"taskdaemon/internal/data/ent/run"
 	"taskdaemon/internal/data/ent/session"
 	"taskdaemon/internal/data/ent/task"
@@ -77,11 +78,12 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			admin.Table:       admin.ValidColumn,
-			audiorecord.Table: audiorecord.ValidColumn,
-			run.Table:         run.ValidColumn,
-			session.Table:     session.ValidColumn,
-			task.Table:        task.ValidColumn,
+			admin.Table:        admin.ValidColumn,
+			audiorecord.Table:  audiorecord.ValidColumn,
+			notification.Table: notification.ValidColumn,
+			run.Table:          run.ValidColumn,
+			session.Table:      session.ValidColumn,
+			task.Table:         task.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)
