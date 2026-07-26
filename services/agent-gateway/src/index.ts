@@ -7,7 +7,7 @@ import { createApp } from "./app.js";
 import { loadConfig } from "./config.js";
 import { createDefaultMockRuntimes } from "./runtime/mock-adapter.js";
 import { Orchestrator } from "./runtime/orchestrator.js";
-import { PoolManager } from "./runtime/pool.js";
+import { PoolManager } from "./runtime/pool-manager.js";
 import { RuntimeRegistry } from "./runtime/registry.js";
 import { MemoryThreadRunStore } from "./store/memory-store.js";
 import { StreamHub } from "./stream/sse.js";

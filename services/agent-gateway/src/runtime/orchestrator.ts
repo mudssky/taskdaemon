@@ -29,7 +29,7 @@ import type {
 import { mapRuntimeEvent } from "../stream/agui-mapper.js";
 import type { StreamHub } from "../stream/sse.js";
 import { safeEmitAudit, safeEmitUsage } from "../trust/emitter.js";
-import type { AdapterPoolStats, PoolManager } from "./pool.js";
+import type { AdapterPoolStats, PoolManager } from "./pool-manager.js";
 import type { RuntimeRegistry } from "./registry.js";
 
 export type OrchestratorDeps = {

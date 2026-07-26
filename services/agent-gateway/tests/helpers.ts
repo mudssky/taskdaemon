@@ -11,7 +11,7 @@ import {
   mockCapabilities,
 } from "../src/runtime/mock-adapter.js";
 import { Orchestrator } from "../src/runtime/orchestrator.js";
-import { PoolManager } from "../src/runtime/pool.js";
+import { PoolManager } from "../src/runtime/pool-manager.js";
 import { RuntimeRegistry } from "../src/runtime/registry.js";
 import { MemoryThreadRunStore } from "../src/store/memory-store.js";
 import { StreamHub } from "../src/stream/sse.js";

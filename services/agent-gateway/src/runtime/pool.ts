@@ -1,205 +1,98 @@
 /**
- * 按 coldStartCost 差异化的会话槽池。
- *
- * high：维护 minIdle 预热语义（计数）与更长 idleTtl。
- * low：按需起、快速回收。
- * 超 maxConcurrency：reject（由 orchestrator 抛 AGENT_RUNTIME_UNAVAILABLE）。
+ * 冷启动池化策略（G0 → G2）。
+ * 本模块只产出策略参数，不持有真实进程池（池由 G2 编排）。
  */
 
-import type { ColdStartCost } from "@taskdaemon/agent-protocol";
-import type { PoolConfig } from "../config.js";
-import { AgentHttpError } from "../errors.js";
+import type {
+  ColdStartCost,
+  MemoryClass,
+  RuntimeCapabilities,
+} from "@taskdaemon/agent-protocol";
 
-export type PoolSlot = {
-  sessionId: string;
-  runtimeId: string;
-  /** 绑定到 thread 后为 busy；预热未绑定为 idle。 */
-  state: "idle" | "busy";
-  createdAt: number;
-  lastUsedAt: number;
-};
-
-export type AdapterPoolStats = {
+/** 单 runtime 的池参数。 */
+export type RuntimePoolPolicy = {
   runtimeId: string;
   coldStartCost: ColdStartCost;
-  activeSessions: number;
-  processCount: number;
-  warmPoolIdle: number;
-  warmPoolBusy: number;
-  maxConcurrency: number;
+  memoryClass: MemoryClass;
+  /** 建议最小空闲热进程数。 */
   minIdle: number;
+  /** 最大并发会话。 */
+  maxConcurrency: number;
+  /** 空闲保留毫秒。 */
+  idleTtlMs: number;
+  /** 是否建议预热。 */
+  warmup: boolean;
 };
 
-/** 单 runtime 的池状态。 */
-export class AdapterPool {
-  readonly runtimeId: string;
-  readonly coldStartCost: ColdStartCost;
-  readonly config: PoolConfig;
-  private readonly slots = new Map<string, PoolSlot>();
+export type PoolPolicyOptions = {
+  /** 机器可用内存粗粒度提示（GiB），影响 maxConcurrency。 */
+  hostMemoryGiB?: number;
+};
 
-  /**
-   * 参数:
-   *   - runtimeId: adapter id。
-   *   - coldStartCost: 冷启动成本。
-   *   - config: 池配置。
-   */
-  constructor(
-    runtimeId: string,
-    coldStartCost: ColdStartCost,
-    config: PoolConfig,
-  ) {
-    this.runtimeId = runtimeId;
-    this.coldStartCost = coldStartCost;
-    this.config = config;
+/**
+ * 根据 capabilities 推导池策略（G0 §7）。
+ *
+ * 参数:
+ *   - runtimeId: adapter id。
+ *   - caps: 能力声明。
+ *   - options: 主机资源提示。
+ *
+ * 返回值:
+ *   - RuntimePoolPolicy。
+ */
+export function derivePoolPolicy(
+  runtimeId: string,
+  caps: RuntimeCapabilities,
+  options: PoolPolicyOptions = {},
+): RuntimePoolPolicy {
+  const hostMemoryGiB = options.hostMemoryGiB ?? 16;
+  const coldStartCost = caps.coldStartCost;
+  const memoryClass = caps.memoryClass;
+
+  // CLI high：预热 1–2；SDK low：可按需
+  const warmup = coldStartCost === "high";
+  const minIdle = coldStartCost === "high" ? 1 : 0;
+  // 空闲保留 5–15min；high 取更长
+  const idleTtlMs = coldStartCost === "high" ? 10 * 60_000 : 2 * 60_000;
+
+  // 内存：OMP heavy ~490MB，Pi light ~150MB（G0）
+  const perSessionGiB = memoryClass === "heavy" ? 0.55 : 0.2;
+  // 保留 30% 给系统与其它服务
+  const budgetGiB = hostMemoryGiB * 0.7;
+  let maxConcurrency = Math.max(1, Math.floor(budgetGiB / perSessionGiB));
+  // G0 经验上限
+  if (memoryClass === "heavy") {
+    maxConcurrency = Math.min(maxConcurrency, 3);
+  } else {
+    maxConcurrency = Math.min(maxConcurrency, 8);
   }
 
-  /**
-   * 尝试占用一个并发名额并登记 busy 槽。
-   *
-   * 参数:
-   *   - sessionId: 会话 id。
-   *
-   * 异常:
-   *   - 超限 → AGENT_RUNTIME_UNAVAILABLE。
-   */
-  acquire(sessionId: string): void {
-    if (this.busyCount() >= this.config.maxConcurrency) {
-      throw new AgentHttpError(
-        "AGENT_RUNTIME_UNAVAILABLE",
-        `concurrency limit reached for runtime ${this.runtimeId}`,
-        {
-          details: {
-            runtimeId: this.runtimeId,
-            maxConcurrency: this.config.maxConcurrency,
-            policy: "reject",
-          },
-        },
-      );
-    }
-    const now = Date.now();
-    this.slots.set(sessionId, {
-      sessionId,
-      runtimeId: this.runtimeId,
-      state: "busy",
-      createdAt: now,
-      lastUsedAt: now,
-    });
-  }
-
-  /**
-   * 标记最近使用。
-   */
-  touch(sessionId: string): void {
-    const slot = this.slots.get(sessionId);
-    if (slot) {
-      slot.lastUsedAt = Date.now();
-    }
-  }
-
-  /**
-   * 释放槽（会话 dispose）。
-   */
-  release(sessionId: string): void {
-    this.slots.delete(sessionId);
-  }
-
-  /**
-   * 当前 busy 数。
-   */
-  busyCount(): number {
-    let n = 0;
-    for (const slot of this.slots.values()) {
-      if (slot.state === "busy") n += 1;
-    }
-    return n;
-  }
-
-  /**
-   * 当前登记槽数（≈ 进程数代理）。
-   */
-  processCount(): number {
-    return this.slots.size;
-  }
-
-  /**
-   * 预热目标：high 需要 minIdle；此处返回「是否仍需预热名额」。
-   * 真实预热进程由 G3 实现；骨架用配置暴露意图并用 stats 证明分支。
-   */
-  warmPoolTarget(): number {
-    return this.coldStartCost === "high" ? this.config.minIdle : 0;
-  }
-
-  /**
-   * 统计快照。
-   */
-  stats(): AdapterPoolStats {
-    let idle = 0;
-    let busy = 0;
-    for (const slot of this.slots.values()) {
-      if (slot.state === "idle") idle += 1;
-      else busy += 1;
-    }
-    // high 的 warm 目标计入观测（即便尚未 spawn 真实预热进程）
-    const warmTarget = this.warmPoolTarget();
-    return {
-      runtimeId: this.runtimeId,
-      coldStartCost: this.coldStartCost,
-      activeSessions: busy,
-      processCount: this.slots.size,
-      warmPoolIdle: idle,
-      warmPoolBusy: busy,
-      maxConcurrency: this.config.maxConcurrency,
-      minIdle: warmTarget,
-    };
-  }
-
-  /**
-   * 池策略是否为 high 预热型。
-   */
-  usesWarmPool(): boolean {
-    return this.coldStartCost === "high" && this.config.minIdle > 0;
-  }
+  return {
+    runtimeId,
+    coldStartCost,
+    memoryClass,
+    minIdle,
+    maxConcurrency,
+    idleTtlMs,
+    warmup,
+  };
 }
 
-/** 多 adapter 池管理。 */
-export class PoolManager {
-  private readonly pools = new Map<string, AdapterPool>();
-
-  /**
-   * 确保 runtime 有池。
-   *
-   * 参数:
-   *   - runtimeId: id。
-   *   - coldStartCost: 成本。
-   *   - config: 池配置。
-   *
-   * 返回值:
-   *   - AdapterPool。
-   */
-  ensure(
-    runtimeId: string,
-    coldStartCost: ColdStartCost,
-    config: PoolConfig,
-  ): AdapterPool {
-    let pool = this.pools.get(runtimeId);
-    if (!pool) {
-      pool = new AdapterPool(runtimeId, coldStartCost, config);
-      this.pools.set(runtimeId, pool);
-    }
-    return pool;
-  }
-
-  /**
-   * 获取池。
-   */
-  get(runtimeId: string): AdapterPool | undefined {
-    return this.pools.get(runtimeId);
-  }
-
-  /**
-   * 全部统计。
-   */
-  allStats(): AdapterPoolStats[] {
-    return [...this.pools.values()].map((p) => p.stats());
-  }
+/**
+ * 批量推导已注册 runtime 的池策略。
+ *
+ * 参数:
+ *   - catalog: id + capabilities 列表。
+ *   - options: 主机资源。
+ *
+ * 返回值:
+ *   - RuntimePoolPolicy[]。
+ */
+export function derivePoolPolicies(
+  catalog: Array<{ id: string; capabilities: RuntimeCapabilities }>,
+  options: PoolPolicyOptions = {},
+): RuntimePoolPolicy[] {
+  return catalog.map((entry) =>
+    derivePoolPolicy(entry.id, entry.capabilities, options),
+  );
 }
