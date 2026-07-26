@@ -202,6 +202,77 @@ export type NotificationAffectedCount = {
   affected: number;
 };
 
+/** 备份模板参数类型（T7a 有限枚举）。 */
+export const templateParamTypes = [
+  "string",
+  "number",
+  "boolean",
+  "enum",
+  "path",
+  "secret_ref",
+] as const;
+export type TemplateParamType = (typeof templateParamTypes)[number];
+
+/** 模板参数定义（对齐 template_dto.templateParamResponse）。 */
+export type TemplateParamDef = {
+  name: string;
+  type: TemplateParamType;
+  required: boolean;
+  default?: unknown;
+  enumOptions?: string[];
+  help?: string;
+  min?: number;
+  max?: number;
+  sensitive?: boolean;
+};
+
+/** 模板定义（列表项 / 详情）。 */
+export type TemplateDefinition = {
+  id: string;
+  name: string;
+  description: string;
+  scenario: string;
+  runnerType: string;
+  params: TemplateParamDef[];
+};
+
+export type TemplateListResponse = {
+  templates: TemplateDefinition[];
+};
+
+/** 渲染请求体。 */
+export type TemplateRenderRequest = {
+  params: Record<string, unknown>;
+};
+
+/** 渲染草稿 runner（与 createTaskRequest.runner 同形）。 */
+export type TemplateRunnerDraft = {
+  type: string;
+  inline?: string;
+  scriptPath?: string;
+  args?: string[];
+  workDir?: string;
+  env?: Record<string, string>;
+  timeoutSeconds: number;
+  outputLimitBytes?: number;
+};
+
+/**
+ * 渲染成功草稿：与 createTaskRequest 兼容，并附 commandPreview / templateId。
+ * 提交创建任务前须经 draftToTaskPayload 剥离预览字段。
+ */
+export type TemplateTaskDraft = {
+  name: string;
+  description: string;
+  enabled: boolean | null;
+  cronExpression: string;
+  timezone: string;
+  confirmCronWarnings: boolean;
+  runner: TemplateRunnerDraft;
+  commandPreview: string;
+  templateId: string;
+};
+
 export type AuthPrincipal = {
   adminId: number;
   username: string;

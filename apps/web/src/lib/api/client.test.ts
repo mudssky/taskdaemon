@@ -352,4 +352,109 @@ describe("apiClient", () => {
       expect.objectContaining({ method: "DELETE", credentials: "include" }),
     );
   });
+
+  it("calls template list, detail and render endpoints", async () => {
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(input);
+        if (path === "/api/templates") {
+          return new Response(
+            JSON.stringify({
+              code: 0,
+              msg: "ok",
+              data: {
+                templates: [
+                  {
+                    id: "postgres-pg-dump",
+                    name: "pg",
+                    description: "d",
+                    scenario: "s",
+                    runnerType: "shell",
+                    params: [],
+                  },
+                ],
+              },
+            }),
+            { status: 200 },
+          );
+        }
+        if (path === "/api/templates/postgres-pg-dump") {
+          return new Response(
+            JSON.stringify({
+              code: 0,
+              msg: "ok",
+              data: {
+                id: "postgres-pg-dump",
+                name: "pg",
+                description: "d",
+                scenario: "s",
+                runnerType: "shell",
+                params: [{ name: "host", type: "string", required: true }],
+              },
+            }),
+            { status: 200 },
+          );
+        }
+        if (path === "/api/templates/postgres-pg-dump/render") {
+          expect(init?.method).toBe("POST");
+          return new Response(
+            JSON.stringify({
+              code: 0,
+              msg: "ok",
+              data: {
+                name: "t",
+                description: "",
+                enabled: false,
+                cronExpression: "0 2 * * *",
+                timezone: "Local",
+                confirmCronWarnings: false,
+                runner: { type: "shell", inline: "echo", timeoutSeconds: 60 },
+                commandPreview: "echo",
+                templateId: "postgres-pg-dump",
+              },
+            }),
+            { status: 200 },
+          );
+        }
+        return new Response(JSON.stringify({ code: 1, msg: "miss" }), {
+          status: 404,
+        });
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(apiClient.listTemplates()).resolves.toMatchObject({
+      templates: [{ id: "postgres-pg-dump" }],
+    });
+    await expect(
+      apiClient.getTemplate("postgres-pg-dump"),
+    ).resolves.toMatchObject({
+      id: "postgres-pg-dump",
+      params: [{ name: "host" }],
+    });
+    await expect(
+      apiClient.renderTemplate("postgres-pg-dump", {
+        params: { host: "127.0.0.1" },
+      }),
+    ).resolves.toMatchObject({
+      templateId: "postgres-pg-dump",
+      commandPreview: "echo",
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/api/templates",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/templates/postgres-pg-dump",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/templates/postgres-pg-dump/render",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+  });
 });

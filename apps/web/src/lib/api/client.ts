@@ -14,6 +14,10 @@ import type {
   Task,
   TaskPayload,
   TaskRun,
+  TemplateDefinition,
+  TemplateListResponse,
+  TemplateRenderRequest,
+  TemplateTaskDraft,
 } from "./types";
 
 export class ApiClientError extends Error {
@@ -237,5 +241,36 @@ export const apiClient = {
     return requestJSON<NotificationAffectedCount>("/api/notifications/read", {
       method: "DELETE",
     });
+  },
+
+  /** T7a: 列出全部备份模板（含参数定义）。 */
+  async listTemplates() {
+    return requestJSON<TemplateListResponse>("/api/templates");
+  },
+
+  /**
+   * T7a: 查询单个模板详情。
+   *
+   * @param id - 模板稳定标识。
+   * @returns 模板定义。
+   */
+  async getTemplate(id: string) {
+    return requestJSON<TemplateDefinition>(
+      `/api/templates/${encodeURIComponent(id)}`,
+    );
+  },
+
+  /**
+   * T7a: 渲染任务草稿（不落库）。
+   *
+   * @param id - 模板标识。
+   * @param body - 用户参数。
+   * @returns 与 createTask 兼容的草稿 + commandPreview。
+   */
+  async renderTemplate(id: string, body: TemplateRenderRequest) {
+    return requestJSON<TemplateTaskDraft>(
+      `/api/templates/${encodeURIComponent(id)}/render`,
+      { method: "POST", body },
+    );
   },
 };

@@ -17,6 +17,7 @@ import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
 import { TaskCreatePage } from "../features/tasks/TaskCreatePage";
 import { TaskEditPage } from "../features/tasks/TaskEditPage";
 import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
+import { TemplateWizardPage } from "../features/tasks/templates/TemplateWizardPage";
 import {
   DesktopEnvironmentPanel,
   DesktopNativeFeaturesPanel,
@@ -93,6 +94,12 @@ const taskCreateRoute = createRoute({
   component: TaskCreatePage,
 });
 
+const taskFromTemplateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tasks/from-template",
+  component: TemplateWizardPage,
+});
+
 const taskEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tasks/$taskId/edit",
@@ -137,6 +144,7 @@ export const routeTree = rootRoute.addChildren([
   indexRoute,
   tasksRoute,
   taskCreateRoute,
+  taskFromTemplateRoute,
   taskEditRoute,
   runsRoute,
   notificationsRoute,

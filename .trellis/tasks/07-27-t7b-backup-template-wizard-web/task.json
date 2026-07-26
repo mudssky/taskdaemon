@@ -3,7 +3,7 @@
   "name": "t7b-backup-template-wizard-web",
   "title": "T7b 备份模板向导（Web 前端）",
   "description": "消费 T7a 模板契约，落地多步向导生成任务草稿",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,
