@@ -731,3 +731,4 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v5.3 | **C-3 / C-4 冻结（G1）**：落地 `packages/agent-protocol`（types only）与 `docs/agent-contracts/**`；§5.1 AG-UI/Agent Protocol/MCP 锚点补齐；§5.2/§5.4 按 G0 增补 followUp/getMessages/setModel/disposeSession 与 capabilities 扩展字段；§7.5 G1=done；G2/G3/G4 可并行开工 | G1 worker |
 | 2026-07-27 | v5.4 | T6 Run 完整日志归档实现完成（待合入）：`internal/runlog`、RUNLOG_* API、Ent run 三态字段、runs 下载入口 | mudssky / worker |
 | 2026-07-27 | v5.5 | T4 Webhook/邮件出站 sink 合入 | mudssky / worker |
+| 2026-07-27 | coord | 协调波次：可并行任务（G0–G6、T2a/T2b/T3–T6、TD1/TD2、deps）均已合入并 Trellis 归档；剩余 T0 用户进行中及其阻塞链 T1a/T1b/T7a/T7b/T8 | mudssky / coordinator |
