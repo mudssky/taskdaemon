@@ -226,4 +226,130 @@ describe("apiClient", () => {
       expect.objectContaining({ credentials: "include" }),
     );
   });
+
+  it("calls notification list, unread-count and mutation endpoints", async () => {
+    const fetchMock = vi.fn(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const path = String(input);
+        if (path.startsWith("/api/notifications/unread-count")) {
+          return new Response(
+            JSON.stringify({ code: 0, msg: "ok", data: { count: 3 } }),
+            { status: 200 },
+          );
+        }
+        if (path === "/api/notifications/1/read") {
+          return new Response(
+            JSON.stringify({
+              code: 0,
+              msg: "ok",
+              data: { id: 1, title: "done", readAt: "2026-07-27T00:00:00Z" },
+            }),
+            { status: 200 },
+          );
+        }
+        if (path === "/api/notifications/read" && init?.method === "POST") {
+          return new Response(
+            JSON.stringify({ code: 0, msg: "ok", data: { affected: 2 } }),
+            { status: 200 },
+          );
+        }
+        if (path === "/api/notifications/read-all") {
+          return new Response(
+            JSON.stringify({ code: 0, msg: "ok", data: { affected: 5 } }),
+            { status: 200 },
+          );
+        }
+        if (path === "/api/notifications/read" && init?.method === "DELETE") {
+          return new Response(
+            JSON.stringify({ code: 0, msg: "ok", data: { affected: 4 } }),
+            { status: 200 },
+          );
+        }
+        if (path === "/api/notifications/9" && init?.method === "DELETE") {
+          return new Response(
+            JSON.stringify({ code: 0, msg: "ok", data: null }),
+            { status: 200 },
+          );
+        }
+        return new Response(
+          JSON.stringify({
+            code: 0,
+            msg: "ok",
+            data: {
+              notifications: [{ id: 1, title: "ok", severity: "info" }],
+              total: 1,
+              page: 1,
+              pageSize: 20,
+            },
+          }),
+          { status: 200 },
+        );
+      },
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      apiClient.listNotifications({
+        page: 2,
+        pageSize: 10,
+        read: false,
+        severity: "error",
+      }),
+    ).resolves.toMatchObject({
+      total: 1,
+      notifications: [{ id: 1 }],
+    });
+    await expect(apiClient.notificationUnreadCount()).resolves.toEqual({
+      count: 3,
+    });
+    await expect(apiClient.markNotificationRead(1)).resolves.toMatchObject({
+      id: 1,
+    });
+    await expect(apiClient.markNotificationsRead([1, 2])).resolves.toEqual({
+      affected: 2,
+    });
+    await expect(apiClient.markAllNotificationsRead()).resolves.toEqual({
+      affected: 5,
+    });
+    await expect(apiClient.deleteNotification(9)).resolves.toBeUndefined();
+    await expect(apiClient.clearReadNotifications()).resolves.toEqual({
+      affected: 4,
+    });
+
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      1,
+      "/api/notifications?page=2&pageSize=10&read=false&severity=error",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      2,
+      "/api/notifications/unread-count",
+      expect.objectContaining({ credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      3,
+      "/api/notifications/1/read",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      4,
+      "/api/notifications/read",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      5,
+      "/api/notifications/read-all",
+      expect.objectContaining({ method: "POST", credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      6,
+      "/api/notifications/9",
+      expect.objectContaining({ method: "DELETE", credentials: "include" }),
+    );
+    expect(fetchMock).toHaveBeenNthCalledWith(
+      7,
+      "/api/notifications/read",
+      expect.objectContaining({ method: "DELETE", credentials: "include" }),
+    );
+  });
 });

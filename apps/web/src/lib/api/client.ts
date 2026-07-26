@@ -6,6 +6,11 @@ import type {
   AuthLoginResponse,
   AuthPrincipal,
   AuthStatus,
+  Notification,
+  NotificationAffectedCount,
+  NotificationListParams,
+  NotificationListResponse,
+  NotificationUnreadCount,
   Task,
   TaskPayload,
   TaskRun,
@@ -176,5 +181,61 @@ export const apiClient = {
 
   async audioConfig() {
     return requestJSON<AudioConfig>("/api/config/audio");
+  },
+
+  async listNotifications(params: NotificationListParams = {}) {
+    const search = new URLSearchParams();
+    if (params.page !== undefined) {
+      search.set("page", String(params.page));
+    }
+    if (params.pageSize !== undefined) {
+      search.set("pageSize", String(params.pageSize));
+    }
+    if (params.read !== undefined) {
+      search.set("read", String(params.read));
+    }
+    if (params.severity !== undefined) {
+      search.set("severity", params.severity);
+    }
+    const query = search.toString();
+    return requestJSON<NotificationListResponse>(
+      `/api/notifications${query ? `?${query}` : ""}`,
+    );
+  },
+
+  async notificationUnreadCount() {
+    return requestJSON<NotificationUnreadCount>(
+      "/api/notifications/unread-count",
+    );
+  },
+
+  async markNotificationRead(id: number) {
+    return requestJSON<Notification>(`/api/notifications/${id}/read`, {
+      method: "POST",
+    });
+  },
+
+  async markNotificationsRead(ids: number[]) {
+    return requestJSON<NotificationAffectedCount>("/api/notifications/read", {
+      method: "POST",
+      body: { ids },
+    });
+  },
+
+  async markAllNotificationsRead() {
+    return requestJSON<NotificationAffectedCount>(
+      "/api/notifications/read-all",
+      { method: "POST" },
+    );
+  },
+
+  async deleteNotification(id: number) {
+    await requestJSON<void>(`/api/notifications/${id}`, { method: "DELETE" });
+  },
+
+  async clearReadNotifications() {
+    return requestJSON<NotificationAffectedCount>("/api/notifications/read", {
+      method: "DELETE",
+    });
   },
 };

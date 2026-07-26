@@ -10,6 +10,8 @@ import { AudioSettingsPage } from "../features/audio/AudioSettingsPage";
 import { AdminSetupPanel } from "../features/auth/AdminSetupPanel";
 import { useAuthStatusQuery } from "../features/auth/auth.queries";
 import { LoginPanel } from "../features/auth/LoginPanel";
+import { NotificationListPage } from "../features/notifications/NotificationListPage";
+import { parseNotificationSearch } from "../features/notifications/notification.schema";
 import { RunHistoryPage } from "../features/runs/RunHistoryPage";
 import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
 import { TaskCreatePage } from "../features/tasks/TaskCreatePage";
@@ -99,6 +101,14 @@ const runsRoute = createRoute({
   component: RunHistoryPage,
 });
 
+const notificationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/notifications",
+  validateSearch: (search: Record<string, unknown>) =>
+    parseNotificationSearch(search),
+  component: NotificationListPage,
+});
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
@@ -123,6 +133,7 @@ export const routeTree = rootRoute.addChildren([
   taskCreateRoute,
   taskEditRoute,
   runsRoute,
+  notificationsRoute,
   settingsRoute,
 ]);
 
