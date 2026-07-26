@@ -129,25 +129,7 @@ func NewRootCommand(ctx context.Context, opts Options) *cobra.Command {
 		},
 	})
 
-	db := &cobra.Command{
-		Use:   "db",
-		Short: "Database maintenance commands",
-	}
-	db.AddCommand(&cobra.Command{
-		Use:   "migrate",
-		Short: "Run schema migrations for the configured database",
-		RunE: func(*cobra.Command, []string) error {
-			cfg, err := load()
-			if err != nil {
-				return err
-			}
-			if opts.Hooks.DBMigrate == nil {
-				return fmt.Errorf("db migrate hook is not configured")
-			}
-			return opts.Hooks.DBMigrate(ctx, cfg)
-		},
-	})
-	root.AddCommand(db)
+	root.AddCommand(newDBCommand(ctx, opts, load))
 	root.AddCommand(newConfigCommand(ctx, opts, load, loadOptions, &sessionToken))
 	root.AddCommand(newTaskCommand(ctx, opts, load, &sessionToken))
 	root.AddCommand(newServiceCommand(ctx, opts, loadOptions))

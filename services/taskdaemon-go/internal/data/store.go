@@ -28,6 +28,8 @@ var ErrUnsupportedDriver = errors.New("unsupported database driver")
 // Store 封装 Ent client 和数据库方言细节。
 type Store struct {
 	client *ent.Client
+	db     *sql.DB
+	driver string
 }
 
 // Open 根据配置打开数据层连接。
@@ -69,7 +71,7 @@ func Open(ctx context.Context, cfg config.DatabaseConfig) (*Store, error) {
 	}
 
 	driver := entsql.OpenDB(entDialect, db)
-	return &Store{client: ent.NewClient(ent.Driver(driver))}, nil
+	return &Store{client: ent.NewClient(ent.Driver(driver)), db: db, driver: driverName}, nil
 }
 
 // Client 返回当前 Store 持有的 Ent client。
@@ -81,6 +83,34 @@ func Open(ctx context.Context, cfg config.DatabaseConfig) (*Store, error) {
 //   - *ent.Client: 数据库访问 client。
 func (store *Store) Client() *ent.Client {
 	return store.client
+}
+
+// SQL 返回底层 database/sql 连接（数据迁移等需要显式 SQL 的路径使用）。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - *sql.DB: 底层连接；Store 未打开时可能为 nil。
+func (store *Store) SQL() *sql.DB {
+	if store == nil {
+		return nil
+	}
+	return store.db
+}
+
+// Driver 返回配置方言名称（sqlite / postgres）。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - string: 数据库方言。
+func (store *Store) Driver() string {
+	if store == nil {
+		return ""
+	}
+	return store.driver
 }
 
 // Migrate 对当前连接的数据库执行 Ent schema migration。

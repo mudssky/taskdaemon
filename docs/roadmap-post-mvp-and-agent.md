@@ -394,6 +394,8 @@ interface RuntimeCapabilities {
 | T6 | `07-27-t6-run-log-archive` | Run 完整日志归档 | — | **done（待合入）** |
 | T7a | `07-27-t7a-backup-template-api` | 备份模板后端 API | T1a | **done（待合入）** |
 | T8 | `07-27-t8-db-migration-tool` | SQLite ↔ PostgreSQL 迁移工具（CLI，纯后端） | T1a | |
+| T7a | `07-27-t7a-backup-template-api` | 备份模板后端 API | T1a | |
+| T8 | `07-27-t8-db-migration-tool` | SQLite ↔ PostgreSQL 迁移工具（CLI，纯后端） | T1a | **done（待协调者 merge）** |
 
 ### 7.3 Track W · Web 前端
 
