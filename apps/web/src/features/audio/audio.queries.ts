@@ -3,15 +3,7 @@ import { apiClient } from "../../lib/api/client";
 
 export const audioKeys = {
   history: ["audio", "history"] as const,
-  config: ["audio", "config"] as const,
 };
-
-export function useAudioConfigQuery() {
-  return useQuery({
-    queryKey: audioKeys.config,
-    queryFn: apiClient.audioConfig,
-  });
-}
 
 export function useAudioHistoryQuery(limit = 50) {
   return useQuery({

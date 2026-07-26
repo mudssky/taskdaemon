@@ -3,7 +3,7 @@
   "name": "t1b-settings-page-web",
   "title": "T1b 完整设置页（Web 前端）",
   "description": "消费 C-1 配置写入契约，落地设置页多面板表单、危险操作确认与需重启提示",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

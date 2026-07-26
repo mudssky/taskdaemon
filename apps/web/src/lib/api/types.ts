@@ -147,7 +147,65 @@ export type AudioConfig = {
   configuration: {
     runtimeEditable: string[];
     restartRequired: string[];
+    /** 仅配置文件字段（C-1 GET 契约）。 */
+    fileOnly: string[];
   };
+};
+
+/** PUT /api/config/:section 音频部分更新请求（字段均可选）。 */
+export type AudioConfigWriteRequest = {
+  autoplay?: {
+    enabled?: boolean;
+    target?: string;
+  };
+  playback?: {
+    queueLimit?: number;
+  };
+  inbound?: {
+    /** 明文 Bearer；落盘为 hash，响应永不回显。 */
+    token?: string;
+    maxBytes?: number;
+    url?: {
+      allowedSchemes?: string[];
+      allowPrivateNetworks?: boolean;
+      allowedHosts?: string[];
+      downloadTimeoutSeconds?: number;
+      maxRedirects?: number;
+    };
+  };
+  history?: {
+    limit?: number;
+  };
+  ffmpeg?: {
+    transcodeTimeoutSeconds?: number;
+  };
+};
+
+/** 配置字段级错误（error.details.fields[]）。 */
+export type ConfigFieldError = {
+  path: string;
+  reason: string;
+  code: string;
+};
+
+/** PUT /api/config/:section 成功响应 data。 */
+export type ConfigSectionWriteResponse = {
+  config: AudioConfig;
+  applied: string[];
+  restartRequired: string[];
+  reload: ConfigSectionReloadResponse;
+};
+
+export type ConfigSectionReloadResponse = {
+  applied: string[];
+  restartRequired: string[];
+  subsystems: ConfigSubsystemStatus[];
+};
+
+export type ConfigSubsystemStatus = {
+  name: string;
+  status: string;
+  error?: string;
 };
 
 /** 通知严重级别（C-2 冻结枚举）。 */

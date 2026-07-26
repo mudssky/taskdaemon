@@ -2,10 +2,12 @@ import type {
   ApiEnvelope,
   ApiErrorBody,
   AudioConfig,
+  AudioConfigWriteRequest,
   AudioRecord,
   AuthLoginResponse,
   AuthPrincipal,
   AuthStatus,
+  ConfigSectionWriteResponse,
   Notification,
   NotificationAffectedCount,
   NotificationListParams,
@@ -181,6 +183,29 @@ export const apiClient = {
 
   async audioConfig() {
     return requestJSON<AudioConfig>("/api/config/audio");
+  },
+
+  /**
+   * 按 section 部分更新配置（C-1）。
+   *
+   * 参数:
+   *   - section: section 名，首版仅 audio
+   *   - body: 部分更新请求体
+   *
+   * 返回值:
+   *   - ConfigSectionWriteResponse: 安全 config + applied/restart/reload
+   */
+  async putConfigSection(
+    section: string,
+    body: AudioConfigWriteRequest,
+  ): Promise<ConfigSectionWriteResponse> {
+    return requestJSON<ConfigSectionWriteResponse>(
+      `/api/config/${encodeURIComponent(section)}`,
+      {
+        method: "PUT",
+        body,
+      },
+    );
   },
 
   async listNotifications(params: NotificationListParams = {}) {

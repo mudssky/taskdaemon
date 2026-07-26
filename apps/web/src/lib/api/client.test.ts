@@ -169,7 +169,12 @@ describe("apiClient", () => {
               },
               configuration: {
                 runtimeEditable: ["autoplay"],
-                restartRequired: ["ffmpeg.path"],
+                restartRequired: ["ffmpeg.transcodeTimeoutSeconds"],
+                fileOnly: [
+                  "ffmpeg.path",
+                  "ffmpeg.probePath",
+                  "inbound.tokenHash",
+                ],
               },
             },
           }),
@@ -224,6 +229,87 @@ describe("apiClient", () => {
       3,
       "/api/config/audio",
       expect.objectContaining({ credentials: "include" }),
+    );
+  });
+
+  it("puts audio config section and returns write response", async () => {
+    const fetchMock = vi.fn(async () => {
+      return new Response(
+        JSON.stringify({
+          code: 0,
+          msg: "ok",
+          data: {
+            config: {
+              autoplay: { enabled: false, target: "backend" },
+              playback: { queueLimit: 8 },
+              inbound: {
+                tokenConfigured: true,
+                maxBytes: 209715200,
+                url: {
+                  allowedSchemes: ["https"],
+                  allowPrivateNetworks: false,
+                  allowedHosts: [],
+                  downloadTimeoutSeconds: 60,
+                  maxRedirects: 3,
+                },
+              },
+              history: { limit: 50 },
+              ffmpeg: {
+                pathConfigured: false,
+                probePathConfigured: false,
+                transcodeTimeoutSeconds: 120,
+              },
+              configuration: {
+                runtimeEditable: ["autoplay", "playback", "inbound", "history"],
+                restartRequired: ["ffmpeg.transcodeTimeoutSeconds"],
+                fileOnly: [
+                  "ffmpeg.path",
+                  "ffmpeg.probePath",
+                  "inbound.tokenHash",
+                ],
+              },
+            },
+            applied: ["audio.playback.queueLimit"],
+            restartRequired: [],
+            reload: {
+              applied: ["audio.playback.queueLimit"],
+              restartRequired: [],
+              subsystems: [
+                { name: "runtime", status: "ok" },
+                { name: "audio", status: "ok" },
+              ],
+            },
+          },
+          traceId: "trace-config-write",
+        }),
+        { status: 200 },
+      );
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await apiClient.putConfigSection("audio", {
+      playback: { queueLimit: 8 },
+      inbound: { token: "once-token" },
+    });
+
+    expect(result.applied).toEqual(["audio.playback.queueLimit"]);
+    expect(result.config.inbound.tokenConfigured).toBe(true);
+    expect(result.reload.subsystems).toEqual(
+      expect.arrayContaining([
+        { name: "runtime", status: "ok" },
+        { name: "audio", status: "ok" },
+      ]),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/config/audio",
+      expect.objectContaining({
+        method: "PUT",
+        credentials: "include",
+        body: JSON.stringify({
+          playback: { queueLimit: 8 },
+          inbound: { token: "once-token" },
+        }),
+      }),
     );
   });
 
