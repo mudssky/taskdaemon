@@ -22,6 +22,9 @@
 | `POST` | `/v1/threads/{threadId}/runs/{runId}/cancel` | abort 当前生成 |
 | `POST` | `/v1/threads/{threadId}/steer` | 可选：运行中转向 |
 | `POST` | `/v1/threads/{threadId}/follow-up` | 可选：follow-up |
+| `PATCH` | `/v1/threads/{threadId}` | G5：重命名 / 归档恢复 |
+| `POST` | `/v1/threads/{threadId}/fork` | G5：会话分叉 |
+| `POST` | `/v1/threads/{threadId}/hitl` | G5：HITL 决策响应 |
 
 路径常量见 `AgentRoutes`。
 
@@ -111,6 +114,14 @@ G0：abort 真停后会话可继续 → run 变 `cancelled`/`interrupted`，thre
 
 仅当 capabilities 对应字段为 true。否则 `400 AGENT_CAPABILITY_UNSUPPORTED`。  
 Body：`PromptInput` 形状（`{ "input": { "text": "..." } }`）。
+
+### 2.11 会话管理与 HITL（G5 append）
+
+- `PATCH /v1/threads/{threadId}`：`UpdateThreadRequest`（`title` → `metadata.title`；`archived`）。
+- `POST /v1/threads/{threadId}/fork`：`ForkThreadRequest`；返回新 `Thread`；原会话消息不变。
+- `POST /v1/threads/{threadId}/hitl`：`HitlRespondRequest`；仅在存在 pending `hitl_request` 时有效。
+- `GET /v1/threads`：`q` 搜索标题/内容；`includeArchived` 控制归档可见性。
+- `ThreadStatus` 增加 `archived`。
 
 ## 3. 错误形态
 

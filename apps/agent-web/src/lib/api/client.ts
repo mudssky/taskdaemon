@@ -9,13 +9,20 @@ import {
   type CancelRunResponse,
   type CreateRunRequest,
   type CreateThreadRequest,
+  type ForkThreadRequest,
+  type HitlRespondRequest,
+  type HitlRespondResponse,
   type ListMessagesQuery,
   type ListMessagesResponse,
   type ListThreadsQuery,
   type ListThreadsResponse,
   type RuntimeCapabilities,
+  type SteerRequest,
+  type SteerResponse,
+  type StreamReconnectQuery,
   type Thread,
   type ThreadCapabilitiesResponse,
+  type UpdateThreadRequest,
 } from "@taskdaemon/agent-protocol";
 import { errorFromResponse } from "./errors";
 
@@ -43,6 +50,11 @@ export type AgentApi = {
   listThreads: (query?: ListThreadsQuery) => Promise<ListThreadsResponse>;
   createThread: (body: CreateThreadRequest) => Promise<Thread>;
   getThread: (threadId: string) => Promise<Thread>;
+  updateThread: (
+    threadId: string,
+    body: UpdateThreadRequest,
+  ) => Promise<Thread>;
+  forkThread: (threadId: string, body?: ForkThreadRequest) => Promise<Thread>;
   deleteThread: (threadId: string) => Promise<void>;
   listMessages: (
     threadId: string,
@@ -54,11 +66,23 @@ export type AgentApi = {
     body: CreateRunRequest,
     handlers: StreamHandlers,
   ) => StreamHandle;
+  /** 重连已有 run 的事件流（C-3 游标语义）。 */
+  reconnectRunStream: (
+    threadId: string,
+    runId: string,
+    query: StreamReconnectQuery | undefined,
+    handlers: StreamHandlers,
+  ) => StreamHandle;
   cancelRun: (
     threadId: string,
     runId: string,
     body?: CancelRunRequest,
   ) => Promise<CancelRunResponse>;
+  steer: (threadId: string, body: SteerRequest) => Promise<SteerResponse>;
+  respondHitl: (
+    threadId: string,
+    body: HitlRespondRequest,
+  ) => Promise<HitlRespondResponse>;
 };
 
 type DataEnvelope<T> = {
@@ -70,7 +94,7 @@ type RuntimesPayload = {
 };
 
 /**
- * 基于 fetch 的真实 gateway 客户端（G2 就绪后使用）。
+ * 基于 fetch 的真实 gateway 客户端。
  *
  * 参数:
  *   - baseUrl: API 前缀，默认 AGENT_API_PREFIX。
@@ -83,7 +107,6 @@ export function createHttpAgentApi(
 ): AgentApi {
   return {
     async listRuntimes() {
-      // 契约未强制该端点；G2 可选。失败时返回空，UI 仍可创建默认 runtime。
       try {
         const data = await requestJSON<RuntimesPayload>(`${baseUrl}/runtimes`);
         return data.items;
@@ -104,6 +127,18 @@ export function createHttpAgentApi(
     getThread(threadId) {
       return requestJSON(`${baseUrl}/threads/${encodeURIComponent(threadId)}`);
     },
+    updateThread(threadId, body) {
+      return requestJSON(`${baseUrl}/threads/${encodeURIComponent(threadId)}`, {
+        method: "PATCH",
+        body,
+      });
+    },
+    forkThread(threadId, body = {}) {
+      return requestJSON(
+        `${baseUrl}/threads/${encodeURIComponent(threadId)}/fork`,
+        { method: "POST", body },
+      );
+    },
     async deleteThread(threadId) {
       await requestJSON(`${baseUrl}/threads/${encodeURIComponent(threadId)}`, {
         method: "DELETE",
@@ -121,73 +156,30 @@ export function createHttpAgentApi(
       );
     },
     streamRun(threadId, body, handlers) {
-      const controller = new AbortController();
-      const { promise: runIdPromise, resolve: resolveRunId } =
-        Promise.withResolvers<string>();
-      let runIdResolved = false;
-      const settleRunId = (id: string) => {
-        if (!runIdResolved) {
-          runIdResolved = true;
-          resolveRunId(id);
-        }
-      };
-
-      void (async () => {
-        try {
-          const response = await fetch(
-            `${baseUrl}/threads/${encodeURIComponent(threadId)}/runs/stream`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(body),
-              signal: controller.signal,
-            },
-          );
-          if (!response.ok) {
-            let parsed: unknown = null;
-            try {
-              parsed = await response.json();
-            } catch {
-              parsed = null;
-            }
-            throw errorFromResponse(response, parsed);
-          }
-
-          const location = response.headers.get("Content-Location");
-          const runFromHeader = location?.split("/").pop();
-          if (runFromHeader) {
-            settleRunId(runFromHeader);
-          }
-
-          if (!response.body) {
-            throw new Error("stream response has no body");
-          }
-
-          await readSseStream(response.body, {
-            onEvent: (event) => {
-              if (event.type === "RUN_STARTED") {
-                settleRunId(event.runId);
-              }
-              handlers.onEvent(event);
-            },
-            onError: handlers.onError,
-          });
-          handlers.onDone();
-        } catch (error) {
-          if ((error as Error).name === "AbortError") {
-            handlers.onDone();
-            return;
-          }
-          handlers.onError(
-            error instanceof Error ? error : new Error(String(error)),
-          );
-        }
-      })();
-
-      return {
-        abort: () => controller.abort(),
-        runId: runIdPromise,
-      };
+      return openSse(
+        `${baseUrl}/threads/${encodeURIComponent(threadId)}/runs/stream`,
+        {
+          method: "POST",
+          body,
+        },
+        handlers,
+      );
+    },
+    reconnectRunStream(threadId, runId, query, handlers) {
+      const qs = toQuery(query);
+      const headers: Record<string, string> = {};
+      if (query?.lastEventId || query?.cursor) {
+        headers["Last-Event-ID"] = query.lastEventId ?? query.cursor ?? "";
+      }
+      return openSse(
+        `${baseUrl}/threads/${encodeURIComponent(threadId)}/runs/${encodeURIComponent(runId)}/stream${qs}`,
+        {
+          method: "GET",
+          headers,
+          settleRunId: runId,
+        },
+        handlers,
+      );
     },
     cancelRun(threadId, runId, body = { action: "interrupt" }) {
       return requestJSON(
@@ -195,6 +187,104 @@ export function createHttpAgentApi(
         { method: "POST", body },
       );
     },
+    steer(threadId, body) {
+      return requestJSON(
+        `${baseUrl}/threads/${encodeURIComponent(threadId)}/steer`,
+        { method: "POST", body },
+      );
+    },
+    respondHitl(threadId, body) {
+      return requestJSON(
+        `${baseUrl}/threads/${encodeURIComponent(threadId)}/hitl`,
+        { method: "POST", body },
+      );
+    },
+  };
+}
+
+function openSse(
+  path: string,
+  options: {
+    method: string;
+    body?: unknown;
+    headers?: Record<string, string>;
+    settleRunId?: string;
+  },
+  handlers: StreamHandlers,
+): StreamHandle {
+  const controller = new AbortController();
+  const { promise: runIdPromise, resolve: resolveRunId } =
+    Promise.withResolvers<string>();
+  let runIdResolved = false;
+  const settleRunId = (id: string) => {
+    if (!runIdResolved) {
+      runIdResolved = true;
+      resolveRunId(id);
+    }
+  };
+  if (options.settleRunId) {
+    settleRunId(options.settleRunId);
+  }
+
+  void (async () => {
+    try {
+      const headers: Record<string, string> = {
+        ...(options.headers ?? {}),
+      };
+      if (options.body !== undefined) {
+        headers["Content-Type"] = "application/json";
+      }
+      const response = await fetch(path, {
+        method: options.method,
+        headers,
+        body:
+          options.body === undefined ? undefined : JSON.stringify(options.body),
+        signal: controller.signal,
+      });
+      if (!response.ok) {
+        let parsed: unknown = null;
+        try {
+          parsed = await response.json();
+        } catch {
+          parsed = null;
+        }
+        throw errorFromResponse(response, parsed);
+      }
+
+      const location = response.headers.get("Content-Location");
+      const runFromHeader = location?.split("/").pop();
+      if (runFromHeader) {
+        settleRunId(runFromHeader);
+      }
+
+      if (!response.body) {
+        throw new Error("stream response has no body");
+      }
+
+      await readSseStream(response.body, {
+        onEvent: (event) => {
+          if (event.type === "RUN_STARTED") {
+            settleRunId(event.runId);
+          }
+          handlers.onEvent(event);
+        },
+        onError: handlers.onError,
+      });
+      handlers.onDone();
+    } catch (error) {
+      if ((error as Error).name === "AbortError") {
+        handlers.onDone();
+        return;
+      }
+      handlers.onError(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+    }
+  })();
+
+  return {
+    abort: () => controller.abort(),
+    runId: runIdPromise,
   };
 }
 
@@ -226,7 +316,6 @@ async function requestJSON<T>(
     throw errorFromResponse(response, parsed);
   }
 
-  // 兼容裸 DTO 与 { data } envelope。
   if (isDataEnvelope<T>(parsed)) {
     return parsed.data;
   }
@@ -281,18 +370,24 @@ async function readSseStream(
     const parts = buffer.split("\n\n");
     buffer = parts.pop() ?? "";
     for (const part of parts) {
-      const dataLine = part
-        .split("\n")
-        .find((line) => line.startsWith("data:"));
-      if (!dataLine) {
-        continue;
+      let eventId: string | undefined;
+      let dataJson: string | undefined;
+      for (const line of part.split("\n")) {
+        if (line.startsWith("id:")) {
+          eventId = line.slice(3).trim();
+        } else if (line.startsWith("data:")) {
+          dataJson = line.slice(5).trim();
+        }
       }
-      const json = dataLine.slice(5).trim();
-      if (!json || json === "[DONE]") {
+      if (!dataJson || dataJson === "[DONE]") {
         continue;
       }
       try {
-        handlers.onEvent(JSON.parse(json) as AguiEvent);
+        const event = JSON.parse(dataJson) as AguiEvent;
+        if (eventId && !event.id) {
+          event.id = eventId;
+        }
+        handlers.onEvent(event);
       } catch (error) {
         handlers.onError(
           error instanceof Error ? error : new Error(String(error)),

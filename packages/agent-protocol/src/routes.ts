@@ -20,6 +20,12 @@ export const AgentRoutes = {
   threadSteer: "/threads/:threadId/steer",
   /** follow-up（可选）。 */
   threadFollowUp: "/threads/:threadId/follow-up",
+  /** 会话元数据更新（G5：重命名 / 归档）。 */
+  threadUpdate: "/threads/:threadId",
+  /** 会话分叉（G5）。 */
+  threadFork: "/threads/:threadId/fork",
+  /** HITL 决策响应（G5）。 */
+  threadHitl: "/threads/:threadId/hitl",
 } as const;
 
 export type AgentRouteKey = keyof typeof AgentRoutes;
