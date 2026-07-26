@@ -82,6 +82,30 @@ func (app *App) Serve(ctx context.Context) error {
 	app.audioService = audio.New(store, app.cfg.Audio, audio.Options{Queue: audioQueue})
 
 	bridgeCfg := app.cfg.AgentBridge
+	writeConfig := httpapi.DefaultConfigSectionWriter(func(ctx context.Context, patch config.AudioSectionPatch) (httpapi.ConfigSectionWriteResponse, error) {
+		result, err := app.WriteAudioConfig(ctx, patch)
+		if err != nil {
+			return httpapi.ConfigSectionWriteResponse{}, err
+		}
+		subsystems := make([]httpapi.ConfigSubsystemStatusResponse, 0, len(result.Subsystems))
+		for _, item := range result.Subsystems {
+			subsystems = append(subsystems, httpapi.ConfigSubsystemStatusResponse{
+				Name:   item.Name,
+				Status: item.Status,
+				Error:  item.Error,
+			})
+		}
+		return httpapi.ConfigSectionWriteResponse{
+			Config:          httpapi.AudioConfigResponseFromConfig(result.Config.Audio),
+			Applied:         result.Applied,
+			RestartRequired: result.RestartRequired,
+			Reload: httpapi.ConfigSectionReloadResponse{
+				Applied:         result.Reload.Applied,
+				RestartRequired: result.Reload.RestartRequired,
+				Subsystems:      subsystems,
+			},
+		}, nil
+	})
 	server := &http.Server{
 		Addr: app.cfg.Server.Address(),
 		Handler: httpapi.NewRouter(httpapi.Options{
@@ -97,6 +121,7 @@ func (app *App) Serve(ctx context.Context) error {
 			HTTPLog:                app.cfg.Logging.HTTP,
 			RuntimeConfig:          app.runtimeConfig,
 			ReloadConfig:           app.ReloadRuntimeConfig,
+			WriteConfig:            writeConfig,
 			FrontendFS:             mustFrontendFS(),
 			// T6
 			RunLog: runLogService,

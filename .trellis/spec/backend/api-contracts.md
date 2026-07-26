@@ -212,6 +212,23 @@ writeAPIError(ctx, http.StatusBadRequest, "task_invalid", "Task definition is in
 `notificationResponse` 字段：`id`、`eventId`、`name`、`severity`、`subjectKind`、`subjectId`、`title`、`body`、`detail`、`readAt`、`occurredAt`、`createdAt`。
 
 错误码见 [错误处理](./error-handling.md) 中 `NOTIFY_*` 表。事件模型与 Sink 契约见 [通知事件总线契约 C-2](./notification-event-contract.md)。
+
+## 配置写入 API（C-1 / T1a）
+
+全部端点走管理员 session 认证（`requireSession`）。实现：`config_routes.go` + `config_dto.go` + `app/config_write.go`。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/config/audio` | 安全只读；敏感字段仅 `*Configured` |
+| PUT | `/api/config/:section` | 部分更新；首版 section=`audio` |
+| POST | `/api/config/reload` | 从文件重载热配置（既有） |
+
+`PUT` 成功 `data`：`config` + `applied` + `restartRequired` + `reload.subsystems[]`。
+
+字段级错误 `error.details.fields[]`：`{ path, reason, code }`。
+
+错误码见 [错误处理](./error-handling.md) 中 `CONFIG_*` 表。分级与落盘规则见 [配置运行时规范](./configuration-runtime-guidelines.md) C-1 节。
+
 ---
 
 ## 前后端联动清单

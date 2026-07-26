@@ -387,7 +387,7 @@ interface RuntimeCapabilities {
 | ID | 任务目录 | 主题 | 依赖 | 状态 |
 |---|---|---|---|---|
 | T0 | `05-28-hermes-agent-audio-api` | 音频收口（**现有任务，不新建**；跨前后端） | — | **done**（写配置→T1a/T1b） |
-| T1a | `07-27-t1a-config-write-api` | 配置写入 API + **契约 C-1 冻结** | T0 | |
+| T1a | `07-27-t1a-config-write-api` | 配置写入 API + **契约 C-1 冻结** | T0 | **done（C-1 已冻结，待合入）** |
 | T2a | `07-27-t2a-notification-event-bus` | 通知事件总线 + 站内 sink + **契约 C-2 冻结** | — | **done（C-2 已冻结）** |
 | T4 | `07-27-t4-outbound-notification-sink` | Webhook / 邮件出站 sink | T2a | **done** |
 | T5 | `07-27-t5-service-installer` | 系统服务安装器（CLI，纯后端） | — | **done**（真实三平台装机为残留） |
@@ -547,7 +547,7 @@ T2a ─────────────────────────�
 
 | # | 契约 | 冻结任务 | 冻结产物 | 消费方 |
 |---|---|---|---|---|
-| C-1 | **配置写入 API 形状**（`PUT /api/config/<section>`、热生效 vs 需重启标记、校验错误结构、reload 结果 envelope） | **T1a** | `.trellis/spec/backend/configuration-runtime-guidelines.md` 增补 + `config_dto.go` | **W1**、T0 音频写配置、T4、T5、T6、D3 |
+| C-1 | **配置写入 API 形状**（`PUT /api/config/<section>`、热生效 vs 需重启标记、校验错误结构、reload 结果 envelope） | **T1a** | `.trellis/spec/backend/configuration-runtime-guidelines.md`（C-1 节）+ `api-contracts.md` + `error-handling.md`（`CONFIG_*`）+ `config_{dto,routes}.go` / `classification.go` / `write.go` | **W1**、T4、T5、T6、D3 |
 | C-2 | **通知事件 schema**（事件名空间、payload 字段、`Sink`/`Bus` 接口、sink 注册与失败语义、已读状态模型） | **T2a** | `services/taskdaemon-go/internal/notify/event.go` + `.trellis/spec/backend/notification-event-contract.md` + `api-contracts.md`/`error-handling.md` 增补 | **W2**、T4、D2、G6 |
 | C-3 | **Agent 对外契约**（Agent Protocol 子集 + AG-UI 事件映射表 + `AgentRuntime` 接口 + **`RuntimeCapabilities` 能力协商** + 共享 TS 类型包） | **G1** | **`packages/agent-protocol/`**（`@taskdaemon/agent-protocol`）+ **`docs/agent-contracts/`**（`README.md`、`agent-protocol-subset.md`、`agui-event-mapping.md`、`agent-runtime.md`、`runtime-capabilities.md`、`non-coding-profile.md`） | G2、G3、**G4**、G5、G6 |
 | C-4 | **信任边界契约**（注入头名称与语义、`PrincipalResolver` 接口、audit/usage 事件 schema） | **G1** | **`docs/agent-contracts/trust-boundary.md`** + 类型 `packages/agent-protocol/src/trust.ts` | G2、G6、未来 Java 网关 |
