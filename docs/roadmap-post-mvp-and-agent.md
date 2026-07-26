@@ -194,9 +194,9 @@
 
 | 规范 | 参考版本 | 快照日期 | 实现子集 |
 |---|---|---|---|
-| AG-UI | *待 G1 填* | *待 G1 填* | *待 G1 填* |
-| Agent Protocol | *待 G1 填* | *待 G1 填* | *待 G1 填* |
-| MCP | *待 G1 填* | *待 G1 填* | *待 G1 填* |
+| AG-UI | docs.ag-ui.com `concepts/events`（2026-07-27 快照；无独立 semver） | 2026-07-27 | Lifecycle + Text + Tool + Reasoning + 有限 State/Custom；映射见 `docs/agent-contracts/agui-event-mapping.md` |
+| Agent Protocol | OpenAPI **0.1.6**（https://langchain-ai.github.io/agent-protocol/openapi.json） | 2026-07-27 | threads / runs / stream / cancel / messages；无 Store/Agents/全量 stream；见 `docs/agent-contracts/agent-protocol-subset.md` |
+| MCP | 协议修订 **2025-03-26**（tools 面） | 2026-07-27 | 不在 gateway 重做 MCP transport；经 runtime 透传，G6 接目录/allowlist |
 | Pi RPC / SDK | `@earendil-works/pi-coding-agent` **0.82.0**（CLI `pi`；RPC JSONL + `createAgentSession` SDK） | 2026-07-27 | Adapter 内部：CLI `--mode rpc` 与可选 sdk-inprocess；事件子集见 G0 `research/samples/pi/` |
 | OMP | `@oh-my-pi/pi-coding-agent` / CLI `omp` **17.1.3**（Oh My Pi，MIT，https://github.com/can1357/oh-my-pi） | 2026-07-27 | Adapter 内部：CLI `--mode rpc`（与 Pi 同构 JSONL）；能力超集与裁剪见 G0 `research/omp-capability-matrix.md` |
 
@@ -210,16 +210,22 @@ gateway 只依赖 adapter，不依赖任何具体 agent 的细节。
 
 ```ts
 interface AgentRuntime {
-  readonly id: string                   // 'pi' | 'omp' | ...
-  capabilities(): RuntimeCapabilities   // 能力声明，见 §5.6
+  readonly id: string
+  capabilities(): RuntimeCapabilities
   createSession(opts: SessionOpts): Promise<SessionHandle>
   prompt(sessionId: string, input: PromptInput): AsyncIterable<RuntimeEvent>
   steer?(sessionId: string, input: PromptInput): Promise<void>
+  followUp?(sessionId: string, input: PromptInput): Promise<void>
   abort(sessionId: string): Promise<void>
-  getState(sessionId: string): Promise<RuntimeState>
+  getState(sessionId: string): Promise<RuntimeState> // 必须 secret-sanitize
+  getMessages(sessionId: string, page?: HistoryPage): Promise<MessagePage>
+  setModel?(sessionId: string, model: ModelRef): Promise<void>
   listModels?(sessionId: string): Promise<ModelInfo[]>
+  disposeSession(sessionId: string): Promise<void>
 }
 ```
+
+> **G1 已冻结**：权威类型在 `packages/agent-protocol`（`@taskdaemon/agent-protocol`）；说明见 `docs/agent-contracts/agent-runtime.md`。
 
 `RuntimeEvent` → AG-UI events；HTTP 资源 → Agent Protocol 子集。
 
@@ -250,13 +256,19 @@ interface RuntimeCapabilities {
   attachMode: 'cli-spawn' | 'sdk-inprocess'
   coldStartCost: 'low' | 'high'      // 供 G2 的池化策略使用
   steering: boolean
+  followUp: boolean
   thinking: boolean
   toolCallDetail: 'full' | 'name-only' | 'none'
   modelSwitch: 'session' | 'request' | 'none'
   workspaceBinding: boolean          // general profile 下通常为 false
   sessionPersistence: 'runtime' | 'gateway' | 'none'
+  abortContinuesSession: boolean
+  history: 'messages' | 'messages+entries' | 'none'
+  memoryClass: 'light' | 'heavy'
 }
 ```
+
+> **G1 已冻结**：Pi/OMP 实例值见 `docs/agent-contracts/runtime-capabilities.md` 与包内 `PI_CLI_CAPABILITIES` / `OMP_CLI_CAPABILITIES`。
 
 > **同构提示**：这与 Track D 的 `C-5 Desktop capability` 契约是**同一个模式** —— 能力声明 + 前端按声明降级。两处应共用词汇与心智模型，减少认知负担。能力不可用时前端展示禁用态并说明原因，不隐藏、不伪造。
 
@@ -403,15 +415,15 @@ interface RuntimeCapabilities {
 
 ### 7.5 Track G · Agent Gateway
 
-| ID | 任务目录 | 主题 | 依赖 |
-|---|---|---|---|
-| G0 | `07-27-g0-agent-runtime-spike` | 技术 spike + **Pi/OMP 能力盘点与 gateway 规模判定**（**done**，见任务 `research/`） | — |
-| G1 | `07-27-g1-agent-contract-freeze` | **契约 C-3 / C-4 冻结** + `packages/` 落地 | G0 |
-| G2 | `07-27-g2-hono-gateway-skeleton` | Hono gateway 骨架（**规模由 G0 判定**）+ 多 adapter 编排 + 信任边界钩子 | G1 |
-| G3 | `07-27-g3-runtime-adapters` | **Runtime Adapter 层 + Pi/OMP 两个实现** | G1（与 G2 并行；联调需 G2） |
-| G4 | `07-27-g4-agent-web-mvp` | 最小 agent-web（**参考 Pi WebUI 简化重写**，见 §5.9；按能力声明与 profile 渲染） | G1（与 G2/G3 并行；联调需 G2+G3） |
-| G5 | `07-27-g5-agui-full-experience` | AG-UI 完整体验（Codex 式） | G4 |
-| G6 | `07-27-g6-mcp-and-interop` | MCP 目录 + 双引擎打通 | G3、T2a |
+| ID | 任务目录 | 主题 | 依赖 | 状态 |
+|---|---|---|---|---|
+| G0 | `07-27-g0-agent-runtime-spike` | 技术 spike + **Pi/OMP 能力盘点与 gateway 规模判定** | — | **done**（见任务 `research/`） |
+| G1 | `07-27-g1-agent-contract-freeze` | **契约 C-3 / C-4 冻结** + `packages/` 落地 | G0 | **done**（C-3/C-4 已冻结） |
+| G2 | `07-27-g2-hono-gateway-skeleton` | Hono gateway 骨架（**规模由 G0 判定**）+ 多 adapter 编排 + 信任边界钩子 | G1 | pending |
+| G3 | `07-27-g3-runtime-adapters` | **Runtime Adapter 层 + Pi/OMP 两个实现** | G1（与 G2 并行；联调需 G2） | pending |
+| G4 | `07-27-g4-agent-web-mvp` | 最小 agent-web（**参考 Pi WebUI 简化重写**，见 §5.9；按能力声明与 profile 渲染） | G1（与 G2/G3 并行；联调需 G2+G3） | pending |
+| G5 | `07-27-g5-agui-full-experience` | AG-UI 完整体验（Codex 式） | G4 | pending |
+| G6 | `07-27-g6-mcp-and-interop` | MCP 目录 + 双引擎打通 | G3、T2a | pending |
 
 > **Track G 的重心在前端。** G2/G3 的后端工作量取决于 G0 对 runtime 原生能力的盘点结果 —— runtime 已提供的一律透传（见 §5.8）。真正需要从零定制的是 G4/G5 的产品体验层，以及 G3 的**多 adapter 抽象**。
 
@@ -537,8 +549,8 @@ T2a ─────────────────────────�
 |---|---|---|---|---|
 | C-1 | **配置写入 API 形状**（`PUT /api/config/<section>`、热生效 vs 需重启标记、校验错误结构、reload 结果 envelope） | **T1a** | `.trellis/spec/backend/configuration-runtime-guidelines.md` 增补 + `config_dto.go` | **W1**、T0 音频写配置、T4、T5、T6、D3 |
 | C-2 | **通知事件 schema**（事件名空间、payload 字段、`Sink`/`Bus` 接口、sink 注册与失败语义、已读状态模型） | **T2a** | `services/taskdaemon-go/internal/notify/event.go` + `.trellis/spec/backend/notification-event-contract.md` + `api-contracts.md`/`error-handling.md` 增补 | **W2**、T4、D2、G6 |
-| C-3 | **Agent 对外契约**（Agent Protocol 子集 + AG-UI 事件映射表 + `AgentRuntime` 接口 + **`RuntimeCapabilities` 能力协商** + 共享 TS 类型包） | **G1** | `packages/agent-protocol/`、`docs/agent-contracts/` | G2、G3、**G4**、G5、G6 |
-| C-4 | **信任边界契约**（注入头名称与语义、`PrincipalResolver` 接口、audit/usage 事件 schema） | **G1** | `docs/agent-contracts/trust-boundary.md` | G2、G6、未来 Java 网关 |
+| C-3 | **Agent 对外契约**（Agent Protocol 子集 + AG-UI 事件映射表 + `AgentRuntime` 接口 + **`RuntimeCapabilities` 能力协商** + 共享 TS 类型包） | **G1** | **`packages/agent-protocol/`**（`@taskdaemon/agent-protocol`）+ **`docs/agent-contracts/`**（`README.md`、`agent-protocol-subset.md`、`agui-event-mapping.md`、`agent-runtime.md`、`runtime-capabilities.md`、`non-coding-profile.md`） | G2、G3、**G4**、G5、G6 |
+| C-4 | **信任边界契约**（注入头名称与语义、`PrincipalResolver` 接口、audit/usage 事件 schema） | **G1** | **`docs/agent-contracts/trust-boundary.md`** + 类型 `packages/agent-protocol/src/trust.ts` | G2、G6、未来 Java 网关 |
 | C-5 | **Desktop capability 契约**（capability 命名、`useDesktopCapability` 返回形状、Web fallback 语义、Wails binding 注册模式） | **D1** | `apps/web/src/lib/desktop/index.ts` + `.trellis/spec/frontend/routing-platform-guidelines.md`（C-5 节）+ `.trellis/spec/backend/error-handling.md`（`DESKTOP_*`）+ `services/taskdaemon-go/internal/desktop/bridge.go` | D2、D3、W 轨全部任务 |
 | C-6 | **错误码前缀分配** | **本父任务（下表）** | 本文 §9.1 | 全部 |
 
@@ -707,3 +719,4 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v5.3 | T5 系统服务安装器合入（launchd/systemd/SCM；真实三平台装机残留） | mudssky / worker |
 | 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
 | 2026-07-27 | chore | **deps-latest-upgrade 合入**：JS/TS+Go 直接依赖升 latest（TS7/Biome2.5/Wails alpha2.118 等） | mudssky / worker |
+| 2026-07-27 | v5.3 | **C-3 / C-4 冻结（G1）**：落地 `packages/agent-protocol`（types only）与 `docs/agent-contracts/**`；§5.1 AG-UI/Agent Protocol/MCP 锚点补齐；§5.2/§5.4 按 G0 增补 followUp/getMessages/setModel/disposeSession 与 capabilities 扩展字段；§7.5 G1=done；G2/G3/G4 可并行开工 | G1 worker |
