@@ -3,7 +3,7 @@
   "name": "t2b-notification-center-web",
   "title": "T2b 通知中心（Web 前端）",
   "description": "消费 C-2 通知事件契约，落地通知铃铛、列表、已读与筛选",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

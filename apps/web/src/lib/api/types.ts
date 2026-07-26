@@ -150,6 +150,58 @@ export type AudioConfig = {
   };
 };
 
+/** 通知严重级别（C-2 冻结枚举）。 */
+export const notificationSeverities = [
+  "info",
+  "warning",
+  "error",
+  "critical",
+] as const;
+export type NotificationSeverity = (typeof notificationSeverities)[number];
+
+/** 通知关联实体类型（C-2 Subject.Kind）。 */
+export const notificationSubjectKinds = ["task", "run", "scheduler"] as const;
+export type NotificationSubjectKind = (typeof notificationSubjectKinds)[number];
+
+/** 站内通知 DTO（对齐 /api/notifications）。 */
+export type Notification = {
+  id: number;
+  eventId: string;
+  name: string;
+  severity: NotificationSeverity | string;
+  subjectKind?: NotificationSubjectKind | string;
+  subjectId?: string;
+  title: string;
+  body?: string;
+  detail?: Record<string, unknown>;
+  readAt?: string | null;
+  occurredAt: string;
+  createdAt: string;
+};
+
+export type NotificationListResponse = {
+  notifications: Notification[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
+export type NotificationListParams = {
+  page?: number;
+  pageSize?: number;
+  /** true=已读，false=未读，undefined=全部 */
+  read?: boolean;
+  severity?: NotificationSeverity;
+};
+
+export type NotificationUnreadCount = {
+  count: number;
+};
+
+export type NotificationAffectedCount = {
+  affected: number;
+};
+
 export type AuthPrincipal = {
   adminId: number;
   username: string;

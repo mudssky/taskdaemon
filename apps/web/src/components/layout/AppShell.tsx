@@ -1,6 +1,7 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
 import {
   Activity,
+  Bell,
   Clock3,
   Database,
   LogOut,
@@ -12,6 +13,8 @@ import {
   useAuthStatusQuery,
   useLogoutMutation,
 } from "../../features/auth/auth.queries";
+import { NotificationBell } from "../../features/notifications/NotificationBell";
+import { DEFAULT_NOTIFICATION_SEARCH } from "../../features/notifications/notification.schema";
 
 type AppShellProps = PropsWithChildren<{
   pageTitle?: string;
@@ -55,6 +58,14 @@ export function AppShell({
             <Database aria-hidden="true" size={18} />
             执行历史
           </Link>
+          <Link
+            to="/notifications"
+            search={DEFAULT_NOTIFICATION_SEARCH}
+            activeProps={{ "aria-current": "page" }}
+          >
+            <Bell aria-hidden="true" size={18} />
+            通知
+          </Link>
           <Link to="/settings" activeProps={{ "aria-current": "page" }}>
             <Settings aria-hidden="true" size={18} />
             设置
@@ -68,6 +79,7 @@ export function AppShell({
             <h1 id="page-title">{title}</h1>
           </div>
           <div className="topbar-actions">
+            {authStatus.data?.authenticated ? <NotificationBell /> : null}
             <span className="status">{statusText}</span>
             {authStatus.data?.authenticated ? (
               <button
@@ -101,6 +113,9 @@ function pageTitleForPath(pathname: string): string {
   }
   if (pathname.startsWith("/runs")) {
     return "执行历史";
+  }
+  if (pathname.startsWith("/notifications")) {
+    return "通知中心";
   }
   if (pathname.startsWith("/settings")) {
     return "设置";
