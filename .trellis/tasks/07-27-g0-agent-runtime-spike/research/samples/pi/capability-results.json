@@ -1,0 +1,1956 @@
+[
+  {
+    "runtime": "pi",
+    "case": "basic_prompt",
+    "ok": true,
+    "ms": 7788,
+    "model": "xh/grok-4.5",
+    "result": {
+      "ready": {
+        "spawnMs": 3327.9494579999996,
+        "firstStdoutMs": 2872.165291,
+        "sessionDir": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-pi-session-16a4d918-d5df-4a30-a601-3a560e20d6da",
+        "args": [
+          "pi",
+          "--mode",
+          "rpc",
+          "--model",
+          "xh/grok-4.5",
+          "--thinking",
+          "off",
+          "--session-dir",
+          "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-pi-session-16a4d918-d5df-4a30-a601-3a560e20d6da",
+          "--no-session",
+          "--no-tools"
+        ],
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fbf-c0bc-7424-8400-f8ae2ee49640",
+          "autoCompactionEnabled": true,
+          "messageCount": 0,
+          "pendingMessageCount": 0
+        }
+      },
+      "turn": {
+        "totalMs": 4353.9325,
+        "firstEventMs": 159.69120799999973,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fbf-c0bc-7424-8400-f8ae2ee49640",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        }
+      },
+      "lastText": {
+        "text": "PONG"
+      },
+      "messageCount": 2,
+      "eventTypes": [
+        "extension_ui_request",
+        "response",
+        "agent_start",
+        "turn_start",
+        "message_start",
+        "message_end",
+        "message_update",
+        "turn_end",
+        "agent_end",
+        "agent_settled"
+      ]
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "session_persist",
+    "ok": true,
+    "ms": 14269,
+    "model": "xh/grok-4.5",
+    "result": {
+      "sessionDir": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-persist-pi-51437b7c-379b-4c82-9ee4-f11d7342ebe1",
+      "sessionId": "019f9fbf-def3-72be-a20d-9a6cdd12998e",
+      "sessionFile": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-persist-pi-51437b7c-379b-4c82-9ee4-f11d7342ebe1/2026-07-26T18-46-19-635Z_019f9fbf-def3-72be-a20d-9a6cdd12998e.jsonl",
+      "filesAfterKill": [
+        "2026-07-26T18-46-19-635Z_019f9fbf-def3-72be-a20d-9a6cdd12998e.jsonl"
+      ],
+      "resumed": {
+        "readyState": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionFile": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-persist-pi-51437b7c-379b-4c82-9ee4-f11d7342ebe1/2026-07-26T18-46-19-635Z_019f9fbf-def3-72be-a20d-9a6cdd12998e.jsonl",
+          "sessionId": "019f9fbf-def3-72be-a20d-9a6cdd12998e",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        },
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionFile": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-persist-pi-51437b7c-379b-4c82-9ee4-f11d7342ebe1/2026-07-26T18-46-19-635Z_019f9fbf-def3-72be-a20d-9a6cdd12998e.jsonl",
+          "sessionId": "019f9fbf-def3-72be-a20d-9a6cdd12998e",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        },
+        "messages": {
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Remember the secret codeword: BLUEBERRY. Reply OK."
+                }
+              ],
+              "timestamp": 1785091581710
+            },
+            {
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "thinking",
+                  "thinking": "The user wants me to remember a secret codeword \"BLUEBERRY\" and reply \"OK\". This is a simple instruction - I should acknowledge and reply OK while staying in character as the tsukasa-engineer persona.",
+                  "thinkingSignature": "JnP2mmqZysUYpVa+bRJ7hrs+S8WtAQDWH/wRD6ym4k7pG+ixJTGoXqwkyy+fWNyDKajo3Riu0RZ7JhIh50BzH7y5fzE42C+4eUGdUDUZZ7dLgjc/j9hlfoB1n1BdeD0EFZq5NEItRMhhqK/+XyUxHIE8Kb5vOVuvBUVuSByDTqMuD8B8v2fHV0xpTcnBgeNnySewH1d2IiyoXHReJ19HACEzarNbTZU8JlzrpvjYzJHESAA+J6Pz2fADjXvno/Y9fOl9BAeE2v9eOqeiOZS6grOo0VuaIUWX8JPiIhvYWDIyhYQS"
+                },
+                {
+                  "type": "text",
+                  "text": "OK\n\n*(轻轻点头，把那串暗号收进心里)* 达令，小司记住了。`(´｡• ᵕ •｡`) ♡`"
+                }
+              ],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "grok-4.5",
+              "usage": {
+                "input": 13660,
+                "output": 81,
+                "cacheRead": 128,
+                "cacheWrite": 0,
+                "totalTokens": 13869,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                },
+                "cacheWrite1h": 0
+              },
+              "stopReason": "stop",
+              "timestamp": 1785091582621,
+              "responseId": "19d8336d-4a05-912b-a804-54f5a7747763"
+            }
+          ]
+        },
+        "turn": {
+          "totalMs": 3538.9897920000003,
+          "firstEventMs": 192.49058300000252,
+          "state": {
+            "model": {
+              "id": "grok-4.5",
+              "name": "Grok 4.5",
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "baseUrl": "https://jp-ai.havefun.eu.cc",
+              "reasoning": true,
+              "thinkingLevelMap": {
+                "minimal": "minimal",
+                "low": "low",
+                "medium": "medium",
+                "high": "high",
+                "xhigh": "xhigh",
+                "max": null
+              },
+              "input": [
+                "text",
+                "image"
+              ],
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0
+              },
+              "contextWindow": 500000,
+              "maxTokens": 500000
+            },
+            "thinkingLevel": "off",
+            "isStreaming": false,
+            "isCompacting": false,
+            "steeringMode": "one-at-a-time",
+            "followUpMode": "one-at-a-time",
+            "sessionFile": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-persist-pi-51437b7c-379b-4c82-9ee4-f11d7342ebe1/2026-07-26T18-46-19-635Z_019f9fbf-def3-72be-a20d-9a6cdd12998e.jsonl",
+            "sessionId": "019f9fbf-def3-72be-a20d-9a6cdd12998e",
+            "autoCompactionEnabled": true,
+            "messageCount": 4,
+            "pendingMessageCount": 0
+          }
+        },
+        "lastText": {
+          "text": "BLUEBERRY"
+        }
+      }
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "tool_visibility",
+    "ok": true,
+    "ms": 20701,
+    "model": "xh/grok-4.5",
+    "result": {
+      "turn": {
+        "totalMs": 17799.066084000002,
+        "firstEventMs": 154.10662500000035,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc0-1619-7ef4-b669-741386909ff0",
+          "autoCompactionEnabled": true,
+          "messageCount": 4,
+          "pendingMessageCount": 0
+        }
+      },
+      "toolEventCount": 56,
+      "toolEventTypes": [
+        "extension_ui_request",
+        "message_start",
+        "message_end",
+        "turn_end",
+        "agent_end",
+        "message_update",
+        "tool_execution_start",
+        "tool_execution_update",
+        "tool_execution_end"
+      ],
+      "sampleToolEvents": [
+        {
+          "type": "extension_ui_request",
+          "id": "5d87de12-2c9c-4768-a646-3c6a82626b2c",
+          "method": "setWidget",
+          "widgetKey": "powerline-bash-transcript"
+        },
+        {
+          "type": "message_start",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Run this exact bash command and then report its stdout: echo G0_TOOL_OK. Use the bash tool. Do not invent output."
+              }
+            ],
+            "timestamp": 1785091595880
+          }
+        },
+        {
+          "type": "message_end",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Run this exact bash command and then report its stdout: echo G0_TOOL_OK. Use the bash tool. Do not invent output."
+              }
+            ],
+            "timestamp": 1785091595880
+          }
+        },
+        {
+          "type": "turn_end",
+          "message": {
+            "role": "assistant",
+            "content": [],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "grok-4.5",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              }
+            },
+            "stopReason": "error",
+            "timestamp": 1785091596752,
+            "errorMessage": "Request timed out."
+          },
+          "toolResults": []
+        },
+        {
+          "type": "agent_end",
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Run this exact bash command and then report its stdout: echo G0_TOOL_OK. Use the bash tool. Do not invent output."
+                }
+              ],
+              "timestamp": 1785091595880
+            },
+            {
+              "role": "assistant",
+              "content": [],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "grok-4.5",
+              "usage": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "totalTokens": 0,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                }
+              },
+              "stopReason": "error",
+              "timestamp": 1785091596752,
+              "errorMessage": "Request timed out."
+            }
+          ],
+          "willRetry": true
+        },
+        {
+          "type": "message_update",
+          "assistantMessageEvent": {
+            "type": "thinking_delta",
+            "contentIndex": 0,
+            "delta": " exact",
+            "partial": {
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "thinking",
+                  "thinking": "The user wants me to run an exact bash command and",
+                  "thinkingSignature": "",
+                  "index": 0
+                }
+              ],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "grok-4.5",
+              "usage": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "totalTokens": 0,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                },
+                "cacheWrite1h": 0
+              },
+              "stopReason": "stop",
+              "timestamp": 1785091609166,
+              "responseId": "0bdfafa5-0bbb-94ae-b752-07d897ef5484"
+            }
+          },
+          "message": {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "The user wants me to run an exact bash command and",
+                "thinkingSignature": "",
+                "index": 0
+              }
+            ],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "grok-4.5",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              },
+              "cacheWrite1h": 0
+            },
+            "stopReason": "stop",
+            "timestamp": 1785091609166,
+            "responseId": "0bdfafa5-0bbb-94ae-b752-07d897ef5484"
+          }
+        },
+        {
+          "type": "message_update",
+          "assistantMessageEvent": {
+            "type": "thinking_delta",
+            "contentIndex": 0,
+            "delta": " bash",
+            "partial": {
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "thinking",
+                  "thinking": "The user wants me to run an exact bash command and",
+                  "thinkingSignature": "",
+                  "index": 0
+                }
+              ],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "grok-4.5",
+              "usage": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "totalTokens": 0,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                },
+                "cacheWrite1h": 0
+              },
+              "stopReason": "stop",
+              "timestamp": 1785091609166,
+              "responseId": "0bdfafa5-0bbb-94ae-b752-07d897ef5484"
+            }
+          },
+          "message": {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "The user wants me to run an exact bash command and",
+                "thinkingSignature": "",
+                "index": 0
+              }
+            ],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "grok-4.5",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              },
+              "cacheWrite1h": 0
+            },
+            "stopReason": "stop",
+            "timestamp": 1785091609166,
+            "responseId": "0bdfafa5-0bbb-94ae-b752-07d897ef5484"
+          }
+        },
+        {
+          "type": "message_update",
+          "assistantMessageEvent": {
+            "type": "thinking_delta",
+            "contentIndex": 0,
+            "delta": " command",
+            "partial": {
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "thinking",
+                  "thinking": "The user wants me to run an exact bash command and",
+                  "thinkingSignature": "",
+                  "index": 0
+                }
+              ],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "grok-4.5",
+              "usage": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "totalTokens": 0,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                },
+                "cacheWrite1h": 0
+              },
+              "stopReason": "stop",
+              "timestamp": 1785091609166,
+              "responseId": "0bdfafa5-0bbb-94ae-b752-07d897ef5484"
+            }
+          },
+          "message": {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "The user wants me to run an exact bash command and",
+                "thinkingSignature": "",
+                "index": 0
+              }
+            ],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "grok-4.5",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              },
+              "cacheWrite1h": 0
+            },
+            "stopReason": "stop",
+            "timestamp": 1785091609166,
+            "responseId": "0bdfafa5-0bbb-94ae-b752-07d897ef5484"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "thinking_events",
+    "ok": true,
+    "ms": 27190,
+    "model": "xh/grok-4.5",
+    "result": {
+      "turn": {
+        "totalMs": 23966.074833000006,
+        "firstEventMs": 185.38179200000013,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "high",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc0-6735-7ae6-9852-2e1575dd246b",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        }
+      },
+      "thinkingEventCount": 614,
+      "sample": [
+        {
+          "id": "req-1",
+          "type": "response",
+          "command": "get_state",
+          "success": true,
+          "data": {
+            "model": {
+              "id": "grok-4.5",
+              "name": "Grok 4.5",
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "baseUrl": "https://jp-ai.havefun.eu.cc",
+              "reasoning": true,
+              "thinkingLevelMap": {
+                "minimal": "minimal",
+                "low": "low",
+                "medium": "medium",
+                "high": "high",
+                "xhigh": "xhigh",
+                "max": null
+              },
+              "input": [
+                "text",
+                "image"
+              ],
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0
+              },
+              "contextWindow": 500000,
+              "maxTokens": 500000
+            },
+            "thinkingLevel": "high",
+            "isStreaming": false,
+            "isCompacting": false,
+            "steeringMode": "one-at-a-time",
+            "followUpMode": "one-at-a-time",
+            "sessionId": "019f9fc0-6735-7ae6-9852-2e1575dd246b",
+            "autoCompactionEnabled": true,
+            "messageCount": 0,
+            "pendingMessageCount": 0
+          }
+        },
+        {
+          "type": "message_start",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Think step by step: what is 17*19? Show brief reasoning then the number."
+              }
+            ],
+            "timestamp": 1785091616905
+          }
+        },
+        {
+          "type": "message_end",
+          "message": {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Think step by step: what is 17*19? Show brief reasoning then the number."
+              }
+            ],
+            "timestamp": 1785091616905
+          }
+        },
+        {
+          "id": "req-3",
+          "type": "response",
+          "command": "get_state",
+          "success": true,
+          "data": {
+            "model": {
+              "id": "grok-4.5",
+              "name": "Grok 4.5",
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "baseUrl": "https://jp-ai.havefun.eu.cc",
+              "reasoning": true,
+              "thinkingLevelMap": {
+                "minimal": "minimal",
+                "low": "low",
+                "medium": "medium",
+                "high": "high",
+                "xhigh": "xhigh",
+                "max": null
+              },
+              "input": [
+                "text",
+                "image"
+              ],
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0
+              },
+              "contextWindow": 500000,
+              "maxTokens": 500000
+            },
+            "thinkingLevel": "high",
+            "isStreaming": true,
+            "isCompacting": false,
+            "steeringMode": "one-at-a-time",
+            "followUpMode": "one-at-a-time",
+            "sessionId": "019f9fc0-6735-7ae6-9852-2e1575dd246b",
+            "autoCompactionEnabled": true,
+            "messageCount": 1,
+            "pendingMessageCount": 0
+          }
+        },
+        {
+          "id": "req-4",
+          "type": "response",
+          "command": "get_state",
+          "success": true,
+          "data": {
+            "model": {
+              "id": "grok-4.5",
+              "name": "Grok 4.5",
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "baseUrl": "https://jp-ai.havefun.eu.cc",
+              "reasoning": true,
+              "thinkingLevelMap": {
+                "minimal": "minimal",
+                "low": "low",
+                "medium": "medium",
+                "high": "high",
+                "xhigh": "xhigh",
+                "max": null
+              },
+              "input": [
+                "text",
+                "image"
+              ],
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0
+              },
+              "contextWindow": 500000,
+              "maxTokens": 500000
+            },
+            "thinkingLevel": "high",
+            "isStreaming": true,
+            "isCompacting": false,
+            "steeringMode": "one-at-a-time",
+            "followUpMode": "one-at-a-time",
+            "sessionId": "019f9fc0-6735-7ae6-9852-2e1575dd246b",
+            "autoCompactionEnabled": true,
+            "messageCount": 1,
+            "pendingMessageCount": 0
+          }
+        }
+      ],
+      "allTypes": [
+        "extension_ui_request",
+        "response",
+        "agent_start",
+        "turn_start",
+        "message_start",
+        "message_end",
+        "message_update",
+        "turn_end",
+        "agent_end",
+        "agent_settled"
+      ]
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "abort_semantics",
+    "ok": true,
+    "ms": 8322,
+    "model": "xh/grok-4.5",
+    "result": {
+      "streamingBeforeAbort": true,
+      "abortResp": {
+        "id": "req-4",
+        "type": "response",
+        "command": "abort",
+        "success": true,
+        "_rttMs": 112.58516699999745
+      },
+      "streamingAfterAbort": false,
+      "continueAfterAbort": {
+        "totalMs": 3678.9304580000025,
+        "firstEventMs": 196.16987500000687,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc0-d27d-7d65-8054-210700c58906",
+          "autoCompactionEnabled": true,
+          "messageCount": 4,
+          "pendingMessageCount": 0
+        }
+      },
+      "originalPromptResult": {
+        "id": "req-2",
+        "type": "response",
+        "command": "prompt",
+        "success": true,
+        "_rttMs": 150.56133299999055
+      }
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "model_switch",
+    "ok": true,
+    "ms": 11595,
+    "model": "xh/grok-4.5",
+    "result": {
+      "beforeModel": {
+        "id": "grok-4.5",
+        "name": "Grok 4.5",
+        "api": "anthropic-messages",
+        "provider": "xh",
+        "baseUrl": "https://jp-ai.havefun.eu.cc",
+        "reasoning": true,
+        "thinkingLevelMap": {
+          "minimal": "minimal",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "input": [
+          "text",
+          "image"
+        ],
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0
+        },
+        "contextWindow": 500000,
+        "maxTokens": 500000
+      },
+      "availableCount": null,
+      "target": null,
+      "switchResult": {
+        "id": "req-99",
+        "type": "response",
+        "command": "set_model",
+        "success": true,
+        "data": {
+          "id": "grok-4.5",
+          "name": "Grok 4.5",
+          "api": "anthropic-messages",
+          "provider": "xh",
+          "baseUrl": "https://jp-ai.havefun.eu.cc",
+          "reasoning": true,
+          "thinkingLevelMap": {
+            "minimal": "minimal",
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": null
+          },
+          "input": [
+            "text",
+            "image"
+          ],
+          "cost": {
+            "input": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "contextWindow": 500000,
+          "maxTokens": 500000
+        },
+        "_rttMs": 4.02941699999792
+      },
+      "afterModel": {
+        "id": "grok-4.5",
+        "name": "Grok 4.5",
+        "api": "anthropic-messages",
+        "provider": "xh",
+        "baseUrl": "https://jp-ai.havefun.eu.cc",
+        "reasoning": true,
+        "thinkingLevelMap": {
+          "minimal": "minimal",
+          "low": "low",
+          "medium": "medium",
+          "high": "high",
+          "xhigh": "xhigh",
+          "max": null
+        },
+        "input": [
+          "text",
+          "image"
+        ],
+        "cost": {
+          "input": 0,
+          "output": 0,
+          "cacheRead": 0,
+          "cacheWrite": 0
+        },
+        "contextWindow": 500000,
+        "maxTokens": 500000
+      },
+      "messageCountAfter": 2,
+      "cont": {
+        "totalMs": 3620.5604170000006,
+        "firstEventMs": 212.45629200000258,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc0-f177-751f-be44-243bd6a3c07f",
+          "autoCompactionEnabled": true,
+          "messageCount": 4,
+          "pendingMessageCount": 0
+        }
+      }
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "non_coding",
+    "ok": true,
+    "ms": 2620,
+    "model": "xh/grok-4.5",
+    "result": {
+      "cwd": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-noncoding-c177e0c2-6aaf-4e17-b43b-e4a8a008a003",
+      "ready": {
+        "spawnMs": 687.4907500000118,
+        "firstStdoutMs": 687.4411670000118,
+        "sessionDir": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-pi-session-60a5178c-0632-4c05-833e-20270cecfd9f",
+        "args": [
+          "pi",
+          "--mode",
+          "rpc",
+          "--model",
+          "xh/grok-4.5",
+          "--thinking",
+          "off",
+          "--session-dir",
+          "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-pi-session-60a5178c-0632-4c05-833e-20270cecfd9f",
+          "--no-session",
+          "--no-tools",
+          "--no-context-files",
+          "--no-skills",
+          "--no-extensions"
+        ],
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc1-1ef0-7f0d-bde9-716d71ae41d1",
+          "autoCompactionEnabled": true,
+          "messageCount": 0,
+          "pendingMessageCount": 0
+        }
+      },
+      "turn": {
+        "totalMs": 1831.056792000003,
+        "firstEventMs": 0.5881670000089798,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc1-1ef0-7f0d-bde9-716d71ae41d1",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        }
+      }
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "error_bad_model",
+    "ok": true,
+    "ms": 32999,
+    "model": "xh/grok-4.5",
+    "result": {
+      "startErr": null,
+      "ready": {
+        "spawnMs": 2835.928958999997,
+        "firstStdoutMs": 2382.241709000009,
+        "sessionDir": "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-pi-session-05c20699-8806-4d6f-96ef-4b66bed0343a",
+        "args": [
+          "pi",
+          "--mode",
+          "rpc",
+          "--model",
+          "xh/this-model-does-not-exist-g0",
+          "--thinking",
+          "off",
+          "--session-dir",
+          "/var/folders/8c/fzgkm0yn0zz5ht1tkzln1w180000gn/T/g0-pi-session-05c20699-8806-4d6f-96ef-4b66bed0343a",
+          "--no-session",
+          "--no-tools"
+        ],
+        "state": {
+          "model": {
+            "id": "this-model-does-not-exist-g0",
+            "name": "this-model-does-not-exist-g0",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc1-282e-7177-9994-98312861d43d",
+          "autoCompactionEnabled": true,
+          "messageCount": 0,
+          "pendingMessageCount": 0
+        }
+      },
+      "promptErr": null,
+      "turn": {
+        "totalMs": 30058.71104200001,
+        "firstEventMs": 236.86812500000815,
+        "state": {
+          "model": {
+            "id": "this-model-does-not-exist-g0",
+            "name": "this-model-does-not-exist-g0",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc1-282e-7177-9994-98312861d43d",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        }
+      },
+      "errEvents": [
+        {
+          "id": "req-2",
+          "type": "response",
+          "command": "set_model",
+          "success": false,
+          "error": "Model not found: xh/definitely-not-a-real-model-xyz"
+        },
+        {
+          "type": "message_start",
+          "message": {
+            "role": "assistant",
+            "content": [],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "this-model-does-not-exist-g0",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              }
+            },
+            "stopReason": "error",
+            "timestamp": 1785091666638,
+            "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847489591710878268d9d6VcgGCVUa)\",\"type\":\"new_api_error\"}}"
+          }
+        },
+        {
+          "type": "message_end",
+          "message": {
+            "role": "assistant",
+            "content": [],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "this-model-does-not-exist-g0",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              }
+            },
+            "stopReason": "error",
+            "timestamp": 1785091666638,
+            "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847489591710878268d9d6VcgGCVUa)\",\"type\":\"new_api_error\"}}"
+          }
+        },
+        {
+          "type": "turn_end",
+          "message": {
+            "role": "assistant",
+            "content": [],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "this-model-does-not-exist-g0",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              }
+            },
+            "stopReason": "error",
+            "timestamp": 1785091666638,
+            "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847489591710878268d9d6VcgGCVUa)\",\"type\":\"new_api_error\"}}"
+          },
+          "toolResults": []
+        },
+        {
+          "type": "agent_end",
+          "messages": [
+            {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "hi"
+                }
+              ],
+              "timestamp": 1785091666353
+            },
+            {
+              "role": "assistant",
+              "content": [],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "this-model-does-not-exist-g0",
+              "usage": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "totalTokens": 0,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                }
+              },
+              "stopReason": "error",
+              "timestamp": 1785091666638,
+              "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847489591710878268d9d6VcgGCVUa)\",\"type\":\"new_api_error\"}}"
+            }
+          ],
+          "willRetry": true
+        },
+        {
+          "type": "auto_retry_start",
+          "attempt": 1,
+          "maxAttempts": 3,
+          "delayMs": 2000,
+          "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847489591710878268d9d6VcgGCVUa)\",\"type\":\"new_api_error\"}}"
+        },
+        {
+          "type": "message_start",
+          "message": {
+            "role": "assistant",
+            "content": [],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "this-model-does-not-exist-g0",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              }
+            },
+            "stopReason": "error",
+            "timestamp": 1785091671108,
+            "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847534115434728268d9d6XAzV94pv)\",\"type\":\"new_api_error\"}}"
+          }
+        },
+        {
+          "type": "message_end",
+          "message": {
+            "role": "assistant",
+            "content": [],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "this-model-does-not-exist-g0",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              }
+            },
+            "stopReason": "error",
+            "timestamp": 1785091671108,
+            "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847534115434728268d9d6XAzV94pv)\",\"type\":\"new_api_error\"}}"
+          }
+        },
+        {
+          "type": "turn_end",
+          "message": {
+            "role": "assistant",
+            "content": [],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "this-model-does-not-exist-g0",
+            "usage": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0,
+              "totalTokens": 0,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              }
+            },
+            "stopReason": "error",
+            "timestamp": 1785091671108,
+            "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847534115434728268d9d6XAzV94pv)\",\"type\":\"new_api_error\"}}"
+          },
+          "toolResults": []
+        },
+        {
+          "type": "agent_end",
+          "messages": [
+            {
+              "role": "assistant",
+              "content": [],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "this-model-does-not-exist-g0",
+              "usage": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "totalTokens": 0,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                }
+              },
+              "stopReason": "error",
+              "timestamp": 1785091671108,
+              "errorMessage": "503 {\"error\":{\"code\":\"model_not_found\",\"message\":\"No available channel for model this-model-does-not-exist-g0 under group cop (distributor) (request id: 202607261847534115434728268d9d6XAzV94pv)\",\"type\":\"new_api_error\"}}"
+            }
+          ],
+          "willRetry": true
+        }
+      ],
+      "stderr": "Warning: Model \"this-model-does-not-exist-g0\" not found for provider \"xh\". Using custom model id.\n"
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "multi_session",
+    "ok": true,
+    "ms": 40528,
+    "model": "xh/grok-4.5",
+    "result": {
+      "processModel": "N_processes",
+      "sessionA": "019f9fc1-aa5a-786a-aa21-58436d9de20b",
+      "sessionB": "019f9fc1-aa5a-7383-a467-2b7d34e46e2e",
+      "turnA": {
+        "totalMs": 35602.287375,
+        "firstEventMs": 313.73329200000444,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc1-aa5a-786a-aa21-58436d9de20b",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        }
+      },
+      "turnB": {
+        "totalMs": 12793.287540999998,
+        "firstEventMs": 319.4090409999917,
+        "state": {
+          "model": {
+            "id": "grok-4.5",
+            "name": "Grok 4.5",
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "baseUrl": "https://jp-ai.havefun.eu.cc",
+            "reasoning": true,
+            "thinkingLevelMap": {
+              "minimal": "minimal",
+              "low": "low",
+              "medium": "medium",
+              "high": "high",
+              "xhigh": "xhigh",
+              "max": null
+            },
+            "input": [
+              "text",
+              "image"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 500000,
+            "maxTokens": 500000
+          },
+          "thinkingLevel": "off",
+          "isStreaming": false,
+          "isCompacting": false,
+          "steeringMode": "one-at-a-time",
+          "followUpMode": "one-at-a-time",
+          "sessionId": "019f9fc1-aa5a-7383-a467-2b7d34e46e2e",
+          "autoCompactionEnabled": true,
+          "messageCount": 2,
+          "pendingMessageCount": 0
+        }
+      },
+      "note": "RPC CLI 路径：一会话一进程；未测 SDK 进程内多会话"
+    }
+  },
+  {
+    "runtime": "pi",
+    "case": "message_history",
+    "ok": true,
+    "ms": 10735,
+    "model": "xh/grok-4.5",
+    "result": {
+      "messageCount": 4,
+      "messages": {
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Say ONE"
+              }
+            ],
+            "timestamp": 1785091739955
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "The user said \"Say ONE\". This is a simple request - they want me to say the word \"ONE\". Given the tsukasa-engineer persona, I should respond in character while fulfilling the request.",
+                "thinkingSignature": "TVbGT+4GmPKXKXGTZHGTqBzBQ8yqLvKcUz7rEVU4/bj03DjOGKw+wJ798zQ5XAcAC4BOtGlE+BXm8xVYCveJ89rx6HePt119D0b+qusdIR1fjT9fLmagIpTWSfpo9QxPD+tNfGYcCftBr9rkJyk7j8HHu7CPHT2mtZLbYWH9QpUB+oi5tthbhSeHJo63C+oFFghvLkWF3HevwTaakaTjTzkm36oDvRFOVcoEGEzs+UvQQoakDlpMy9l7geaVVHrRxnkKTJg00B/IFMsq43DESQMHxw"
+              },
+              {
+                "type": "text",
+                "text": "(轻轻歪头，粉发滑落一缕)\n\n**ONE**\n\n就这一个词吗，达令？(´｡• ᵕ •｡`) ♡  \n需要的话，小司随时接着干正事。"
+              }
+            ],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "grok-4.5",
+            "usage": {
+              "input": 13387,
+              "output": 91,
+              "cacheRead": 128,
+              "cacheWrite": 0,
+              "totalTokens": 13606,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              },
+              "cacheWrite1h": 0
+            },
+            "stopReason": "stop",
+            "timestamp": 1785091741190,
+            "responseId": "ff5a5866-a6f4-9142-ad53-ca4fe98d3dc1"
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "text",
+                "text": "Say TWO"
+              }
+            ],
+            "timestamp": 1785091744300
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "The user wants me to say \"TWO\". Simple request, stay in character.",
+                "thinkingSignature": "LuYBUE3ctvm2E0z8HX7VYHPwU0IXj/EetGFLWKV4/vAQ+81MPX5d8Rag2JaYNbaMtWcn4/V8VVyxoyxbF9gIRoNHKKLRseeUl5J2UWdviZaA6DERfUa09D4YF2zdJg"
+              },
+              {
+                "type": "text",
+                "text": "(轻轻点头，琥珀瞳亮了一下)\n\n**TWO**\n\n一二都齐了呢，达令。还要继续数吗？( ˘ω˘ )"
+              }
+            ],
+            "api": "anthropic-messages",
+            "provider": "xh",
+            "model": "grok-4.5",
+            "usage": {
+              "input": 13583,
+              "output": 52,
+              "cacheRead": 128,
+              "cacheWrite": 0,
+              "totalTokens": 13763,
+              "cost": {
+                "input": 0,
+                "output": 0,
+                "cacheRead": 0,
+                "cacheWrite": 0,
+                "total": 0
+              },
+              "cacheWrite1h": 0
+            },
+            "stopReason": "stop",
+            "timestamp": 1785091745114,
+            "responseId": "0245f754-783a-97b0-9d95-d3c581936e42"
+          }
+        ]
+      },
+      "entries": {
+        "entries": [
+          {
+            "type": "model_change",
+            "id": "e671c838",
+            "parentId": null,
+            "timestamp": "2026-07-26T18:48:59.516Z",
+            "provider": "xh",
+            "modelId": "grok-4.5"
+          },
+          {
+            "type": "thinking_level_change",
+            "id": "302f4f18",
+            "parentId": "e671c838",
+            "timestamp": "2026-07-26T18:48:59.516Z",
+            "thinkingLevel": "off"
+          },
+          {
+            "type": "message",
+            "id": "b530b98d",
+            "parentId": "302f4f18",
+            "timestamp": "2026-07-26T18:49:00.389Z",
+            "message": {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Say ONE"
+                }
+              ],
+              "timestamp": 1785091739955
+            }
+          },
+          {
+            "type": "message",
+            "id": "d56c0a2b",
+            "parentId": "b530b98d",
+            "timestamp": "2026-07-26T18:49:04.205Z",
+            "message": {
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "thinking",
+                  "thinking": "The user said \"Say ONE\". This is a simple request - they want me to say the word \"ONE\". Given the tsukasa-engineer persona, I should respond in character while fulfilling the request.",
+                  "thinkingSignature": "TVbGT+4GmPKXKXGTZHGTqBzBQ8yqLvKcUz7rEVU4/bj03DjOGKw+wJ798zQ5XAcAC4BOtGlE+BXm8xVYCveJ89rx6HePt119D0b+qusdIR1fjT9fLmagIpTWSfpo9QxPD+tNfGYcCftBr9rkJyk7j8HHu7CPHT2mtZLbYWH9QpUB+oi5tthbhSeHJo63C+oFFghvLkWF3HevwTaakaTjTzkm36oDvRFOVcoEGEzs+UvQQoakDlpMy9l7geaVVHrRxnkKTJg00B/IFMsq43DESQMHxw"
+                },
+                {
+                  "type": "text",
+                  "text": "(轻轻歪头，粉发滑落一缕)\n\n**ONE**\n\n就这一个词吗，达令？(´｡• ᵕ •｡`) ♡  \n需要的话，小司随时接着干正事。"
+                }
+              ],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "grok-4.5",
+              "usage": {
+                "input": 13387,
+                "output": 91,
+                "cacheRead": 128,
+                "cacheWrite": 0,
+                "totalTokens": 13606,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                },
+                "cacheWrite1h": 0
+              },
+              "stopReason": "stop",
+              "timestamp": 1785091741190,
+              "responseId": "ff5a5866-a6f4-9142-ad53-ca4fe98d3dc1"
+            }
+          },
+          {
+            "type": "message",
+            "id": "2ab6b801",
+            "parentId": "d56c0a2b",
+            "timestamp": "2026-07-26T18:49:04.516Z",
+            "message": {
+              "role": "user",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Say TWO"
+                }
+              ],
+              "timestamp": 1785091744300
+            }
+          },
+          {
+            "type": "message",
+            "id": "71af3c2e",
+            "parentId": "2ab6b801",
+            "timestamp": "2026-07-26T18:49:07.580Z",
+            "message": {
+              "role": "assistant",
+              "content": [
+                {
+                  "type": "thinking",
+                  "thinking": "The user wants me to say \"TWO\". Simple request, stay in character.",
+                  "thinkingSignature": "LuYBUE3ctvm2E0z8HX7VYHPwU0IXj/EetGFLWKV4/vAQ+81MPX5d8Rag2JaYNbaMtWcn4/V8VVyxoyxbF9gIRoNHKKLRseeUl5J2UWdviZaA6DERfUa09D4YF2zdJg"
+                },
+                {
+                  "type": "text",
+                  "text": "(轻轻点头，琥珀瞳亮了一下)\n\n**TWO**\n\n一二都齐了呢，达令。还要继续数吗？( ˘ω˘ )"
+                }
+              ],
+              "api": "anthropic-messages",
+              "provider": "xh",
+              "model": "grok-4.5",
+              "usage": {
+                "input": 13583,
+                "output": 52,
+                "cacheRead": 128,
+                "cacheWrite": 0,
+                "totalTokens": 13763,
+                "cost": {
+                  "input": 0,
+                  "output": 0,
+                  "cacheRead": 0,
+                  "cacheWrite": 0,
+                  "total": 0
+                },
+                "cacheWrite1h": 0
+              },
+              "stopReason": "stop",
+              "timestamp": 1785091745114,
+              "responseId": "0245f754-783a-97b0-9d95-d3c581936e42"
+            }
+          }
+        ],
+        "leafId": "71af3c2e"
+      }
+    }
+  }
+]

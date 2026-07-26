@@ -1,0 +1,2 @@
+{"t":1785091836959,"kind":"stdin","frame":{"id":"req-1","type":"get_state"}}
+{"t":1785091840831,"kind":"stderr","chunk":"Model \"xh/this-model-does-not-exist-g0\" not found\n\nSet an API key environment variable:\n  ANTHROPIC_API_KEY, OPENAI_API_KEY, GEMINI_API_KEY, etc.\n\nOr create /Users/mudssky/.omp/agent/models.yml\n"}
