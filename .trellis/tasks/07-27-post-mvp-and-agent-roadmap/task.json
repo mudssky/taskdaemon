@@ -39,7 +39,8 @@
     "07-27-t2b-notification-center-web",
     "07-27-t7b-backup-template-wizard-web",
     "07-27-td1-desktop-platform-bridge",
-    "07-27-td2-desktop-native-features"
+    "07-27-td2-desktop-native-features",
+    "07-27-deps-latest-upgrade"
   ],
   "parent": null,
   "relatedFiles": [],

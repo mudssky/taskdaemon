@@ -699,3 +699,4 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v2 | 双轨重构；通知合并为事件总线；企业能力移出仓库；新增 G0 spike；补依赖图/文件所有权/契约冻结点 | mudssky |
 | 2026-07-27 | v3 | 前后端按层拆任务（T1/T2/T7 → a/b）；新增 Track W 与 Track D；D1 平台边界层立项；补 §4.2 Web/Desktop 架构决策、C-5 capability 契约、query key 分配；子任务总数 21 | mudssky |
 | 2026-07-27 | v4 | **多 Runtime Adapter 转向**：撤销「第二 adapter 后置」，初版即 Pi + OMP 并存；新增 §5.3 两个正交维度（接入方式 × profile）、§5.4 `RuntimeCapabilities` 能力协商、§5.5 非 coding 场景；gateway 职责增至七项；G3 改为「Runtime Adapter 层 + Pi/OMP 实现」 | mudssky |
+| 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
