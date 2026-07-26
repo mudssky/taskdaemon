@@ -74,7 +74,7 @@
 
 | 状态 | 任务 | 说明 |
 |---|---|---|
-| `in_progress` | `05-28-hermes-agent-audio-api` | **即 T0**，已挂载为本父任务子任务；不新建收口任务 |
+| `in_progress` | `05-28-hermes-agent-audio-api` | **即 T0**，已挂载为本父任务子任务；不新建收口任务 | | **done**（写配置→T1a/T1b） |
 | 已归档（2026-05） | 34 项 | 骨架、调度、UI、shadcn、Go 拆分、前端规范等一期关账 |
 
 ### 3.3 Agent 平台（尚未立项 → 现已建 Track G 任务）
@@ -386,7 +386,7 @@ interface RuntimeCapabilities {
 
 | ID | 任务目录 | 主题 | 依赖 | 状态 |
 |---|---|---|---|---|
-| T0 | `05-28-hermes-agent-audio-api` | 音频收口（**现有任务，不新建**；跨前后端） | — | |
+| T0 | `05-28-hermes-agent-audio-api` | 音频收口（**现有任务，不新建**；跨前后端） | — | **done**（写配置→T1a/T1b） |
 | T1a | `07-27-t1a-config-write-api` | 配置写入 API + **契约 C-1 冻结** | T0 | |
 | T2a | `07-27-t2a-notification-event-bus` | 通知事件总线 + 站内 sink + **契约 C-2 冻结** | — | **done（C-2 已冻结）** |
 | T4 | `07-27-t4-outbound-notification-sink` | Webhook / 邮件出站 sink | T2a | **done** |
@@ -677,7 +677,7 @@ pnpm --filter @taskdaemon/agent-web test
 | 旧内容 | 关系 |
 |---|---|
 | `05-14-cross-platform-scheduler-daemon` 第二轮清单 | Track T/W/D 的需求来源；**不重复开已交付一期子项** |
-| `05-28-hermes-agent-audio-api` | **即 T0**，已 `add-subtask` 挂到本父任务；完成后 archive |
+| `05-28-hermes-agent-audio-api` | **即 T0**，已 `add-subtask` 挂到本父任务；完成后 archive | | **done**（写配置→T1a/T1b） |
 | 本文档 v1 | 被本版完全取代；变更见 §1.1 |
 
 ---
