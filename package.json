@@ -13,15 +13,16 @@
     "desktop": "pnpm --filter @taskdaemon/service-go desktop",
     "migrate": "pnpm --filter @taskdaemon/service-go migrate",
     "sync:web-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/sync-web-assets.ps1",
-    "typecheck": "pnpm --filter @taskdaemon/web typecheck && pnpm --filter @taskdaemon/agent-protocol typecheck && pnpm --filter @taskdaemon/agent-gateway typecheck",
-    "lint": "pnpm --filter @taskdaemon/web lint && pnpm --filter @taskdaemon/agent-protocol lint && pnpm --filter @taskdaemon/agent-gateway lint",
+    "typecheck": "pnpm --filter @taskdaemon/web typecheck && pnpm --filter @taskdaemon/agent-protocol typecheck && pnpm --filter @taskdaemon/agent-gateway typecheck && pnpm --filter @taskdaemon/agent-web typecheck",
+    "lint": "pnpm --filter @taskdaemon/web lint && pnpm --filter @taskdaemon/agent-protocol lint && pnpm --filter @taskdaemon/agent-gateway lint && pnpm --filter @taskdaemon/agent-web lint",
     "test:agent-gateway": "pnpm --filter @taskdaemon/agent-gateway test",
     "test": "pnpm typecheck && pnpm lint && pnpm test:go",
     "test:go": "pnpm --filter @taskdaemon/service-go test",
     "test:go:integration": "pnpm --filter @taskdaemon/service-go test:integration",
     "generate:go": "pnpm --filter @taskdaemon/service-go generate",
     "vet:go": "pnpm --filter @taskdaemon/service-go vet",
-    "prepare": "husky"
+    "prepare": "husky",
+    "dev:agent-web": "pnpm --filter @taskdaemon/agent-web dev"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.5",
@@ -46,6 +47,9 @@
     ],
     "**/*.go": [
       "gofmt -w"
+    ],
+    "apps/agent-web/**/*.{ts,tsx,js,jsx,json,css,md}": [
+      "pnpm --filter @taskdaemon/agent-web lint"
     ]
   }
 }
