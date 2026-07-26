@@ -87,6 +87,20 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 * 依赖服务未注入或不可用 -> HTTP 503，`*_unavailable`。
 * 未分类系统故障 -> HTTP 500，`internal_error` 或更具体的稳定错误码。
 
+### 通知错误码（`NOTIFY_*`，C-2 / T2a）
+
+| 码 | HTTP | 场景 |
+|---|---:|---|
+| `NOTIFY_NOT_FOUND` | 404 | 通知不存在 |
+| `NOTIFY_INVALID_SEVERITY` | 400 | 筛选 severity 非法 |
+| `NOTIFY_INVALID_PAGE` | 400 | 分页参数非法 |
+| `NOTIFY_SINK_UNAVAILABLE` | 503 | 通知服务/总线未装配 |
+| `NOTIFY_LIST_FAILED` | 500 | 列表查询失败 |
+| `NOTIFY_UNREAD_COUNT_FAILED` | 500 | 未读计数失败 |
+| `NOTIFY_MARK_READ_FAILED` | 500 | 标记已读失败 |
+| `NOTIFY_CLEAR_READ_FAILED` | 500 | 清空已读失败 |
+| `NOTIFY_OPERATION_FAILED` | 500 | 其他通知操作失败 |
+
 ---
 
 ## CLI 错误

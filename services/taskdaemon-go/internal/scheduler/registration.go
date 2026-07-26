@@ -13,6 +13,7 @@ import (
 	"taskdaemon/internal/data/ent"
 	entrun "taskdaemon/internal/data/ent/run"
 	enttask "taskdaemon/internal/data/ent/task"
+	"taskdaemon/internal/notify"
 )
 
 // RegisterEnabledTasks 将已启用的 cron 任务注册到进程内 gocron scheduler。
@@ -59,6 +60,7 @@ func (service *Service) Start() error {
 		return err
 	}
 	service.scheduler.Start()
+	service.publishSchedulerLifecycle(context.Background(), notify.NameSchedulerStarted)
 	return nil
 }
 
@@ -78,7 +80,9 @@ func (service *Service) Shutdown() error {
 	if s == nil {
 		return nil
 	}
-	return s.Shutdown()
+	err := s.Shutdown()
+	service.publishSchedulerLifecycle(context.Background(), notify.NameSchedulerStopped)
+	return err
 }
 
 // RegisteredTaskIDs 返回当前已注册到 gocron 的任务 ID。

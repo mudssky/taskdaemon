@@ -43,6 +43,12 @@ func envMap(prefix string) map[string]any {
 	applyEnvAlias(values, prefix, "AUDIO_HISTORY_LIMIT", "audio.history.limit")
 	applyEnvAlias(values, prefix, "AUDIO_FFMPEG_PROBE_PATH", "audio.ffmpeg.probePath")
 	applyEnvAlias(values, prefix, "AUDIO_FFMPEG_TRANSCODE_TIMEOUT_SECONDS", "audio.ffmpeg.transcodeTimeoutSeconds")
+	// T2a
+	applyEnvAlias(values, prefix, "NOTIFY_BUFFER_SIZE", "notify.bufferSize")
+	applyEnvAlias(values, prefix, "NOTIFY_STORE_ENABLED", "notify.store.enabled")
+	applyEnvAlias(values, prefix, "NOTIFY_STORE_MAX_RECORDS", "notify.store.maxRecords")
+	applyEnvAlias(values, prefix, "NOTIFY_STORE_RETAIN_DAYS", "notify.store.retainDays")
+	applyEnvAlias(values, prefix, "NOTIFY_STORE_MIN_SEVERITY", "notify.store.minSeverity")
 	return values
 }
 

@@ -12,6 +12,9 @@ type Admin func(*sql.Selector)
 // AudioRecord is the predicate function for audiorecord builders.
 type AudioRecord func(*sql.Selector)
 
+// Notification is the predicate function for notification builders.
+type Notification func(*sql.Selector)
+
 // Run is the predicate function for run builders.
 type Run func(*sql.Selector)
 

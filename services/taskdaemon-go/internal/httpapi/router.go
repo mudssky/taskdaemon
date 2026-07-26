@@ -16,6 +16,7 @@ import (
 	"taskdaemon/internal/auth"
 	"taskdaemon/internal/config"
 	"taskdaemon/internal/data/ent"
+	"taskdaemon/internal/notify"
 	"taskdaemon/internal/scheduler"
 )
 
@@ -28,10 +29,13 @@ const (
 
 // Options 控制 HTTP router 的可选路由。
 type Options struct {
-	EnableSwagger          bool
-	Auth                   AuthService
-	Tasks                  TaskService
-	Audio                  AudioService
+	EnableSwagger bool
+	Auth          AuthService
+	Tasks         TaskService
+	Audio         AudioService
+	// T2a
+	Notifications          NotificationService
+	NotifyBus              *notify.Bus
 	Logger                 *slog.Logger
 	IncludeTraceInResponse *bool
 	HTTPLog                config.LoggingHTTPConfig
@@ -91,7 +95,8 @@ func NewRouter(opts Options) http.Handler {
 	registerTaskRoutes(router, opts.Auth, opts.Tasks)
 	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig, runtimeConfigOption(opts))
 	registerAudioRoutes(router, opts.Auth, opts.Audio)
-
+	// T2a
+	registerNotificationRoutes(router, opts.Auth, opts.Notifications, opts.NotifyBus)
 	if opts.EnableSwagger {
 		router.GET("/swagger/index.html", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Swagger UI is enabled. Generated docs will be mounted here.")
