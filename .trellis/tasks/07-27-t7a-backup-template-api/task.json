@@ -3,7 +3,7 @@
   "name": "t7a-backup-template-api",
   "title": "T7a 备份任务模板后端 API",
   "description": "模板定义、渲染为 runner 任务草稿、pg_dump 等预设的后端能力与契约",
-  "status": "planning",
+  "status": "in_progress",
   "dev_type": null,
   "scope": null,
   "package": null,

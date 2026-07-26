@@ -229,6 +229,25 @@ writeAPIError(ctx, http.StatusBadRequest, "task_invalid", "Task definition is in
 
 错误码见 [错误处理](./error-handling.md) 中 `CONFIG_*` 表。分级与落盘规则见 [配置运行时规范](./configuration-runtime-guidelines.md) C-1 节。
 
+## 备份模板 API（T7a）
+
+全部端点走管理员 session 认证（`requireSession`）。实现：`template_routes.go` + `template_dto.go` + `internal/template`。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/templates` | 列表（含完整参数定义）`{ "templates": [...] }` |
+| GET | `/api/templates/:id` | 模板详情 |
+| POST | `/api/templates/:id/render` | body `{ "params": { ... } }` → 任务草稿（不落库） |
+
+渲染成功 `data` 与 `createTaskRequest` 字段兼容，并额外包含：
+
+* `commandPreview`：可读命令预览（敏感值掩码）
+* `templateId`：来源模板
+
+字段级错误 `error.details.fields[]`：`{ path, reason, code }`（与 C-1 同形）。
+
+错误码见 [错误处理](./error-handling.md) 中 `TEMPLATE_*` 表。领域实现见 `internal/template`。
+
 ---
 
 ## 前后端联动清单
