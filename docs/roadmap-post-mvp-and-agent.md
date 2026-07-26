@@ -705,3 +705,5 @@ pnpm --filter @taskdaemon/agent-web test
 | 2026-07-27 | v5.2 | G0 实测回写：§5.1 填入 Pi 0.82.0 / OMP 17.1.3；确认 OMP 可 RPC 程序驱动、双 adapter 可抽象；CLI 冷启动均为 high（需预热池）；gateway 薄索引持久化；§7.5 G0=done。详情 `.trellis/tasks/07-27-g0-agent-runtime-spike/research/HANDOFF.md` | G0 worker |
 | 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
 | 2026-07-27 | v5.3 | T5 系统服务安装器合入（launchd/systemd/SCM；真实三平台装机残留） | mudssky / worker |
+| 2026-07-27 | chore | 新增子任务 `07-27-deps-latest-upgrade`：JS/Go 依赖升 latest；独占 lockfile；与功能波次错开 | mudssky |
+| 2026-07-27 | chore | **deps-latest-upgrade 合入**：JS/TS+Go 直接依赖升 latest（TS7/Biome2.5/Wails alpha2.118 等） | mudssky / worker |
