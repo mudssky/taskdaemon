@@ -140,7 +140,9 @@ type AudioFFmpegConfig struct {
 type NotifyConfig struct {
 	BufferSize int               // 事件缓冲区大小；需重启生效
 	Store      NotifyStoreConfig // 站内 sink
-	// T4 追加 Webhook / Email
+	// T4
+	Webhook NotifyWebhookConfig // Webhook 出站 sink
+	Email   NotifyEmailConfig   // 邮件出站 sink
 	// D2 追加 Desktop
 }
 
@@ -151,6 +153,58 @@ type NotifyStoreConfig struct {
 	MaxRecords  int    // 0 = 不限
 	RetainDays  int    // 0 = 不限
 	MinSeverity string // 最低投递级别；空表示不限
+}
+
+// NotifyWebhookConfig 保存 Webhook 出站 sink 配置。
+// T4
+type NotifyWebhookConfig struct {
+	Enabled              bool
+	DefaultTimeoutSec    int
+	DefaultMaxRetries    int
+	DefaultBackoffMs     int
+	AllowedSchemes       []string
+	AllowPrivateNetworks bool
+	AllowedHosts         []string
+	MaxRedirects         int
+	Targets              []NotifyWebhookTargetConfig
+}
+
+// NotifyWebhookTargetConfig 描述单个 Webhook 目标。
+// T4
+type NotifyWebhookTargetConfig struct {
+	Name           string
+	URL            string
+	Enabled        bool
+	Method         string
+	Headers        map[string]string
+	SigningSecret  string
+	SigningHeader  string
+	TimeoutSeconds int
+	MaxRetries     int
+	BackoffMs      int
+}
+
+// NotifyEmailConfig 保存邮件出站 sink 配置。
+// T4
+type NotifyEmailConfig struct {
+	Enabled        bool
+	MinSeverity    string
+	From           string
+	To             []string
+	TimeoutSeconds int
+	MaxRetries     int
+	BackoffMs      int
+	SMTP           NotifySMTPConfig
+}
+
+// NotifySMTPConfig 保存 SMTP 连接配置。
+// T4
+type NotifySMTPConfig struct {
+	Host       string
+	Port       int
+	Username   string
+	Password   string
+	Encryption string // none | starttls | tls
 }
 
 // LoadOptions 控制配置加载来源和覆盖值。

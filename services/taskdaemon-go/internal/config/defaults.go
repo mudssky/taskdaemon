@@ -96,6 +96,34 @@ func Default() Config {
 				RetainDays:  30,
 				MinSeverity: "",
 			},
+			// T4
+			Webhook: NotifyWebhookConfig{
+				Enabled:              false,
+				DefaultTimeoutSec:    10,
+				DefaultMaxRetries:    2,
+				DefaultBackoffMs:     200,
+				AllowedSchemes:       []string{"https"},
+				AllowPrivateNetworks: false,
+				AllowedHosts:         []string{},
+				MaxRedirects:         3,
+				Targets:              []NotifyWebhookTargetConfig{},
+			},
+			Email: NotifyEmailConfig{
+				Enabled:        false,
+				MinSeverity:    "",
+				From:           "",
+				To:             []string{},
+				TimeoutSeconds: 15,
+				MaxRetries:     2,
+				BackoffMs:      200,
+				SMTP: NotifySMTPConfig{
+					Host:       "",
+					Port:       587,
+					Username:   "",
+					Password:   "",
+					Encryption: "starttls",
+				},
+			},
 		},
 	}
 }
@@ -149,6 +177,28 @@ func defaultMap() map[string]any {
 		"notify.store.maxRecords":  defaults.Notify.Store.MaxRecords,
 		"notify.store.retainDays":  defaults.Notify.Store.RetainDays,
 		"notify.store.minSeverity": defaults.Notify.Store.MinSeverity,
+		// T4
+		"notify.webhook.enabled":              defaults.Notify.Webhook.Enabled,
+		"notify.webhook.defaultTimeoutSec":    defaults.Notify.Webhook.DefaultTimeoutSec,
+		"notify.webhook.defaultMaxRetries":    defaults.Notify.Webhook.DefaultMaxRetries,
+		"notify.webhook.defaultBackoffMs":     defaults.Notify.Webhook.DefaultBackoffMs,
+		"notify.webhook.allowedSchemes":       defaults.Notify.Webhook.AllowedSchemes,
+		"notify.webhook.allowPrivateNetworks": defaults.Notify.Webhook.AllowPrivateNetworks,
+		"notify.webhook.allowedHosts":         defaults.Notify.Webhook.AllowedHosts,
+		"notify.webhook.maxRedirects":         defaults.Notify.Webhook.MaxRedirects,
+		"notify.webhook.targets":              defaults.Notify.Webhook.Targets,
+		"notify.email.enabled":                defaults.Notify.Email.Enabled,
+		"notify.email.minSeverity":            defaults.Notify.Email.MinSeverity,
+		"notify.email.from":                   defaults.Notify.Email.From,
+		"notify.email.to":                     defaults.Notify.Email.To,
+		"notify.email.timeoutSeconds":         defaults.Notify.Email.TimeoutSeconds,
+		"notify.email.maxRetries":             defaults.Notify.Email.MaxRetries,
+		"notify.email.backoffMs":              defaults.Notify.Email.BackoffMs,
+		"notify.email.smtp.host":              defaults.Notify.Email.SMTP.Host,
+		"notify.email.smtp.port":              defaults.Notify.Email.SMTP.Port,
+		"notify.email.smtp.username":          defaults.Notify.Email.SMTP.Username,
+		"notify.email.smtp.password":          defaults.Notify.Email.SMTP.Password,
+		"notify.email.smtp.encryption":        defaults.Notify.Email.SMTP.Encryption,
 	}
 }
 

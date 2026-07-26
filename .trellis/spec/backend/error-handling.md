@@ -87,7 +87,7 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 * 依赖服务未注入或不可用 -> HTTP 503，`*_unavailable`。
 * 未分类系统故障 -> HTTP 500，`internal_error` 或更具体的稳定错误码。
 
-### 通知错误码（`NOTIFY_*`，C-2 / T2a）
+### 通知错误码（`NOTIFY_*`，C-2 / T2a / T4）
 
 | 码 | HTTP | 场景 |
 |---|---:|---|
@@ -100,6 +100,9 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 | `NOTIFY_MARK_READ_FAILED` | 500 | 标记已读失败 |
 | `NOTIFY_CLEAR_READ_FAILED` | 500 | 清空已读失败 |
 | `NOTIFY_OPERATION_FAILED` | 500 | 其他通知操作失败 |
+| `NOTIFY_WEBHOOK_URL_REJECTED` | — | Webhook URL 协议/私网/Host 策略拒绝（sink 层） |
+| `NOTIFY_WEBHOOK_DELIVER_FAILED` | — | Webhook 投递失败（含重试耗尽） |
+| `NOTIFY_EMAIL_DELIVER_FAILED` | — | 邮件 SMTP 投递失败（含重试耗尽） |
 ### Desktop capability 错误码（`DESKTOP_*`，D1/C-5）
 
 Desktop Wails binding / capability 调用使用以下稳定码（非 HTTP envelope 的 `error.code` 同名字段，也可出现在 bridge `InvokeResult.code`）：

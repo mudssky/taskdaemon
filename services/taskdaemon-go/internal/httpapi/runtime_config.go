@@ -103,6 +103,9 @@ func (runtime *RuntimeConfig) Apply(cfg config.Config) config.ReloadResult {
 			"audio.history",
 			// T2a
 			"notify.store",
+			// T4
+			"notify.webhook",
+			"notify.email",
 		},
 		RestartRequired: []string{"server", "database", "audio.ffmpeg", "notify.bufferSize"},
 	}
