@@ -140,12 +140,13 @@ export type AguiMessagesSnapshotEvent = AguiBaseEvent & {
 };
 
 /**
- * 扩展事件（coding 文件变更等）。
- * name 使用稳定字符串；前端按 capabilities.profile 决定是否渲染。
+ * 扩展事件（coding 文件变更、HITL、用量等）。
+ * name 使用稳定字符串；前端按 capabilities / profile 决定是否渲染。
+ * G5 稳定名：file_change | usage | hitl_request。
  */
 export type AguiCustomEvent = AguiBaseEvent & {
   type: "CUSTOM";
-  name: "file_change" | "usage" | string;
+  name: "file_change" | "usage" | "hitl_request" | string;
   value: unknown;
 };
 

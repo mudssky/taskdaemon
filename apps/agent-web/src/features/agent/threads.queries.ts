@@ -5,7 +5,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CreateThreadRequest,
+  ForkThreadRequest,
   ListThreadsQuery,
+  UpdateThreadRequest,
 } from "@taskdaemon/agent-protocol";
 import { agentKeys } from "../../app/queryClient";
 import { getAgentApi } from "../../lib/api/agent-api";
@@ -123,6 +125,44 @@ export function useDeleteThreadMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (threadId: string) => getAgentApi().deleteThread(threadId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: agentKeys.all });
+    },
+  });
+}
+
+/**
+ * 更新会话（重命名 / 归档）。
+ *
+ * 参数: 无。
+ *
+ * 返回值:
+ *   - useMutation。
+ */
+export function useUpdateThreadMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (args: { threadId: string; body: UpdateThreadRequest }) =>
+      getAgentApi().updateThread(args.threadId, args.body),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: agentKeys.all });
+    },
+  });
+}
+
+/**
+ * 分叉会话。
+ *
+ * 参数: 无。
+ *
+ * 返回值:
+ *   - useMutation。
+ */
+export function useForkThreadMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (args: { threadId: string; body?: ForkThreadRequest }) =>
+      getAgentApi().forkThread(args.threadId, args.body),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: agentKeys.all });
     },

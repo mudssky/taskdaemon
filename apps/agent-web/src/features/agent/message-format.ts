@@ -102,6 +102,8 @@ export function threadStatusLabel(status: string): string {
       return "已中断";
     case "error":
       return "出错";
+    case "archived":
+      return "已归档";
     case "deleted":
       return "已删除";
     default:

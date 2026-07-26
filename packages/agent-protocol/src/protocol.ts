@@ -14,6 +14,7 @@ export type ThreadStatus =
   | "busy"
   | "interrupted"
   | "error"
+  | "archived"
   | "deleted";
 
 /** Run 生命周期状态。 */
@@ -107,6 +108,89 @@ export type ListThreadsQuery = PageQuery & {
   runtimeId?: string;
   profile?: AgentProfile;
   sort?: ResourceSort;
+  /** 标题与消息内容搜索（G5；gateway 可降级为仅标题）。 */
+  q?: string;
+  /** 为 true 时包含 archived；默认 false。 */
+  includeArchived?: boolean;
+};
+
+/**
+ * 更新 Thread 元数据（G5 会话管理）。
+ * title 写入 metadata.title；archived=true 时 status→archived。
+ */
+export type UpdateThreadRequest = {
+  title?: string;
+  /** true=归档，false=从归档恢复为 idle。 */
+  archived?: boolean;
+  metadata?: Record<string, unknown>;
+};
+
+/** 从某条消息分叉新会话（G5）。 */
+export type ForkThreadRequest = {
+  /** 分叉点消息 id；缺省复制全部历史。 */
+  fromMessageId?: string;
+  /** 新会话标题；缺省自动生成。 */
+  title?: string;
+};
+
+/** 运行中注入（与 CreateRunRequest.input 同形子集）。 */
+export type SteerRequest = {
+  input: {
+    text?: string;
+    messages?: AgentMessage[];
+    metadata?: Record<string, unknown>;
+  };
+};
+
+export type SteerResponse = {
+  ok: true;
+  threadId: string;
+};
+
+/** HITL 决策（G5；对应 CUSTOM hitl_request）。 */
+export type HitlDecision = "approve" | "reject" | "modify";
+
+export type HitlRespondRequest = {
+  requestId: string;
+  decision: HitlDecision;
+  /** decision=modify 时的改写输入。 */
+  modifiedInput?: {
+    text?: string;
+    metadata?: Record<string, unknown>;
+  };
+};
+
+export type HitlRespondResponse = {
+  ok: true;
+  requestId: string;
+  decision: HitlDecision;
+};
+
+/** CUSTOM hitl_request 的 value 形状。 */
+export type HitlRequestPayload = {
+  requestId: string;
+  title: string;
+  context: string;
+  options?: Array<{ id: string; label: string }>;
+  /** 可选超时毫秒；缺省无超时。 */
+  timeoutMs?: number;
+};
+
+/** CUSTOM file_change 的 value 形状。 */
+export type FileChangePayload = {
+  path: string;
+  kind: "create" | "modify" | "delete";
+  /** 可选 unified diff 文本；只读预览。 */
+  diff?: string;
+  /** 越出沙箱根时为 true。 */
+  outsideSandbox?: boolean;
+};
+
+/** CUSTOM usage 的 value 形状。 */
+export type UsagePayload = {
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
 };
 
 export type ListThreadsResponse = PageResult<Thread>;

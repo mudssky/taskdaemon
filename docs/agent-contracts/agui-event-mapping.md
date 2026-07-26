@@ -140,3 +140,14 @@ data: {"type":"TEXT_MESSAGE_CONTENT","messageId":"...","delta":"Hi"}
 - `event` 固定 `agui`（或省略，靠 data.type 区分）。  
 - `data` 为单个 `AguiEvent` JSON。  
 - 心跳：注释行 `:ping` 每 15s（实现建议，非类型约束）。
+
+
+## 7. G5 CUSTOM 扩展（append-only，2026-07-27）
+
+| CUSTOM name | value 类型 | 说明 |
+|---|---|---|
+| `file_change` | `FileChangePayload` | coding + workspaceBound；可含 `diff`、`outsideSandbox` |
+| `usage` | `UsagePayload` | 可选用量；无则不发 |
+| `hitl_request` | `HitlRequestPayload` | 人工决策点；响应走 REST `POST .../hitl`，不发明 SSE 类型 |
+
+前端不得自造其它事件 type 字符串；未知 CUSTOM name 忽略。

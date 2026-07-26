@@ -1,13 +1,16 @@
 /**
- * AG-UI 事件流 → 聊天时间线归约（G4 核心逻辑）。
+ * AG-UI 事件流 → 聊天时间线归约（G4 核心 + G5 扩展）。
  * 纯函数，无 I/O；不伪造 runtime 未提供的字段。
  */
 
 import type {
   AgentMessage,
   AguiEvent,
+  FileChangePayload,
+  HitlRequestPayload,
   MessageRole,
   RunStatus,
+  UsagePayload,
 } from "@taskdaemon/agent-protocol";
 
 /** 时间线上的消息气泡。 */
@@ -20,6 +23,8 @@ export type TimelineMessage = {
   thinking?: string;
   streaming: boolean;
   thinkingStreaming?: boolean;
+  /** 推理区默认收起。 */
+  thinkingCollapsed?: boolean;
 };
 
 /** 时间线上的工具调用条目。 */
@@ -35,13 +40,38 @@ export type TimelineTool = {
   collapsed: boolean;
 };
 
-export type TimelineItem = TimelineMessage | TimelineTool;
+/** 运行中 steering 注入（本地时间线标记）。 */
+export type TimelineSteer = {
+  kind: "steer";
+  id: string;
+  text: string;
+};
+
+/** HITL 决策点。 */
+export type TimelineHitl = {
+  kind: "hitl";
+  id: string;
+  request: HitlRequestPayload;
+  status: "awaiting" | "approved" | "rejected" | "modified" | "timed_out";
+  modifiedText?: string;
+};
+
+export type TimelineItem =
+  | TimelineMessage
+  | TimelineTool
+  | TimelineSteer
+  | TimelineHitl;
+
+/** 工作区文件变更条目。 */
+export type FileChangeItem = FileChangePayload & {
+  id: string;
+};
 
 /** 单次 run / 会话视图的流状态。 */
 export type StreamViewState = {
   runId: string | null;
-  /** UI 运行态：idle / running / error / cancelled。 */
-  status: "idle" | "running" | "error" | "cancelled";
+  /** UI 运行态：idle / running / error / cancelled / awaiting_human。 */
+  status: "idle" | "running" | "error" | "cancelled" | "awaiting_human";
   items: TimelineItem[];
   error?: {
     message: string;
@@ -49,8 +79,18 @@ export type StreamViewState = {
     traceId?: string;
   };
   lastEventId?: string;
+  /** 已见事件 id（续传去重）。 */
+  seenEventIds: string[];
   /** 连接层状态（与 run status 正交）。 */
-  connection: "connected" | "disconnected" | "connecting";
+  connection:
+    | "connected"
+    | "connecting"
+    | "reconnecting"
+    | "disconnected"
+    | "cursor_invalid";
+  fileChanges: FileChangeItem[];
+  usage?: UsagePayload;
+  pendingHitlId?: string;
 };
 
 /**
@@ -66,7 +106,9 @@ export function createEmptyStreamState(): StreamViewState {
     runId: null,
     status: "idle",
     items: [],
+    seenEventIds: [],
     connection: "connected",
+    fileChanges: [],
   };
 }
 
@@ -153,6 +195,7 @@ export function hydrateTimelineFromMessages(
         text,
         thinking,
         streaming: false,
+        thinkingCollapsed: true,
       });
     }
   }
@@ -180,14 +223,27 @@ export function reduceAguiEvent(
     includeThinking: boolean;
   } = { toolCallDetail: "full", includeThinking: true },
 ): StreamViewState {
+  // 续传去重：已见 id 直接跳过（保留 lastEventId 不回退）。
+  if (event.id && state.seenEventIds.includes(event.id)) {
+    return state;
+  }
+
   const next: StreamViewState = {
     ...state,
     items: state.items.map(cloneItem),
+    fileChanges: state.fileChanges.map((f) => ({ ...f })),
+    seenEventIds: [...state.seenEventIds],
     error: state.error ? { ...state.error } : undefined,
+    usage: state.usage ? { ...state.usage } : undefined,
   };
 
   if (event.id) {
     next.lastEventId = event.id;
+    next.seenEventIds.push(event.id);
+    // 环缓：只保留最近 2000 个 id，防内存无限涨。
+    if (next.seenEventIds.length > 2000) {
+      next.seenEventIds = next.seenEventIds.slice(-1500);
+    }
   }
 
   switch (event.type) {
@@ -201,6 +257,7 @@ export function reduceAguiEvent(
     case "RUN_FINISHED": {
       next.status = event.outcome?.type === "interrupt" ? "cancelled" : "idle";
       next.items = finalizeStreaming(next.items);
+      next.pendingHitlId = undefined;
       return next;
     }
     case "RUN_ERROR": {
@@ -210,6 +267,7 @@ export function reduceAguiEvent(
         code: event.code,
       };
       next.items = finalizeStreaming(next.items);
+      next.pendingHitlId = undefined;
       return next;
     }
     case "TEXT_MESSAGE_START": {
@@ -219,6 +277,7 @@ export function reduceAguiEvent(
         role: event.role,
         text: "",
         streaming: true,
+        thinkingCollapsed: true,
       });
       return next;
     }
@@ -251,11 +310,15 @@ export function reduceAguiEvent(
           thinking: "",
           streaming: true,
           thinkingStreaming: true,
+          thinkingCollapsed: true,
         };
         next.items.push(msg);
       } else {
         msg.thinking = msg.thinking ?? "";
         msg.thinkingStreaming = true;
+        if (msg.thinkingCollapsed === undefined) {
+          msg.thinkingCollapsed = true;
+        }
       }
       return next;
     }
@@ -307,7 +370,6 @@ export function reduceAguiEvent(
       if (options.toolCallDetail === "none") {
         return next;
       }
-      // END 本身不改 status；等 RESULT 或保持 running 直到 result。
       return next;
     }
     case "TOOL_CALL_RESULT": {
@@ -322,35 +384,53 @@ export function reduceAguiEvent(
       }
       return next;
     }
+    case "CUSTOM": {
+      return reduceCustomEvent(next, event.name, event.value, event.id);
+    }
     case "STEP_STARTED":
     case "STEP_FINISHED":
     case "STATE_SNAPSHOT":
     case "MESSAGES_SNAPSHOT":
-    case "CUSTOM":
       return next;
     default: {
-      // 穷尽检查：未知类型原样返回。
       return next;
     }
   }
 }
 
 /**
- * 标记连接断开（不做自动续传；G5 才做）。
+ * 标记连接断开（G5 自动续传前的瞬时态）。
+ *
+ * 参数:
+ *   - state: 当前状态。
+ *   - mode: disconnected | reconnecting | cursor_invalid。
+ *
+ * 返回值:
+ *   - 更新 connection 的状态。
+ */
+export function markStreamConnection(
+  state: StreamViewState,
+  mode: StreamViewState["connection"],
+): StreamViewState {
+  return {
+    ...state,
+    connection: mode,
+  };
+}
+
+/**
+ * 兼容 G4 命名：标记断开。
  *
  * 参数:
  *   - state: 当前状态。
  *
  * 返回值:
- *   - connection=disconnected 的状态。
+ *   - connection=disconnected。
  */
 export function markStreamDisconnected(
   state: StreamViewState,
 ): StreamViewState {
-  return {
-    ...state,
-    connection: "disconnected",
-  };
+  return markStreamConnection(state, "disconnected");
 }
 
 /**
@@ -361,21 +441,17 @@ export function markStreamDisconnected(
  *   - runStatus: cancel API 返回的状态。
  *
  * 返回值:
- *   - 回落为 cancelled/idle 的状态。
+ *   - 回落为 cancelled 的状态。
  */
 export function applyLocalCancel(
   state: StreamViewState,
   runStatus: RunStatus,
 ): StreamViewState {
-  const cancelled =
-    runStatus === "cancelled" ||
-    runStatus === "interrupted" ||
-    runStatus === "success"
-      ? "cancelled"
-      : "cancelled";
+  void runStatus;
   return {
     ...state,
-    status: cancelled,
+    status: "cancelled",
+    pendingHitlId: undefined,
     items: finalizeStreaming(state.items.map(cloneItem)),
   };
 }
@@ -399,6 +475,34 @@ export function toggleToolCollapsed(
     items: state.items.map((item) => {
       if (item.kind === "tool" && item.id === toolCallId) {
         return { ...item, collapsed: !item.collapsed };
+      }
+      return item;
+    }),
+  };
+}
+
+/**
+ * 切换 thinking 折叠（默认收起）。
+ *
+ * 参数:
+ *   - state: 当前状态。
+ *   - messageId: 消息 id。
+ *
+ * 返回值:
+ *   - thinkingCollapsed 翻转后的状态。
+ */
+export function toggleThinkingCollapsed(
+  state: StreamViewState,
+  messageId: string,
+): StreamViewState {
+  return {
+    ...state,
+    items: state.items.map((item) => {
+      if (item.kind === "message" && item.id === messageId) {
+        return {
+          ...item,
+          thinkingCollapsed: !(item.thinkingCollapsed ?? true),
+        };
       }
       return item;
     }),
@@ -436,11 +540,173 @@ export function appendLocalUserMessage(
   };
 }
 
+/**
+ * 追加 steering 时间线条目（不中断 run）。
+ *
+ * 参数:
+ *   - state: 当前状态。
+ *   - text: 注入文本。
+ *   - id: 条目 id。
+ *
+ * 返回值:
+ *   - 含 steer 条目的状态。
+ */
+export function appendSteerMessage(
+  state: StreamViewState,
+  text: string,
+  id: string,
+): StreamViewState {
+  return {
+    ...state,
+    items: [
+      ...state.items,
+      {
+        kind: "steer",
+        id,
+        text,
+      },
+    ],
+  };
+}
+
+/**
+ * 应用 HITL 本地决策（乐观更新）。
+ *
+ * 参数:
+ *   - state: 当前状态。
+ *   - requestId: HITL 请求 id。
+ *   - decision: approve | reject | modify。
+ *   - modifiedText: modify 时的文本。
+ *
+ * 返回值:
+ *   - 更新后的状态。
+ */
+export function applyHitlDecision(
+  state: StreamViewState,
+  requestId: string,
+  decision: "approve" | "reject" | "modify",
+  modifiedText?: string,
+): StreamViewState {
+  const status =
+    decision === "approve"
+      ? "approved"
+      : decision === "reject"
+        ? "rejected"
+        : "modified";
+  return {
+    ...state,
+    status: "running",
+    pendingHitlId: undefined,
+    items: state.items.map((item) => {
+      if (item.kind === "hitl" && item.id === requestId) {
+        return {
+          ...item,
+          status,
+          modifiedText,
+        };
+      }
+      return item;
+    }),
+  };
+}
+
+/**
+ * 标记 HITL 超时。
+ *
+ * 参数:
+ *   - state: 当前状态。
+ *   - requestId: HITL id。
+ *
+ * 返回值:
+ *   - timed_out 状态。
+ */
+export function markHitlTimedOut(
+  state: StreamViewState,
+  requestId: string,
+): StreamViewState {
+  if (state.pendingHitlId !== requestId) {
+    return state;
+  }
+  return {
+    ...state,
+    status: "error",
+    pendingHitlId: undefined,
+    error: {
+      message: "等待人工确认已超时",
+      code: "AGENT_HITL_TIMEOUT",
+    },
+    items: state.items.map((item) => {
+      if (item.kind === "hitl" && item.id === requestId) {
+        return { ...item, status: "timed_out" as const };
+      }
+      return item;
+    }),
+  };
+}
+
+function reduceCustomEvent(
+  next: StreamViewState,
+  name: string,
+  value: unknown,
+  eventId?: string,
+): StreamViewState {
+  if (name === "file_change") {
+    const payload = value as FileChangePayload;
+    if (!payload || typeof payload.path !== "string") {
+      return next;
+    }
+    next.fileChanges.push({
+      id: eventId ?? `fc_${next.fileChanges.length}`,
+      path: payload.path,
+      kind: payload.kind,
+      diff: payload.diff,
+      outsideSandbox: payload.outsideSandbox,
+    });
+    return next;
+  }
+
+  if (name === "usage") {
+    const payload = value as UsagePayload;
+    if (payload && typeof payload === "object") {
+      next.usage = { ...payload };
+    }
+    return next;
+  }
+
+  if (name === "hitl_request") {
+    const payload = value as HitlRequestPayload;
+    if (!payload || typeof payload.requestId !== "string") {
+      return next;
+    }
+    next.items.push({
+      kind: "hitl",
+      id: payload.requestId,
+      request: payload,
+      status: "awaiting",
+    });
+    next.pendingHitlId = payload.requestId;
+    next.status = "awaiting_human";
+    return next;
+  }
+
+  // 未知 CUSTOM：忽略，不发明字段。
+  return next;
+}
+
 function cloneItem(item: TimelineItem): TimelineItem {
   if (item.kind === "message") {
     return { ...item };
   }
-  return { ...item };
+  if (item.kind === "tool") {
+    return { ...item };
+  }
+  if (item.kind === "steer") {
+    return { ...item };
+  }
+  return {
+    ...item,
+    request: { ...item.request },
+  };
 }
 
 function findMessage(
@@ -473,7 +739,6 @@ function finalizeStreaming(items: TimelineItem[]): TimelineItem[] {
       };
     }
     if (item.kind === "tool" && item.status === "running") {
-      // 中断时工具可能无 RESULT；保持 running 会误导，标为 error 但不伪造 result。
       return { ...item, status: "error" as const };
     }
     return item;

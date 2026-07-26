@@ -583,6 +583,15 @@ T2a ─────────────────────────�
 | `desktopKeys` | D1 |
 | `agentKeys` | G4 / G5 |
 
+### 9.2.1 C-3 G5 append（2026-07-27）
+
+| 变更 | 说明 | 任务 |
+|---|---|---|
+| `PATCH /threads/{id}`、`POST .../fork`、`POST .../hitl` | 会话重命名/归档、分叉、HITL 响应 | G5 |
+| `ListThreadsQuery.q` / `includeArchived`、`ThreadStatus.archived` | 搜索与归档 | G5 |
+| CUSTOM `hitl_request` / `FileChangePayload.diff` | HITL 与 diff 预览 | G5 |
+| 类型 | `packages/agent-protocol` append-only | G5 |
+
 ### 9.3 traceId 贯穿约定
 
 - taskdaemon 已有 `internal/httpapi/trace_middleware.go`，沿用其头名。
