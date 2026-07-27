@@ -80,6 +80,17 @@ describe("router", () => {
         if (path === "/api/tasks/1/runs") {
           return jsonResponse({ runs: runFixtures });
         }
+        if (path.startsWith("/api/notifications/unread-count")) {
+          return jsonResponse({ count: 0 });
+        }
+        if (path.startsWith("/api/notifications")) {
+          return jsonResponse({
+            notifications: [],
+            total: 0,
+            page: 1,
+            pageSize: 20,
+          });
+        }
         return jsonResponse(null);
       }),
     );
@@ -150,6 +161,17 @@ describe("router", () => {
         if (path === "/api/tasks") {
           return jsonResponse({ tasks: taskFixtures });
         }
+        if (path.startsWith("/api/notifications/unread-count")) {
+          return jsonResponse({ count: 0 });
+        }
+        if (path.startsWith("/api/notifications")) {
+          return jsonResponse({
+            notifications: [],
+            total: 0,
+            page: 1,
+            pageSize: 20,
+          });
+        }
         return jsonResponse(null);
       }),
     );
@@ -197,6 +219,17 @@ describe("router", () => {
         if (path === "/api/tasks") {
           return jsonResponse({ tasks: taskFixtures });
         }
+        if (path.startsWith("/api/notifications/unread-count")) {
+          return jsonResponse({ count: 0 });
+        }
+        if (path.startsWith("/api/notifications")) {
+          return jsonResponse({
+            notifications: [],
+            total: 0,
+            page: 1,
+            pageSize: 20,
+          });
+        }
         return jsonResponse(null);
       },
     );
@@ -243,6 +276,17 @@ describe("router", () => {
         }
         if (path === "/api/tasks") {
           return jsonResponse({ tasks: taskFixtures });
+        }
+        if (path.startsWith("/api/notifications/unread-count")) {
+          return jsonResponse({ count: 0 });
+        }
+        if (path.startsWith("/api/notifications")) {
+          return jsonResponse({
+            notifications: [],
+            total: 0,
+            page: 1,
+            pageSize: 20,
+          });
         }
         return jsonResponse(null);
       },

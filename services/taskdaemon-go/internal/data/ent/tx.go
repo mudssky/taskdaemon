@@ -16,6 +16,8 @@ type Tx struct {
 	Admin *AdminClient
 	// AudioRecord is the client for interacting with the AudioRecord builders.
 	AudioRecord *AudioRecordClient
+	// Notification is the client for interacting with the Notification builders.
+	Notification *NotificationClient
 	// Run is the client for interacting with the Run builders.
 	Run *RunClient
 	// Session is the client for interacting with the Session builders.
@@ -155,6 +157,7 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Admin = NewAdminClient(tx.config)
 	tx.AudioRecord = NewAudioRecordClient(tx.config)
+	tx.Notification = NewNotificationClient(tx.config)
 	tx.Run = NewRunClient(tx.config)
 	tx.Session = NewSessionClient(tx.config)
 	tx.Task = NewTaskClient(tx.config)

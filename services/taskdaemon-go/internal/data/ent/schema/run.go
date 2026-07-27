@@ -31,6 +31,12 @@ func (Run) Fields() []ent.Field {
 		field.String("error_summary").Optional(),
 		field.String("stdout").Optional(),
 		field.String("stderr").Optional(),
+		// T6: run 完整日志归档元数据（append-only）
+		field.Enum("log_archive_status").
+			Values("absent", "archived", "pruned").
+			Default("absent"),
+		field.Int64("log_size_bytes").Optional().Nillable(),
+		field.Bool("log_write_failed").Default(false),
 		field.Time("created_at").Default(time.Now).Immutable(),
 		field.Time("updated_at").Default(time.Now).UpdateDefault(time.Now),
 	}

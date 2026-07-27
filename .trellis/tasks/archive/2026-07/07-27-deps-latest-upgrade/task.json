@@ -1,0 +1,29 @@
+{
+  "id": "deps-latest-upgrade",
+  "name": "deps-latest-upgrade",
+  "title": "依赖全量升级到最新（pnpm + Go modules）",
+  "description": "将 monorepo JS/TS 与 Go 依赖升级到当前最新可解析版本，并修复合规/测试破口；独占 lockfile",
+  "status": "completed",
+  "dev_type": null,
+  "scope": null,
+  "package": null,
+  "priority": "P2",
+  "creator": "mudssky",
+  "assignee": "mudssky",
+  "createdAt": "2026-07-27",
+  "completedAt": "2026-07-27",
+  "branch": null,
+  "base_branch": "dev",
+  "worktree_path": null,
+  "commit": null,
+  "pr_url": null,
+  "subtasks": [],
+  "children": [],
+  "parent": "07-27-post-mvp-and-agent-roadmap",
+  "relatedFiles": [],
+  "notes": "",
+  "meta": {
+    "horizon": "chore",
+    "source": "coordinator-request-2026-07-27"
+  }
+}

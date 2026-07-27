@@ -6,15 +6,24 @@ import {
   type RouterHistory,
 } from "@tanstack/react-router";
 import { AppShell } from "../components/layout/AppShell";
-import { AudioSettingsPage } from "../features/audio/AudioSettingsPage";
 import { AdminSetupPanel } from "../features/auth/AdminSetupPanel";
 import { useAuthStatusQuery } from "../features/auth/auth.queries";
 import { LoginPanel } from "../features/auth/LoginPanel";
+import { NotificationListPage } from "../features/notifications/NotificationListPage";
+import { parseNotificationSearch } from "../features/notifications/notification.schema";
 import { RunHistoryPage } from "../features/runs/RunHistoryPage";
+import { SettingsPage } from "../features/settings/SettingsPage";
 import { StatusOverviewPage } from "../features/status/StatusOverviewPage";
 import { TaskCreatePage } from "../features/tasks/TaskCreatePage";
 import { TaskEditPage } from "../features/tasks/TaskEditPage";
 import { TaskManagementPage } from "../features/tasks/TaskManagementPage";
+
+import { TemplateWizardPage } from "../features/tasks/templates/TemplateWizardPage";
+import {
+  DesktopEnvironmentPanel,
+  DesktopNativeFeaturesPanel,
+  DesktopNotificationPanel,
+} from "../lib/desktop";
 
 function ProtectedApp() {
   const authStatus = useAuthStatusQuery();
@@ -86,6 +95,12 @@ const taskCreateRoute = createRoute({
   component: TaskCreatePage,
 });
 
+const taskFromTemplateRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/tasks/from-template",
+  component: TemplateWizardPage,
+});
+
 const taskEditRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/tasks/$taskId/edit",
@@ -98,18 +113,28 @@ const runsRoute = createRoute({
   component: RunHistoryPage,
 });
 
+const notificationsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/notifications",
+  validateSearch: (search: Record<string, unknown>) =>
+    parseNotificationSearch(search),
+  component: NotificationListPage,
+});
+
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  component: AudioSettingsPage,
+  component: SettingsPage,
 });
 
 export const routeTree = rootRoute.addChildren([
   indexRoute,
   tasksRoute,
   taskCreateRoute,
+  taskFromTemplateRoute,
   taskEditRoute,
   runsRoute,
+  notificationsRoute,
   settingsRoute,
 ]);
 

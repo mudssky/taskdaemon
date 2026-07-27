@@ -412,6 +412,59 @@ func TestSessionTokenFromContextReturnsEmptyWhenUnset(t *testing.T) {
 	}
 }
 
+// TestServiceInstallDryRunHasNoSideEffects 验证 service install --dry-run 打印单元且不要求 hooks。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestServiceInstallDryRunHasNoSideEffects(t *testing.T) {
+	stdout := &bytes.Buffer{}
+	err := Execute(context.Background(), Options{
+		Args:       []string{"service", "install", "--dry-run", "--config", "/tmp/taskdaemon-dry-run-config.yaml"},
+		Stdout:     stdout,
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+	})
+	if err != nil {
+		t.Fatalf("dry-run install: %v", err)
+	}
+	out := stdout.String()
+	if !strings.Contains(out, "将写入:") {
+		t.Fatalf("missing unit path header: %s", out)
+	}
+	if !strings.Contains(out, "/tmp/taskdaemon-dry-run-config.yaml") {
+		t.Fatalf("missing config path: %s", out)
+	}
+	if !strings.Contains(out, "--- 单元内容 ---") {
+		t.Fatalf("missing unit body: %s", out)
+	}
+}
+
+// TestServiceStatusCommandRuns 验证 service status 子命令可执行。
+//
+// 参数:
+//   - t: Go 测试上下文。
+//
+// 返回值:
+//   - 无。
+func TestServiceStatusCommandRuns(t *testing.T) {
+	stdout := &bytes.Buffer{}
+	err := Execute(context.Background(), Options{
+		Args:       []string{"service", "status"},
+		Stdout:     stdout,
+		Stderr:     &bytes.Buffer{},
+		LoadConfig: staticConfigLoader(),
+	})
+	if err != nil {
+		t.Fatalf("status: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "platform:") && !strings.Contains(stdout.String(), "installed:") {
+		t.Fatalf("unexpected status output: %s", stdout.String())
+	}
+}
+
 // staticConfigLoader 返回测试使用的静态配置加载函数。
 //
 // 参数:

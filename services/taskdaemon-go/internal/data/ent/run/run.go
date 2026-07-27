@@ -33,6 +33,12 @@ const (
 	FieldStdout = "stdout"
 	// FieldStderr holds the string denoting the stderr field in the database.
 	FieldStderr = "stderr"
+	// FieldLogArchiveStatus holds the string denoting the log_archive_status field in the database.
+	FieldLogArchiveStatus = "log_archive_status"
+	// FieldLogSizeBytes holds the string denoting the log_size_bytes field in the database.
+	FieldLogSizeBytes = "log_size_bytes"
+	// FieldLogWriteFailed holds the string denoting the log_write_failed field in the database.
+	FieldLogWriteFailed = "log_write_failed"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
 	FieldCreatedAt = "created_at"
 	// FieldUpdatedAt holds the string denoting the updated_at field in the database.
@@ -62,6 +68,9 @@ var Columns = []string{
 	FieldErrorSummary,
 	FieldStdout,
 	FieldStderr,
+	FieldLogArchiveStatus,
+	FieldLogSizeBytes,
+	FieldLogWriteFailed,
 	FieldCreatedAt,
 	FieldUpdatedAt,
 }
@@ -90,6 +99,8 @@ func ValidColumn(column string) bool {
 var (
 	// DefaultStartedAt holds the default value on creation for the "started_at" field.
 	DefaultStartedAt func() time.Time
+	// DefaultLogWriteFailed holds the default value on creation for the "log_write_failed" field.
+	DefaultLogWriteFailed bool
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.
@@ -155,6 +166,33 @@ func StatusValidator(s Status) error {
 	}
 }
 
+// LogArchiveStatus defines the type for the "log_archive_status" enum field.
+type LogArchiveStatus string
+
+// LogArchiveStatusAbsent is the default value of the LogArchiveStatus enum.
+const DefaultLogArchiveStatus = LogArchiveStatusAbsent
+
+// LogArchiveStatus values.
+const (
+	LogArchiveStatusAbsent   LogArchiveStatus = "absent"
+	LogArchiveStatusArchived LogArchiveStatus = "archived"
+	LogArchiveStatusPruned   LogArchiveStatus = "pruned"
+)
+
+func (las LogArchiveStatus) String() string {
+	return string(las)
+}
+
+// LogArchiveStatusValidator is a validator for the "log_archive_status" field enum values. It is called by the builders before save.
+func LogArchiveStatusValidator(las LogArchiveStatus) error {
+	switch las {
+	case LogArchiveStatusAbsent, LogArchiveStatusArchived, LogArchiveStatusPruned:
+		return nil
+	default:
+		return fmt.Errorf("run: invalid enum value for log_archive_status field: %q", las)
+	}
+}
+
 // OrderOption defines the ordering options for the Run queries.
 type OrderOption func(*sql.Selector)
 
@@ -206,6 +244,21 @@ func ByStdout(opts ...sql.OrderTermOption) OrderOption {
 // ByStderr orders the results by the stderr field.
 func ByStderr(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldStderr, opts...).ToFunc()
+}
+
+// ByLogArchiveStatus orders the results by the log_archive_status field.
+func ByLogArchiveStatus(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogArchiveStatus, opts...).ToFunc()
+}
+
+// ByLogSizeBytes orders the results by the log_size_bytes field.
+func ByLogSizeBytes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogSizeBytes, opts...).ToFunc()
+}
+
+// ByLogWriteFailed orders the results by the log_write_failed field.
+func ByLogWriteFailed(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLogWriteFailed, opts...).ToFunc()
 }
 
 // ByCreatedAt orders the results by the created_at field.

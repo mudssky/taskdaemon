@@ -87,6 +87,74 @@ func Default() Config {
 				TranscodeTimeoutSeconds: 120,
 			},
 		},
+		// T2a
+		Notify: NotifyConfig{
+			BufferSize: 256,
+			Store: NotifyStoreConfig{
+				Enabled:     true,
+				MaxRecords:  200,
+				RetainDays:  30,
+				MinSeverity: "",
+			},
+			// T4
+			Webhook: NotifyWebhookConfig{
+				Enabled:              false,
+				DefaultTimeoutSec:    10,
+				DefaultMaxRetries:    2,
+				DefaultBackoffMs:     200,
+				AllowedSchemes:       []string{"https"},
+				AllowPrivateNetworks: false,
+				AllowedHosts:         []string{},
+				MaxRedirects:         3,
+				Targets:              []NotifyWebhookTargetConfig{},
+			},
+			Email: NotifyEmailConfig{
+				Enabled:        false,
+				MinSeverity:    "",
+				From:           "",
+				To:             []string{},
+				TimeoutSeconds: 15,
+				MaxRetries:     2,
+				BackoffMs:      200,
+				SMTP: NotifySMTPConfig{
+					Host:       "",
+					Port:       587,
+					Username:   "",
+					Password:   "",
+					Encryption: "starttls",
+				},
+			},
+			// D2 / T3
+			Desktop: NotifyDesktopConfig{
+				Enabled:     true,
+				MinSeverity: "",
+			},
+		},
+		// T6
+		RunLog: RunLogConfig{
+			Enabled:       true,
+			RetainDays:    30,
+			MaxTotalBytes: 2 * 1024 * 1024 * 1024, // 2 GiB
+		},
+		// G6
+		AgentBridge: AgentBridgeConfig{
+			Enabled:               false,
+			GatewayBaseURL:        "http://127.0.0.1:8787",
+			GatewaySubject:        "taskdaemon-service",
+			GatewayTenantID:       "system",
+			InboundTokenHash:      "",
+			AllowedTaskIDs:        []int{},
+			MaxLoopDepth:          1,
+			RequestTimeoutSeconds: 120,
+		},
+		// TD2/D3
+		Desktop: DesktopConfig{
+			TrayEnabled:        true,
+			MinimizeToTray:     true,
+			AutostartEnabled:   false,
+			SingleInstance:     true,
+			WindowStateEnabled: true,
+		},
 	}
 }
 
@@ -133,6 +201,54 @@ func defaultMap() map[string]any {
 		"audio.ffmpeg.path":                        defaults.Audio.FFmpeg.Path,
 		"audio.ffmpeg.probePath":                   defaults.Audio.FFmpeg.ProbePath,
 		"audio.ffmpeg.transcodeTimeoutSeconds":     defaults.Audio.FFmpeg.TranscodeTimeoutSeconds,
+		// T2a
+		"notify.bufferSize":        defaults.Notify.BufferSize,
+		"notify.store.enabled":     defaults.Notify.Store.Enabled,
+		"notify.store.maxRecords":  defaults.Notify.Store.MaxRecords,
+		"notify.store.retainDays":  defaults.Notify.Store.RetainDays,
+		"notify.store.minSeverity": defaults.Notify.Store.MinSeverity,
+		// T6
+		"runlog.enabled":       defaults.RunLog.Enabled,
+		"runlog.retainDays":    defaults.RunLog.RetainDays,
+		"runlog.maxTotalBytes": defaults.RunLog.MaxTotalBytes,
+		// T4
+		"notify.webhook.enabled":              defaults.Notify.Webhook.Enabled,
+		"notify.webhook.defaultTimeoutSec":    defaults.Notify.Webhook.DefaultTimeoutSec,
+		"notify.webhook.defaultMaxRetries":    defaults.Notify.Webhook.DefaultMaxRetries,
+		"notify.webhook.defaultBackoffMs":     defaults.Notify.Webhook.DefaultBackoffMs,
+		"notify.webhook.allowedSchemes":       defaults.Notify.Webhook.AllowedSchemes,
+		"notify.webhook.allowPrivateNetworks": defaults.Notify.Webhook.AllowPrivateNetworks,
+		"notify.webhook.allowedHosts":         defaults.Notify.Webhook.AllowedHosts,
+		"notify.webhook.maxRedirects":         defaults.Notify.Webhook.MaxRedirects,
+		"notify.webhook.targets":              defaults.Notify.Webhook.Targets,
+		"notify.email.enabled":                defaults.Notify.Email.Enabled,
+		"notify.email.minSeverity":            defaults.Notify.Email.MinSeverity,
+		"notify.email.from":                   defaults.Notify.Email.From,
+		"notify.email.to":                     defaults.Notify.Email.To,
+		"notify.email.timeoutSeconds":         defaults.Notify.Email.TimeoutSeconds,
+		"notify.email.smtp.host":              defaults.Notify.Email.SMTP.Host,
+		"notify.email.smtp.port":              defaults.Notify.Email.SMTP.Port,
+		"notify.email.smtp.username":          defaults.Notify.Email.SMTP.Username,
+		"notify.email.smtp.password":          defaults.Notify.Email.SMTP.Password,
+		"notify.email.smtp.encryption":        defaults.Notify.Email.SMTP.Encryption,
+		// G6
+		"agentBridge.enabled":               defaults.AgentBridge.Enabled,
+		"agentBridge.gatewayBaseUrl":        defaults.AgentBridge.GatewayBaseURL,
+		"agentBridge.gatewaySubject":        defaults.AgentBridge.GatewaySubject,
+		"agentBridge.gatewayTenantId":       defaults.AgentBridge.GatewayTenantID,
+		"agentBridge.inboundTokenHash":      defaults.AgentBridge.InboundTokenHash,
+		"agentBridge.allowedTaskIds":        defaults.AgentBridge.AllowedTaskIDs,
+		"agentBridge.maxLoopDepth":          defaults.AgentBridge.MaxLoopDepth,
+		"agentBridge.requestTimeoutSeconds": defaults.AgentBridge.RequestTimeoutSeconds,
+		// D2 / T3
+		"notify.desktop.enabled":     defaults.Notify.Desktop.Enabled,
+		"notify.desktop.minSeverity": defaults.Notify.Desktop.MinSeverity,
+		// TD2/D3
+		"desktop.trayEnabled":        defaults.Desktop.TrayEnabled,
+		"desktop.minimizeToTray":     defaults.Desktop.MinimizeToTray,
+		"desktop.autostartEnabled":   defaults.Desktop.AutostartEnabled,
+		"desktop.singleInstance":     defaults.Desktop.SingleInstance,
+		"desktop.windowStateEnabled": defaults.Desktop.WindowStateEnabled,
 	}
 }
 

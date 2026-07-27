@@ -14,6 +14,7 @@ import (
 )
 
 // newFileHandler 创建带 lumberjack 轮转 writer 的 slog handler。
+// 注意：此处仅服务 taskdaemon 进程日志；run 命令 stdout/stderr 归档见 internal/runlog（T6），不可复用 lumberjack 语义。
 //
 // 参数:
 //   - cfg: 文件日志配置。

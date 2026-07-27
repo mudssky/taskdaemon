@@ -58,6 +58,83 @@ URL state 用于筛选、分页、选中 tab、详情 ID 和可分享页面状�
 
 Web 和 Desktop 共用同一套 React 页面组件。Desktop 专属能力必须通过边界 hook、service 或 `src/lib/desktop` 一类模块封装，业务组件不直接读取 Wails 全局对象或调用 runtime API。
 
+### 实现载体（C-5 冻结）
+
+落地目录：`apps/web/src/lib/desktop/`。对外只从 `index.ts` 导入。
+
+| 文件 | 职责 |
+|---|---|
+| `platform.ts` | **环境判断的唯一来源**（`isDesktopRuntime` / `getPlatformInfo`） |
+| `bridge.ts` | **全仓库唯一**允许读取 Wails 全局对象 / `Call.ByName` 的文件 |
+| `capabilities.ts` | 具名常量、`CapabilityState`、`UnavailableReason` |
+| `useDesktopCapability.ts` | 业务组件唯一 hook 入口 |
+| `DesktopEnvironmentPanel.tsx` | Environment 样板消费点 |
+
+query key 前缀：`desktopKeys`（定义于 `apps/web/src/app/queryClient.ts`，路线图 §9.2）。
+
+### capability 命名
+
+* 使用 `DesktopCapability` 具名常量，不用自由字符串。
+* 名称空间：`desktop.<kebab-or-dot-name>`，例如 `desktop.environment`。
+* 下游任务**只追加常量**，不改对象结构；非法名称在类型层被拒绝（`DesktopCapabilityName`）。
+* 已预留：`Environment`（D1 样板）、`Notification`（D2）、`Tray` / `Autostart` / `WindowState`（D3）。
+
+### `CapabilityState` 返回形状
+
+```ts
+type CapabilityState<TResult> =
+  | { status: "available"; invoke: (input?: unknown) => Promise<InvokeOutcome<TResult>> }
+  | { status: "unavailable"; reason: UnavailableReason; message: string }
+  | { status: "checking" }
+
+type UnavailableReason =
+  | "not-desktop"  // 浏览器环境
+  | "platform"     // Desktop 但当前 OS 不支持
+  | "permission"   // 支持但权限未授予
+  | "error"        // 检测本身失败
+```
+
+* `unavailable` 分支**没有** `invoke`：TypeScript discriminated union 强制 UI 分支处理。
+* `invoke` 内部捕获错误，返回 `{ ok: false, code, message }`，**不抛异常**。
+* `code` 使用 `DESKTOP_*` 稳定错误码（见 backend error-handling）。
+
+四种 `UnavailableReason` 的 UI 语义不同，禁止合并：
+
+* `not-desktop` → 说明「桌面端可用」
+* `platform` → 说明「当前系统不支持」
+* `permission` → 提供「去授权」入口
+* `error` → 提供重试
+
+### Web fallback 语义
+
+* `isDesktopRuntime()` 为 false 时，hook **不发任何请求**，直接返回 `{ status: "unavailable", reason: "not-desktop" }`。
+* 浏览器调用任意 capability 不抛异常、不崩溃。
+* 业务组件只根据 `CapabilityState` 渲染禁用态或隐藏入口，**不做平台判断**。
+
+### 环境判断与 Wails 唯一性
+
+* 环境判断 API 只从 `platform.ts` 导出（`isDesktopRuntime` / `getPlatformInfo`）。
+* Wails 全局对象 / runtime 读取只允许 `bridge.ts`（含 `detectWailsRuntime`）。
+* 守卫命令（review / CI 可复用；排除 bridge 与测试）：
+  ```bash
+  rg -n "window\\.runtime|window\\.go|wails" apps/web/src -g '*.ts' -g '*.tsx' \
+    | rg -v 'lib/desktop/bridge' \
+    | rg -v '\\.test\\.'
+  ```
+  期望：无业务命中。
+
+### 新增一个 Desktop 能力的完整步骤（D2/D3 照做）
+
+1. **Go 实现** `services/taskdaemon-go/internal/desktop/capability_<name>.go`：实现 `Capability` 接口（`Name` / `Available` / `Invoke`）。
+2. **注册（append-only）** 在 `internal/desktop/desktop.go` 的 `newApp` 中追加一行 `registry.Register(...)`，标注 `// TD2` 或 `// TD3`。
+3. **错误**：不可用或调用失败返回 `DESKTOP_*` 结构化错误；`Registry.Invoke` 外层已 `recover`，能力实现内仍禁止 panic。
+4. **前端常量** 在 `capabilities.ts` 的 `DesktopCapability` 追加一项。
+5. **消费** 业务组件 `useDesktopCapability(DesktopCapability.Xxx)`，按 `status` 渲染；需要时 `invoke()`。
+6. **不要** 在 feature 内直接读 Wails；不要分叉第二套业务组件。
+
+Go 侧注册框架：`internal/desktop/bridge.go`（`Capability` / `Registry` / `InvokeResult`）。
+Wails binding 入口：`App.ListCapabilities`、`App.InvokeCapability`。
+
 边界层需要提供 Web fallback：
 
 * 能力可用时返回明确 capability 和方法。

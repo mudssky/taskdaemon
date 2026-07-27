@@ -1,0 +1,122 @@
+{
+  "pi": [
+    {
+      "case": "half_frame",
+      "observed": {
+        "responsesBeforeSecondWrite": 0,
+        "gotResponseAfterComplete": true
+      },
+      "pass": true,
+      "note": "半包在补齐 \\n 前不应解析；补齐后应正常 response"
+    },
+    {
+      "case": "glued_frames",
+      "observed": {
+        "gotA": true,
+        "gotB": true
+      },
+      "pass": true,
+      "note": "一次 write 两帧应都被处理"
+    },
+    {
+      "case": "overlong_line",
+      "observed": {
+        "bytes": 2000044,
+        "exitedWithin3s": false,
+        "exitCode": null,
+        "response": {
+          "id": "big-1",
+          "type": "response",
+          "command": "prompt",
+          "success": true
+        },
+        "parseErrors": 0,
+        "elapsedMs": 3003.525042000001
+      },
+      "note": "记录 runtime 对 ~2MB JSONL 行的行为（接受/拒绝/崩溃）"
+    },
+    {
+      "case": "invalid_json",
+      "observed": {
+        "processExited": false,
+        "subsequentGetStateWorks": true,
+        "stderrTail": ""
+      },
+      "note": "非法 JSON 行后，合法命令是否仍可用"
+    },
+    {
+      "case": "kill_midway",
+      "observed": {
+        "exitCode": null,
+        "promptResult": {
+          "id": "req-2",
+          "type": "response",
+          "command": "prompt",
+          "success": true,
+          "_rttMs": 126.52549999999974
+        }
+      },
+      "note": "SIGKILL 后 pending request 应失败；exitCode 非 0 或 null→killed"
+    }
+  ],
+  "omp": [
+    {
+      "case": "half_frame",
+      "observed": {
+        "responsesBeforeSecondWrite": 0,
+        "gotResponseAfterComplete": true
+      },
+      "pass": true,
+      "note": "半包在补齐 \\n 前不应解析；补齐后应正常 response"
+    },
+    {
+      "case": "glued_frames",
+      "observed": {
+        "gotA": true,
+        "gotB": true
+      },
+      "pass": true,
+      "note": "一次 write 两帧应都被处理"
+    },
+    {
+      "case": "overlong_line",
+      "observed": {
+        "bytes": 2000044,
+        "exitedWithin3s": false,
+        "exitCode": null,
+        "response": {
+          "id": "big-1",
+          "type": "response",
+          "command": "prompt",
+          "success": true
+        },
+        "parseErrors": 0,
+        "elapsedMs": 3004.582583000003
+      },
+      "note": "记录 runtime 对 ~2MB JSONL 行的行为（接受/拒绝/崩溃）"
+    },
+    {
+      "case": "invalid_json",
+      "observed": {
+        "processExited": false,
+        "subsequentGetStateWorks": true,
+        "stderrTail": ""
+      },
+      "note": "非法 JSON 行后，合法命令是否仍可用"
+    },
+    {
+      "case": "kill_midway",
+      "observed": {
+        "exitCode": null,
+        "promptResult": {
+          "id": "req-2",
+          "type": "response",
+          "command": "prompt",
+          "success": true,
+          "_rttMs": 29.837083000005805
+        }
+      },
+      "note": "SIGKILL 后 pending request 应失败；exitCode 非 0 或 null→killed"
+    }
+  ]
+}

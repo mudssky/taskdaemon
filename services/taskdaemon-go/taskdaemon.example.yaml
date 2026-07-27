@@ -101,6 +101,65 @@ audio:
     probePath: ""
     transcodeTimeoutSeconds: 120
 
+# T2a / T4: 通知事件总线与出站 sink（默认关闭出站通道）
+notify:
+  bufferSize: 256
+  store:
+    enabled: true
+    maxRecords: 200
+    retainDays: 30
+    minSeverity: ""
+  # T4
+  webhook:
+    enabled: false
+    defaultTimeoutSec: 10
+    defaultMaxRetries: 2
+    defaultBackoffMs: 200
+    # 默认仅 https，并拒绝私网；内网 webhook 需显式 allowPrivateNetworks: true
+    allowedSchemes:
+      - https
+    allowPrivateNetworks: false
+    allowedHosts: []
+    maxRedirects: 3
+    targets: []
+    # targets 示例：
+    # - name: ops
+    #   url: https://hooks.example.com/taskdaemon
+    #   enabled: true
+    #   method: POST
+    #   headers:
+    #     Authorization: Bearer <token>
+    #   signingSecret: <hmac-secret>
+    #   signingHeader: X-Taskdaemon-Signature
+  email:
+    enabled: false
+    minSeverity: error
+    from: ""
+    to: []
+    timeoutSeconds: 15
+    maxRetries: 2
+    backoffMs: 200
+    smtp:
+      host: ""
+      port: 587
+      username: ""
+      # 密码不明文回显；勿写入日志
+      password: ""
+      encryption: starttls
+
+
+# G6: 双引擎桥接（默认关闭；allowedTaskIds 空 = 拒绝一切 agent 触发）
+agentBridge:
+  enabled: false
+  gatewayBaseUrl: http://127.0.0.1:8787
+  gatewaySubject: taskdaemon-service
+  gatewayTenantId: system
+  # inboundTokenHash: <sha256 of machine bearer>
+  inboundTokenHash: ""
+  allowedTaskIds: []
+  maxLoopDepth: 1
+  requestTimeoutSeconds: 120
+
 # 环境变量覆盖示例：
 # TASKDAEMON_SERVER_HOST=127.0.0.1
 # TASKDAEMON_SERVER_PORT=39245

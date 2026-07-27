@@ -5,6 +5,7 @@ package ent
 import (
 	"taskdaemon/internal/data/ent/admin"
 	"taskdaemon/internal/data/ent/audiorecord"
+	"taskdaemon/internal/data/ent/notification"
 	"taskdaemon/internal/data/ent/run"
 	"taskdaemon/internal/data/ent/schema"
 	"taskdaemon/internal/data/ent/session"
@@ -64,18 +65,40 @@ func init() {
 	audiorecord.DefaultUpdatedAt = audiorecordDescUpdatedAt.Default.(func() time.Time)
 	// audiorecord.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
 	audiorecord.UpdateDefaultUpdatedAt = audiorecordDescUpdatedAt.UpdateDefault.(func() time.Time)
+	notificationFields := schema.Notification{}.Fields()
+	_ = notificationFields
+	// notificationDescEventID is the schema descriptor for event_id field.
+	notificationDescEventID := notificationFields[0].Descriptor()
+	// notification.EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
+	notification.EventIDValidator = notificationDescEventID.Validators[0].(func(string) error)
+	// notificationDescName is the schema descriptor for name field.
+	notificationDescName := notificationFields[1].Descriptor()
+	// notification.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	notification.NameValidator = notificationDescName.Validators[0].(func(string) error)
+	// notificationDescTitle is the schema descriptor for title field.
+	notificationDescTitle := notificationFields[5].Descriptor()
+	// notification.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	notification.TitleValidator = notificationDescTitle.Validators[0].(func(string) error)
+	// notificationDescCreatedAt is the schema descriptor for created_at field.
+	notificationDescCreatedAt := notificationFields[10].Descriptor()
+	// notification.DefaultCreatedAt holds the default value on creation for the created_at field.
+	notification.DefaultCreatedAt = notificationDescCreatedAt.Default.(func() time.Time)
 	runFields := schema.Run{}.Fields()
 	_ = runFields
 	// runDescStartedAt is the schema descriptor for started_at field.
 	runDescStartedAt := runFields[3].Descriptor()
 	// run.DefaultStartedAt holds the default value on creation for the started_at field.
 	run.DefaultStartedAt = runDescStartedAt.Default.(func() time.Time)
+	// runDescLogWriteFailed is the schema descriptor for log_write_failed field.
+	runDescLogWriteFailed := runFields[11].Descriptor()
+	// run.DefaultLogWriteFailed holds the default value on creation for the log_write_failed field.
+	run.DefaultLogWriteFailed = runDescLogWriteFailed.Default.(bool)
 	// runDescCreatedAt is the schema descriptor for created_at field.
-	runDescCreatedAt := runFields[9].Descriptor()
+	runDescCreatedAt := runFields[12].Descriptor()
 	// run.DefaultCreatedAt holds the default value on creation for the created_at field.
 	run.DefaultCreatedAt = runDescCreatedAt.Default.(func() time.Time)
 	// runDescUpdatedAt is the schema descriptor for updated_at field.
-	runDescUpdatedAt := runFields[10].Descriptor()
+	runDescUpdatedAt := runFields[13].Descriptor()
 	// run.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	run.DefaultUpdatedAt = runDescUpdatedAt.Default.(func() time.Time)
 	// run.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.

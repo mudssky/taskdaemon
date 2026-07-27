@@ -205,6 +205,61 @@ func (_u *RunUpdate) ClearStderr() *RunUpdate {
 	return _u
 }
 
+// SetLogArchiveStatus sets the "log_archive_status" field.
+func (_u *RunUpdate) SetLogArchiveStatus(v run.LogArchiveStatus) *RunUpdate {
+	_u.mutation.SetLogArchiveStatus(v)
+	return _u
+}
+
+// SetNillableLogArchiveStatus sets the "log_archive_status" field if the given value is not nil.
+func (_u *RunUpdate) SetNillableLogArchiveStatus(v *run.LogArchiveStatus) *RunUpdate {
+	if v != nil {
+		_u.SetLogArchiveStatus(*v)
+	}
+	return _u
+}
+
+// SetLogSizeBytes sets the "log_size_bytes" field.
+func (_u *RunUpdate) SetLogSizeBytes(v int64) *RunUpdate {
+	_u.mutation.ResetLogSizeBytes()
+	_u.mutation.SetLogSizeBytes(v)
+	return _u
+}
+
+// SetNillableLogSizeBytes sets the "log_size_bytes" field if the given value is not nil.
+func (_u *RunUpdate) SetNillableLogSizeBytes(v *int64) *RunUpdate {
+	if v != nil {
+		_u.SetLogSizeBytes(*v)
+	}
+	return _u
+}
+
+// AddLogSizeBytes adds value to the "log_size_bytes" field.
+func (_u *RunUpdate) AddLogSizeBytes(v int64) *RunUpdate {
+	_u.mutation.AddLogSizeBytes(v)
+	return _u
+}
+
+// ClearLogSizeBytes clears the value of the "log_size_bytes" field.
+func (_u *RunUpdate) ClearLogSizeBytes() *RunUpdate {
+	_u.mutation.ClearLogSizeBytes()
+	return _u
+}
+
+// SetLogWriteFailed sets the "log_write_failed" field.
+func (_u *RunUpdate) SetLogWriteFailed(v bool) *RunUpdate {
+	_u.mutation.SetLogWriteFailed(v)
+	return _u
+}
+
+// SetNillableLogWriteFailed sets the "log_write_failed" field if the given value is not nil.
+func (_u *RunUpdate) SetNillableLogWriteFailed(v *bool) *RunUpdate {
+	if v != nil {
+		_u.SetLogWriteFailed(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *RunUpdate) SetUpdatedAt(v time.Time) *RunUpdate {
 	_u.mutation.SetUpdatedAt(v)
@@ -281,6 +336,11 @@ func (_u *RunUpdate) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Run.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LogArchiveStatus(); ok {
+		if err := run.LogArchiveStatusValidator(v); err != nil {
+			return &ValidationError{Name: "log_archive_status", err: fmt.Errorf(`ent: validator failed for field "Run.log_archive_status": %w`, err)}
+		}
+	}
 	if _u.mutation.TaskCleared() && len(_u.mutation.TaskIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Run.task"`)
 	}
@@ -349,6 +409,21 @@ func (_u *RunUpdate) sqlSave(ctx context.Context) (_node int, err error) {
 	}
 	if _u.mutation.StderrCleared() {
 		_spec.ClearField(run.FieldStderr, field.TypeString)
+	}
+	if value, ok := _u.mutation.LogArchiveStatus(); ok {
+		_spec.SetField(run.FieldLogArchiveStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.LogSizeBytes(); ok {
+		_spec.SetField(run.FieldLogSizeBytes, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedLogSizeBytes(); ok {
+		_spec.AddField(run.FieldLogSizeBytes, field.TypeInt64, value)
+	}
+	if _u.mutation.LogSizeBytesCleared() {
+		_spec.ClearField(run.FieldLogSizeBytes, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.LogWriteFailed(); ok {
+		_spec.SetField(run.FieldLogWriteFailed, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(run.FieldUpdatedAt, field.TypeTime, value)
@@ -578,6 +653,61 @@ func (_u *RunUpdateOne) ClearStderr() *RunUpdateOne {
 	return _u
 }
 
+// SetLogArchiveStatus sets the "log_archive_status" field.
+func (_u *RunUpdateOne) SetLogArchiveStatus(v run.LogArchiveStatus) *RunUpdateOne {
+	_u.mutation.SetLogArchiveStatus(v)
+	return _u
+}
+
+// SetNillableLogArchiveStatus sets the "log_archive_status" field if the given value is not nil.
+func (_u *RunUpdateOne) SetNillableLogArchiveStatus(v *run.LogArchiveStatus) *RunUpdateOne {
+	if v != nil {
+		_u.SetLogArchiveStatus(*v)
+	}
+	return _u
+}
+
+// SetLogSizeBytes sets the "log_size_bytes" field.
+func (_u *RunUpdateOne) SetLogSizeBytes(v int64) *RunUpdateOne {
+	_u.mutation.ResetLogSizeBytes()
+	_u.mutation.SetLogSizeBytes(v)
+	return _u
+}
+
+// SetNillableLogSizeBytes sets the "log_size_bytes" field if the given value is not nil.
+func (_u *RunUpdateOne) SetNillableLogSizeBytes(v *int64) *RunUpdateOne {
+	if v != nil {
+		_u.SetLogSizeBytes(*v)
+	}
+	return _u
+}
+
+// AddLogSizeBytes adds value to the "log_size_bytes" field.
+func (_u *RunUpdateOne) AddLogSizeBytes(v int64) *RunUpdateOne {
+	_u.mutation.AddLogSizeBytes(v)
+	return _u
+}
+
+// ClearLogSizeBytes clears the value of the "log_size_bytes" field.
+func (_u *RunUpdateOne) ClearLogSizeBytes() *RunUpdateOne {
+	_u.mutation.ClearLogSizeBytes()
+	return _u
+}
+
+// SetLogWriteFailed sets the "log_write_failed" field.
+func (_u *RunUpdateOne) SetLogWriteFailed(v bool) *RunUpdateOne {
+	_u.mutation.SetLogWriteFailed(v)
+	return _u
+}
+
+// SetNillableLogWriteFailed sets the "log_write_failed" field if the given value is not nil.
+func (_u *RunUpdateOne) SetNillableLogWriteFailed(v *bool) *RunUpdateOne {
+	if v != nil {
+		_u.SetLogWriteFailed(*v)
+	}
+	return _u
+}
+
 // SetUpdatedAt sets the "updated_at" field.
 func (_u *RunUpdateOne) SetUpdatedAt(v time.Time) *RunUpdateOne {
 	_u.mutation.SetUpdatedAt(v)
@@ -667,6 +797,11 @@ func (_u *RunUpdateOne) check() error {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Run.status": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.LogArchiveStatus(); ok {
+		if err := run.LogArchiveStatusValidator(v); err != nil {
+			return &ValidationError{Name: "log_archive_status", err: fmt.Errorf(`ent: validator failed for field "Run.log_archive_status": %w`, err)}
+		}
+	}
 	if _u.mutation.TaskCleared() && len(_u.mutation.TaskIDs()) > 0 {
 		return errors.New(`ent: clearing a required unique edge "Run.task"`)
 	}
@@ -752,6 +887,21 @@ func (_u *RunUpdateOne) sqlSave(ctx context.Context) (_node *Run, err error) {
 	}
 	if _u.mutation.StderrCleared() {
 		_spec.ClearField(run.FieldStderr, field.TypeString)
+	}
+	if value, ok := _u.mutation.LogArchiveStatus(); ok {
+		_spec.SetField(run.FieldLogArchiveStatus, field.TypeEnum, value)
+	}
+	if value, ok := _u.mutation.LogSizeBytes(); ok {
+		_spec.SetField(run.FieldLogSizeBytes, field.TypeInt64, value)
+	}
+	if value, ok := _u.mutation.AddedLogSizeBytes(); ok {
+		_spec.AddField(run.FieldLogSizeBytes, field.TypeInt64, value)
+	}
+	if _u.mutation.LogSizeBytesCleared() {
+		_spec.ClearField(run.FieldLogSizeBytes, field.TypeInt64)
+	}
+	if value, ok := _u.mutation.LogWriteFailed(); ok {
+		_spec.SetField(run.FieldLogWriteFailed, field.TypeBool, value)
 	}
 	if value, ok := _u.mutation.UpdatedAt(); ok {
 		_spec.SetField(run.FieldUpdatedAt, field.TypeTime, value)

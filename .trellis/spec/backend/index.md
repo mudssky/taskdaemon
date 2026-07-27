@@ -19,10 +19,11 @@
 | [目录结构](./directory-structure.md) | workspace、Go module、入口与包边界 | 当前代码事实 |
 | [Go 文件组织与拆分](./file-organization.md) | 文件体量、职责切分、拆分顺序 | 当前代码事实 |
 | [API 与 DTO 契约](./api-contracts.md) | HTTP handler、DTO、envelope、错误码、前后端联动 | 当前代码事实 |
-| [配置、CLI 与运行时重载](./configuration-runtime-guidelines.md) | 配置加载顺序、env、local 覆盖、runtime reload、CLI daemon API | 当前代码事实 |
+| [配置、CLI 与运行时重载](./configuration-runtime-guidelines.md) | 配置加载顺序、env、local 覆盖、runtime reload、**C-1 写入 API**、CLI daemon API | **C-1 已冻结** |
 | [数据库规范](./database-guidelines.md) | Ent、迁移、查询边界、事务 | 当前代码事实 |
 | [错误处理](./error-handling.md) | sentinel/typed error、API envelope、敏感信息 | 当前代码事实 |
 | [Scheduler 与 Runner 生命周期](./scheduler-runner-guidelines.md) | cron 校验、运行态、执行历史、timeout/cancel、runner JSON | 当前代码事实 |
+| [通知事件总线契约 C-2](./notification-event-contract.md) | 事件名、payload、Sink/Bus、站内已读模型、配置键 | **C-2 已冻结** |
 | [质量规范](./quality-guidelines.md) | 后端测试、行为质量、评审清单 | 当前代码事实 |
 | [日志规范](./logging-guidelines.md) | slog、HTTP 日志、脱敏、运行时重载 | 当前代码事实 |
 

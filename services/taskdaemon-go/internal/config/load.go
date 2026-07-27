@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/knadh/koanf/providers/confmap"
@@ -117,6 +118,74 @@ func Load(opts LoadOptions) (Config, error) {
 				ProbePath:               k.String("audio.ffmpeg.probePath"),
 				TranscodeTimeoutSeconds: k.Int("audio.ffmpeg.transcodeTimeoutSeconds"),
 			},
+		},
+		// T2a
+		Notify: NotifyConfig{
+			BufferSize: k.Int("notify.bufferSize"),
+			Store: NotifyStoreConfig{
+				Enabled:     k.Bool("notify.store.enabled"),
+				MaxRecords:  k.Int("notify.store.maxRecords"),
+				RetainDays:  k.Int("notify.store.retainDays"),
+				MinSeverity: k.String("notify.store.minSeverity"),
+			},
+			// T4
+			Webhook: NotifyWebhookConfig{
+				Enabled:              k.Bool("notify.webhook.enabled"),
+				DefaultTimeoutSec:    k.Int("notify.webhook.defaultTimeoutSec"),
+				DefaultMaxRetries:    k.Int("notify.webhook.defaultMaxRetries"),
+				DefaultBackoffMs:     k.Int("notify.webhook.defaultBackoffMs"),
+				AllowedSchemes:       stringSliceValue(k.Get("notify.webhook.allowedSchemes")),
+				AllowPrivateNetworks: k.Bool("notify.webhook.allowPrivateNetworks"),
+				AllowedHosts:         stringSliceValue(k.Get("notify.webhook.allowedHosts")),
+				MaxRedirects:         k.Int("notify.webhook.maxRedirects"),
+				Targets:              webhookTargetsValue(k.Get("notify.webhook.targets")),
+			},
+			Email: NotifyEmailConfig{
+				Enabled:        k.Bool("notify.email.enabled"),
+				MinSeverity:    k.String("notify.email.minSeverity"),
+				From:           k.String("notify.email.from"),
+				To:             stringSliceValue(k.Get("notify.email.to")),
+				TimeoutSeconds: k.Int("notify.email.timeoutSeconds"),
+				MaxRetries:     k.Int("notify.email.maxRetries"),
+				BackoffMs:      k.Int("notify.email.backoffMs"),
+				SMTP: NotifySMTPConfig{
+					Host:       k.String("notify.email.smtp.host"),
+					Port:       k.Int("notify.email.smtp.port"),
+					Username:   k.String("notify.email.smtp.username"),
+					Password:   k.String("notify.email.smtp.password"),
+					Encryption: k.String("notify.email.smtp.encryption"),
+				},
+			},
+			// D2 / T3
+			Desktop: NotifyDesktopConfig{
+				Enabled:     k.Bool("notify.desktop.enabled"),
+				MinSeverity: k.String("notify.desktop.minSeverity"),
+			},
+		},
+		// T6
+		RunLog: RunLogConfig{
+			Enabled:       k.Bool("runlog.enabled"),
+			RetainDays:    k.Int("runlog.retainDays"),
+			MaxTotalBytes: int64Value(k.Get("runlog.maxTotalBytes")),
+		},
+		// G6
+		AgentBridge: AgentBridgeConfig{
+			Enabled:               k.Bool("agentBridge.enabled"),
+			GatewayBaseURL:        k.String("agentBridge.gatewayBaseUrl"),
+			GatewaySubject:        k.String("agentBridge.gatewaySubject"),
+			GatewayTenantID:       k.String("agentBridge.gatewayTenantId"),
+			InboundTokenHash:      k.String("agentBridge.inboundTokenHash"),
+			AllowedTaskIDs:        intSliceValue(k.Get("agentBridge.allowedTaskIds")),
+			MaxLoopDepth:          k.Int("agentBridge.maxLoopDepth"),
+			RequestTimeoutSeconds: k.Int("agentBridge.requestTimeoutSeconds"),
+		},
+		// TD2/D3
+		Desktop: DesktopConfig{
+			TrayEnabled:        k.Bool("desktop.trayEnabled"),
+			MinimizeToTray:     k.Bool("desktop.minimizeToTray"),
+			AutostartEnabled:   k.Bool("desktop.autostartEnabled"),
+			SingleInstance:     k.Bool("desktop.singleInstance"),
+			WindowStateEnabled: k.Bool("desktop.windowStateEnabled"),
 		},
 	}, nil
 }
@@ -245,4 +314,167 @@ func int64Value(value any) int64 {
 	default:
 		return 0
 	}
+}
+
+// intSliceValue 将任意配置值转为 int 切片。
+//
+// 参数:
+//   - value: koanf 读取到的值。
+//
+// 返回值:
+//   - []int: 整数切片；无法解析时返回空切片。
+func intSliceValue(value any) []int {
+	switch typed := value.(type) {
+	case []int:
+		return append([]int(nil), typed...)
+	case []any:
+		out := make([]int, 0, len(typed))
+		for _, item := range typed {
+			out = append(out, int(int64Value(item)))
+		}
+		return out
+	case []string:
+		out := make([]int, 0, len(typed))
+		for _, item := range typed {
+			if n, err := strconv.Atoi(strings.TrimSpace(item)); err == nil {
+				out = append(out, n)
+			}
+		}
+		return out
+	case string:
+		parts := strings.Split(typed, ",")
+		out := make([]int, 0, len(parts))
+		for _, part := range parts {
+			if n, err := strconv.Atoi(strings.TrimSpace(part)); err == nil {
+				out = append(out, n)
+			}
+		}
+		return out
+	default:
+		return []int{}
+	}
+}
+
+// webhookTargetsValue 解析 Webhook 目标列表配置。
+//
+// 参数:
+//   - value: koanf 读取到的 notify.webhook.targets 值。
+//
+// 返回值:
+//   - []NotifyWebhookTargetConfig: 目标列表；无法解析时返回空切片。
+func webhookTargetsValue(value any) []NotifyWebhookTargetConfig {
+	items, ok := value.([]any)
+	if !ok {
+		if typed, ok := value.([]NotifyWebhookTargetConfig); ok {
+			return typed
+		}
+		return []NotifyWebhookTargetConfig{}
+	}
+	targets := make([]NotifyWebhookTargetConfig, 0, len(items))
+	for _, item := range items {
+		raw, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		target := NotifyWebhookTargetConfig{
+			Name:           stringValue(raw["name"]),
+			URL:            stringValue(raw["url"]),
+			Enabled:        boolValue(raw["enabled"]),
+			Method:         stringValue(raw["method"]),
+			Headers:        stringMapValue(raw["headers"]),
+			SigningSecret:  stringValue(raw["signingSecret"]),
+			SigningHeader:  stringValue(raw["signingHeader"]),
+			TimeoutSeconds: intValue(raw["timeoutSeconds"]),
+			MaxRetries:     intValue(raw["maxRetries"]),
+			BackoffMs:      intValue(raw["backoffMs"]),
+		}
+		targets = append(targets, target)
+	}
+	return targets
+}
+
+// stringValue 将任意配置值转为字符串。
+//
+// 参数:
+//   - value: 原始值。
+//
+// 返回值:
+//   - string: 字符串；不支持类型返回空串。
+func stringValue(value any) string {
+	if value == nil {
+		return ""
+	}
+	if text, ok := value.(string); ok {
+		return text
+	}
+	return fmt.Sprint(value)
+}
+
+// boolValue 将任意配置值转为 bool。
+//
+// 参数:
+//   - value: 原始值。
+//
+// 返回值:
+//   - bool: 布尔值；不支持类型返回 false。
+func boolValue(value any) bool {
+	switch typed := value.(type) {
+	case bool:
+		return typed
+	case string:
+		parsed, err := strconv.ParseBool(typed)
+		return err == nil && parsed
+	default:
+		return false
+	}
+}
+
+// intValue 将任意配置值转为 int。
+//
+// 参数:
+//   - value: 原始值。
+//
+// 返回值:
+//   - int: 整数值；不支持类型返回 0。
+func intValue(value any) int {
+	switch typed := value.(type) {
+	case int:
+		return typed
+	case int64:
+		return int(typed)
+	case int32:
+		return int(typed)
+	case float64:
+		return int(typed)
+	case string:
+		parsed, err := strconv.Atoi(strings.TrimSpace(typed))
+		if err != nil {
+			return 0
+		}
+		return parsed
+	default:
+		return 0
+	}
+}
+
+// stringMapValue 将配置值转为 map[string]string。
+//
+// 参数:
+//   - value: 原始 map 值。
+//
+// 返回值:
+//   - map[string]string: 字符串 map；空或非法时返回 nil。
+func stringMapValue(value any) map[string]string {
+	raw, ok := value.(map[string]any)
+	if !ok {
+		if typed, ok := value.(map[string]string); ok {
+			return typed
+		}
+		return nil
+	}
+	out := make(map[string]string, len(raw))
+	for key, nested := range raw {
+		out[key] = stringValue(nested)
+	}
+	return out
 }

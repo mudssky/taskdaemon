@@ -416,6 +416,12 @@ func TestProjectPathFindsFirstProjectConfig(t *testing.T) {
 		}
 	})
 
+	// macOS 上 t.TempDir 可能是 /var/...，Getwd 解析为 /private/var/...
+	wantDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd after chdir: %v", err)
+	}
+
 	path, found, err := ProjectPath()
 	if err != nil {
 		t.Fatalf("project path: %v", err)
@@ -423,8 +429,8 @@ func TestProjectPathFindsFirstProjectConfig(t *testing.T) {
 	if !found {
 		t.Fatal("project config should be found")
 	}
-	if path != filepath.Join(projectDir, "config.yml") {
-		t.Fatalf("project path = %s, want config.yml", path)
+	if path != filepath.Join(wantDir, "config.yml") {
+		t.Fatalf("project path = %s, want %s", path, filepath.Join(wantDir, "config.yml"))
 	}
 }
 
@@ -457,6 +463,12 @@ func TestProjectLocalPathFindsFirstLocalConfig(t *testing.T) {
 		}
 	})
 
+	// macOS 上 t.TempDir 可能是 /var/...，Getwd 解析为 /private/var/...
+	wantDir, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("getwd after chdir: %v", err)
+	}
+
 	path, found, err := ProjectLocalPath()
 	if err != nil {
 		t.Fatalf("project local path: %v", err)
@@ -464,8 +476,8 @@ func TestProjectLocalPathFindsFirstLocalConfig(t *testing.T) {
 	if !found {
 		t.Fatal("project local config should be found")
 	}
-	if path != filepath.Join(projectDir, "config.local.yml") {
-		t.Fatalf("project local path = %s, want config.local.yml", path)
+	if path != filepath.Join(wantDir, "config.local.yml") {
+		t.Fatalf("project local path = %s, want %s", path, filepath.Join(wantDir, "config.local.yml"))
 	}
 }
 

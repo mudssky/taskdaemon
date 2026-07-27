@@ -2,13 +2,24 @@ import type {
   ApiEnvelope,
   ApiErrorBody,
   AudioConfig,
+  AudioConfigWriteRequest,
   AudioRecord,
   AuthLoginResponse,
   AuthPrincipal,
   AuthStatus,
+  ConfigSectionWriteResponse,
+  Notification,
+  NotificationAffectedCount,
+  NotificationListParams,
+  NotificationListResponse,
+  NotificationUnreadCount,
   Task,
   TaskPayload,
   TaskRun,
+  TemplateDefinition,
+  TemplateListResponse,
+  TemplateRenderRequest,
+  TemplateTaskDraft,
 } from "./types";
 
 export class ApiClientError extends Error {
@@ -139,6 +150,27 @@ export const apiClient = {
     return requestJSON<{ runs: TaskRun[] }>(`/api/tasks/${taskId}/runs`);
   },
 
+  /** T6: 下载完整 run 日志（流式 blob） */
+  async downloadRunLog(runId: number): Promise<Blob> {
+    const response = await fetch(`/api/runs/${runId}/log`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      let code = "RUNLOG_READ_FAILED";
+      let message = "下载完整日志失败";
+      try {
+        const body = (await response.json()) as ApiEnvelope<unknown>;
+        code = body.error?.code ?? code;
+        message = body.error?.message ?? message;
+      } catch {
+        // 非 JSON 错误体时保留默认文案
+      }
+      throw new ApiClientError(response.status, code, message, null, null);
+    }
+    return response.blob();
+  },
+
   async listAudioHistory(limit?: number) {
     const query =
       limit === undefined ? "" : `?limit=${encodeURIComponent(limit)}`;
@@ -155,5 +187,115 @@ export const apiClient = {
 
   async audioConfig() {
     return requestJSON<AudioConfig>("/api/config/audio");
+  },
+
+  /**
+   * 按 section 部分更新配置（C-1）。
+   *
+   * 参数:
+   *   - section: section 名，首版仅 audio
+   *   - body: 部分更新请求体
+   *
+   * 返回值:
+   *   - ConfigSectionWriteResponse: 安全 config + applied/restart/reload
+   */
+  async putConfigSection(
+    section: string,
+    body: AudioConfigWriteRequest,
+  ): Promise<ConfigSectionWriteResponse> {
+    return requestJSON<ConfigSectionWriteResponse>(
+      `/api/config/${encodeURIComponent(section)}`,
+      {
+        method: "PUT",
+        body,
+      },
+    );
+  },
+
+  async listNotifications(params: NotificationListParams = {}) {
+    const search = new URLSearchParams();
+    if (params.page !== undefined) {
+      search.set("page", String(params.page));
+    }
+    if (params.pageSize !== undefined) {
+      search.set("pageSize", String(params.pageSize));
+    }
+    if (params.read !== undefined) {
+      search.set("read", String(params.read));
+    }
+    if (params.severity !== undefined) {
+      search.set("severity", params.severity);
+    }
+    const query = search.toString();
+    return requestJSON<NotificationListResponse>(
+      `/api/notifications${query ? `?${query}` : ""}`,
+    );
+  },
+
+  async notificationUnreadCount() {
+    return requestJSON<NotificationUnreadCount>(
+      "/api/notifications/unread-count",
+    );
+  },
+
+  async markNotificationRead(id: number) {
+    return requestJSON<Notification>(`/api/notifications/${id}/read`, {
+      method: "POST",
+    });
+  },
+
+  async markNotificationsRead(ids: number[]) {
+    return requestJSON<NotificationAffectedCount>("/api/notifications/read", {
+      method: "POST",
+      body: { ids },
+    });
+  },
+
+  async markAllNotificationsRead() {
+    return requestJSON<NotificationAffectedCount>(
+      "/api/notifications/read-all",
+      { method: "POST" },
+    );
+  },
+
+  async deleteNotification(id: number) {
+    await requestJSON<void>(`/api/notifications/${id}`, { method: "DELETE" });
+  },
+
+  async clearReadNotifications() {
+    return requestJSON<NotificationAffectedCount>("/api/notifications/read", {
+      method: "DELETE",
+    });
+  },
+
+  /** T7a: 列出全部备份模板（含参数定义）。 */
+  async listTemplates() {
+    return requestJSON<TemplateListResponse>("/api/templates");
+  },
+
+  /**
+   * T7a: 查询单个模板详情。
+   *
+   * @param id - 模板稳定标识。
+   * @returns 模板定义。
+   */
+  async getTemplate(id: string) {
+    return requestJSON<TemplateDefinition>(
+      `/api/templates/${encodeURIComponent(id)}`,
+    );
+  },
+
+  /**
+   * T7a: 渲染任务草稿（不落库）。
+   *
+   * @param id - 模板标识。
+   * @param body - 用户参数。
+   * @returns 与 createTask 兼容的草稿 + commandPreview。
+   */
+  async renderTemplate(id: string, body: TemplateRenderRequest) {
+    return requestJSON<TemplateTaskDraft>(
+      `/api/templates/${encodeURIComponent(id)}/render`,
+      { method: "POST", body },
+    );
   },
 };

@@ -180,6 +180,74 @@ ctx.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 writeAPIError(ctx, http.StatusBadRequest, "task_invalid", "Task definition is invalid", gin.H{"field": "cronExpression"})
 ```
 
+
+---
+
+## 通知 API（C-2 / T2a）
+
+全部端点走管理员 session 认证。实现：`notification_routes.go` + `notification_dto.go`。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/notifications` | 分页列表；query: `page`/`pageSize`/`read`/`severity` |
+| GET | `/api/notifications/unread-count` | 未读计数 `{ count }` |
+| POST | `/api/notifications/{id}/read` | 单条已读 |
+| POST | `/api/notifications/read` | 批量已读；body `{ ids: number[] }` |
+| POST | `/api/notifications/read-all` | 全部已读 |
+| DELETE | `/api/notifications/{id}` | 删除单条 |
+| DELETE | `/api/notifications/read` | 清空已读 |
+| GET | `/api/notifications/sinks` | sink 状态列表 |
+
+列表响应：
+
+```json
+{
+  "notifications": [/* notificationResponse */],
+  "total": 0,
+  "page": 1,
+  "pageSize": 20
+}
+```
+
+`notificationResponse` 字段：`id`、`eventId`、`name`、`severity`、`subjectKind`、`subjectId`、`title`、`body`、`detail`、`readAt`、`occurredAt`、`createdAt`。
+
+错误码见 [错误处理](./error-handling.md) 中 `NOTIFY_*` 表。事件模型与 Sink 契约见 [通知事件总线契约 C-2](./notification-event-contract.md)。
+
+## 配置写入 API（C-1 / T1a）
+
+全部端点走管理员 session 认证（`requireSession`）。实现：`config_routes.go` + `config_dto.go` + `app/config_write.go`。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/config/audio` | 安全只读；敏感字段仅 `*Configured` |
+| PUT | `/api/config/:section` | 部分更新；首版 section=`audio` |
+| POST | `/api/config/reload` | 从文件重载热配置（既有） |
+
+`PUT` 成功 `data`：`config` + `applied` + `restartRequired` + `reload.subsystems[]`。
+
+字段级错误 `error.details.fields[]`：`{ path, reason, code }`。
+
+错误码见 [错误处理](./error-handling.md) 中 `CONFIG_*` 表。分级与落盘规则见 [配置运行时规范](./configuration-runtime-guidelines.md) C-1 节。
+
+## 备份模板 API（T7a）
+
+全部端点走管理员 session 认证（`requireSession`）。实现：`template_routes.go` + `template_dto.go` + `internal/template`。
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/templates` | 列表（含完整参数定义）`{ "templates": [...] }` |
+| GET | `/api/templates/:id` | 模板详情 |
+| POST | `/api/templates/:id/render` | body `{ "params": { ... } }` → 任务草稿（不落库） |
+
+渲染成功 `data` 与 `createTaskRequest` 字段兼容，并额外包含：
+
+* `commandPreview`：可读命令预览（敏感值掩码）
+* `templateId`：来源模板
+
+字段级错误 `error.details.fields[]`：`{ path, reason, code }`（与 C-1 同形）。
+
+错误码见 [错误处理](./error-handling.md) 中 `TEMPLATE_*` 表。领域实现见 `internal/template`。
+
 ---
 
 ## 前后端联动清单

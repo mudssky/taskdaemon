@@ -16,7 +16,9 @@ import (
 	"taskdaemon/internal/auth"
 	"taskdaemon/internal/config"
 	"taskdaemon/internal/data/ent"
+	"taskdaemon/internal/notify"
 	"taskdaemon/internal/scheduler"
+	"taskdaemon/internal/template"
 )
 
 var errPanicRecovered = errors.New("panic recovered")
@@ -28,16 +30,27 @@ const (
 
 // Options 控制 HTTP router 的可选路由。
 type Options struct {
-	EnableSwagger          bool
-	Auth                   AuthService
-	Tasks                  TaskService
-	Audio                  AudioService
+	EnableSwagger bool
+	Auth          AuthService
+	Tasks         TaskService
+	Audio         AudioService
+	// T2a
+	Notifications          NotificationService
+	NotifyBus              *notify.Bus
 	Logger                 *slog.Logger
 	IncludeTraceInResponse *bool
 	HTTPLog                config.LoggingHTTPConfig
 	RuntimeConfig          *RuntimeConfig
 	ReloadConfig           func(context.Context) (config.ReloadResult, error)
-	FrontendFS             fs.FS
+	// T1a: 配置 section 写入（管理员 session）
+	WriteConfig ConfigSectionWriteFunc
+	FrontendFS  fs.FS
+	// T6
+	RunLog RunLogService
+	// T7a
+	Templates *template.Service
+	// G6
+	AgentBridgeConfig func() config.AgentBridgeConfig
 }
 
 // AuthService 定义 HTTP handler 依赖的认证服务能力。
@@ -89,9 +102,20 @@ func NewRouter(opts Options) http.Handler {
 
 	registerAuthRoutes(router, opts.Auth)
 	registerTaskRoutes(router, opts.Auth, opts.Tasks)
-	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig, runtimeConfigOption(opts))
+	registerConfigRoutes(router, opts.Auth, opts.ReloadConfig, runtimeConfigOption(opts), opts.WriteConfig)
 	registerAudioRoutes(router, opts.Auth, opts.Audio)
-
+	// T2a
+	registerNotificationRoutes(router, opts.Auth, opts.Notifications, opts.NotifyBus)
+	// T6
+	registerRunLogRoutes(router, opts.Auth, opts.RunLog)
+	// T7a
+	registerTemplateRoutes(router, opts.Auth, opts.Templates)
+	// G6
+	registerAgentBridgeRoutes(router, AgentBridgeOptions{
+		Config: opts.AgentBridgeConfig,
+		Tasks:  opts.Tasks,
+		Audio:  opts.Audio,
+	})
 	if opts.EnableSwagger {
 		router.GET("/swagger/index.html", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Swagger UI is enabled. Generated docs will be mounted here.")

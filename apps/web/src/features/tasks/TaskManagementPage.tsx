@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Plus, RefreshCw } from "lucide-react";
+import { LayoutTemplate, Plus, RefreshCw } from "lucide-react";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -73,6 +73,12 @@ export function TaskManagementPage() {
             >
               <RefreshCw aria-hidden="true" data-icon="inline-start" />
               刷新
+            </Button>
+            <Button asChild variant="subtle">
+              <Link to="/tasks/from-template">
+                <LayoutTemplate aria-hidden="true" data-icon="inline-start" />
+                从模板创建
+              </Link>
             </Button>
             <Button asChild variant="primary">
               <Link to="/tasks/new">

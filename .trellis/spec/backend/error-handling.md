@@ -87,6 +87,99 @@ HTTP API 使用统一 envelope。HTTP 状态码表达真实 2xx/4xx/5xx；顶层
 * 依赖服务未注入或不可用 -> HTTP 503，`*_unavailable`。
 * 未分类系统故障 -> HTTP 500，`internal_error` 或更具体的稳定错误码。
 
+### 通知错误码（`NOTIFY_*`，C-2 / T2a / T4）
+
+| 码 | HTTP | 场景 |
+|---|---:|---|
+| `NOTIFY_NOT_FOUND` | 404 | 通知不存在 |
+| `NOTIFY_INVALID_SEVERITY` | 400 | 筛选 severity 非法 |
+| `NOTIFY_INVALID_PAGE` | 400 | 分页参数非法 |
+| `NOTIFY_SINK_UNAVAILABLE` | 503 | 通知服务/总线未装配 |
+| `NOTIFY_LIST_FAILED` | 500 | 列表查询失败 |
+| `NOTIFY_UNREAD_COUNT_FAILED` | 500 | 未读计数失败 |
+| `NOTIFY_MARK_READ_FAILED` | 500 | 标记已读失败 |
+| `NOTIFY_CLEAR_READ_FAILED` | 500 | 清空已读失败 |
+| `NOTIFY_OPERATION_FAILED` | 500 | 其他通知操作失败 |
+| `NOTIFY_WEBHOOK_URL_REJECTED` | — | Webhook URL 协议/私网/Host 策略拒绝（sink 层） |
+| `NOTIFY_WEBHOOK_DELIVER_FAILED` | — | Webhook 投递失败（含重试耗尽） |
+| `NOTIFY_EMAIL_DELIVER_FAILED` | — | 邮件 SMTP 投递失败（含重试耗尽） |
+
+### 配置写入错误码（`CONFIG_*`，C-1 / T1a）
+
+| 码 | HTTP | 场景 |
+|---|---:|---|
+| `CONFIG_SECTION_UNKNOWN` | 404 | 未知或未开放写入的 section |
+| `CONFIG_INVALID_JSON` | 400 | body 非法或缺失 |
+| `CONFIG_FIELD_INVALID` | 400 | 字段格式/类型非法 |
+| `CONFIG_FIELD_OUT_OF_RANGE` | 400 | 取值越界 |
+| `CONFIG_FIELD_CONFLICT` | 400 | 字段与其他配置冲突 |
+| `CONFIG_FIELD_NOT_WRITABLE` | 400 | file_only 或未知字段 |
+| `CONFIG_VALIDATION_FAILED` | 400 | 多类字段错误聚合 |
+| `CONFIG_PATH_UNAVAILABLE` | 503 | 无法解析可写路径或 writer 未装配 |
+| `CONFIG_WRITE_FAILED` | 500 | 落盘失败 |
+| `CONFIG_RELOAD_FAILED` | 500 | 写入后重载/Apply 失败（已回滚） |
+
+约束：
+
+* 校验失败**零写入**；`details.fields` 指明路径与原因。
+* 敏感值永不进入响应、错误 details 或写入日志原文。
+* 既有 `config_reload_failed` / `config_reload_unavailable` 保留兼容 `POST /reload`。
+
+### 备份模板错误码（`TEMPLATE_*`，T7a）
+
+| 码 | HTTP | 场景 |
+|---|---:|---|
+| `TEMPLATE_NOT_FOUND` | 404 | 未知模板 id |
+| `TEMPLATE_INVALID_JSON` | 400 | body 非法 |
+| `TEMPLATE_FIELD_INVALID` | 400 | 参数类型/格式/路径非法 |
+| `TEMPLATE_FIELD_REQUIRED` | 400 | 缺必填参数 |
+| `TEMPLATE_FIELD_OUT_OF_RANGE` | 400 | 数值越界 |
+| `TEMPLATE_VALIDATION_FAILED` | 400 | 多类字段错误聚合 |
+| `TEMPLATE_RUNNER_UNSUPPORTED` | 400 | runner 越界白名单（注册或渲染后） |
+| `TEMPLATE_RENDER_FAILED` | 500 | 未预期渲染失败 |
+| `TEMPLATE_UNAVAILABLE` | 503 | 模板服务未装配 |
+| `TEMPLATE_REGISTER_REJECTED` | — | 注册期定义非法（进程内/测试） |
+
+约束：
+
+* 字段级错误 `error.details.fields[]` 形状与 C-1 一致：`{ path, reason, code }`，`path` 使用 `params.<name>`。
+* 渲染**不落库**；敏感参数（`secret_ref`）不明文进入任务草稿或日志。
+* 用户参数进入 shell 时必须经单引号字面量转义；注入载荷不得构造额外命令。
+### 数据迁移错误码（`DBXFER_*`，T8）
+
+| 码 | 场景 |
+|---|---|
+| `DBXFER_SCHEMA_MISMATCH` | 源/目标/导出文件 schema fingerprint 不一致 |
+| `DBXFER_TARGET_NOT_EMPTY` | 目标业务表非空且未 `--force` |
+| `DBXFER_CONNECT_FAILED` | 打开或 ping 数据库失败 |
+| `DBXFER_PERMISSION` | 缺 migrate/insert/setval 等权限 |
+| `DBXFER_INVALID_INPUT` | flag、文件格式或 format version 非法 |
+| `DBXFER_IMPORT_FAILED` | 导入事务/插入失败 |
+| `DBXFER_VERIFY_FAILED` | 迁移后计数或抽样校验失败 |
+| `DBXFER_CHECKPOINT_INVALID` | 断点文件损坏或状态不可续 |
+
+约束：
+
+* CLI 错误信息带稳定 code 前缀；**不得**把数据库密码/完整 DSN 写入错误或进度日志。
+* 操作步骤与类型映射见 `docs/db-migration.md`。
+
+
+### Desktop capability 错误码（`DESKTOP_*`，D1/C-5）
+
+Desktop Wails binding / capability 调用使用以下稳定码（非 HTTP envelope 的 `error.code` 同名字段，也可出现在 bridge `InvokeResult.code`）：
+
+| 码 | 场景 |
+|---|---|
+| `DESKTOP_CAPABILITY_UNAVAILABLE` | 能力在当前平台不可用（`Available() == false` 且非权限） |
+| `DESKTOP_CAPABILITY_NOT_FOUND` | 请求了未注册的 capability 名 |
+| `DESKTOP_PERMISSION_DENIED` | 能力存在但权限未授予 |
+| `DESKTOP_INVOKE_FAILED` | 调用本体失败，或 capability panic 被 Registry recover |
+
+约束：
+
+* Wails binding 路径**不得 panic**；`Registry.Invoke` 外层统一 `recover` 并映射为 `DESKTOP_INVOKE_FAILED`。
+* 前端 `useDesktopCapability` 的 `invoke` 将上述码放入结构化结果，不抛异常。
+
 ---
 
 ## CLI 错误
