@@ -30,6 +30,7 @@ require (
 	atomicgo.dev/keyboard v0.2.9 // indirect
 	atomicgo.dev/schedule v0.1.0 // indirect
 	dario.cat/mergo v1.0.2 // indirect
+	git.sr.ht/~jackmordaunt/go-toast/v2 v2.0.3 // indirect
 	github.com/AlekSi/pointer v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
