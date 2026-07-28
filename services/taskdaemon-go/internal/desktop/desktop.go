@@ -20,6 +20,7 @@ import (
 
 	"taskdaemon/internal/app"
 	"taskdaemon/internal/config"
+	"taskdaemon/internal/httpapi"
 	"taskdaemon/internal/notify"
 	"taskdaemon/web/embedded"
 )
@@ -91,6 +92,13 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 	}
 	runCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
+
+	// 先装配 registry，注入 HTTP 桥，再启动 API——前端经 Vite/API 同域访问 /api/desktop/*。
+	// 禁止把业务 API POST 走 wails.localhost AssetServer（WebView2 会丢 body → 登录 400）。
+	bindings := newApp(cfg)
+	httpapi.SetDesktopBridge(httpBridge{app: bindings})
+	defer httpapi.SetDesktopBridge(nil)
+
 	apiErrCh := make(chan error, 1)
 	go func() {
 		err := app.New(cfg, logger).Serve(runCtx)
@@ -111,7 +119,6 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 			activateMainWindow(desktopApp)
 		},
 	})
-	bindings := newApp(cfg)
 	bindings.registry.Register(notifCap)
 
 	opts := application.Options{
@@ -211,16 +218,74 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger) error {
 
 // desktopStartURL 返回桌面窗口入口 URL。
 //
+// 开发期直连 Vite（FRONTEND_DEVSERVER_URL），发布期直连本机 HTTP API。
+// 业务 /api 必须同域，避免经 wails.localhost AssetServer 转发时 WebView2 丢失 POST body。
+// Desktop 能力走 /api/desktop/* HTTP 桥，不再依赖 window.wails.Call.ByName。
+//
 // 参数:
 //   - cfg: 已加载的应用配置。
 //
 // 返回值:
-//   - string: 开发期使用 Vite dev server，发布期使用本机 HTTP API server。
+//   - string: 窗口加载 URL。
 func desktopStartURL(cfg config.Config) string {
 	if devServerURL := os.Getenv("FRONTEND_DEVSERVER_URL"); devServerURL != "" {
 		return devServerURL
 	}
 	return "http://" + desktopClientAddress(cfg.Server)
+}
+
+// httpBridge 将 desktop.App 适配为 httpapi.DesktopBridge。
+type httpBridge struct {
+	app *App
+}
+
+// ListDesktopCapabilities 实现 httpapi.DesktopBridge。
+//
+// 参数:
+//   - 无。
+//
+// 返回值:
+//   - []httpapi.DesktopCapabilityDTO: 能力清单。
+func (b httpBridge) ListDesktopCapabilities() []httpapi.DesktopCapabilityDTO {
+	if b.app == nil {
+		return nil
+	}
+	raw := b.app.ListCapabilities()
+	out := make([]httpapi.DesktopCapabilityDTO, 0, len(raw))
+	for _, item := range raw {
+		out = append(out, httpapi.DesktopCapabilityDTO{
+			Name:      item.Name,
+			Available: item.Available,
+			Reason:    string(item.Reason),
+			Message:   item.Message,
+		})
+	}
+	return out
+}
+
+// InvokeDesktopCapability 实现 httpapi.DesktopBridge。
+//
+// 参数:
+//   - name: capability 名。
+//   - payloadJSON: JSON 字符串负载。
+//
+// 返回值:
+//   - httpapi.DesktopInvokeResultDTO: 结构化调用结果。
+func (b httpBridge) InvokeDesktopCapability(name string, payloadJSON string) httpapi.DesktopInvokeResultDTO {
+	if b.app == nil {
+		return httpapi.DesktopInvokeResultDTO{
+			OK:      false,
+			Code:    ErrCodeCapabilityNotFound,
+			Message: "desktop app is not initialized",
+		}
+	}
+	result := b.app.InvokeCapability(name, payloadJSON)
+	return httpapi.DesktopInvokeResultDTO{
+		OK:      result.OK,
+		Data:    result.Data,
+		Code:    result.Code,
+		Message: result.Message,
+	}
 }
 
 // waitForAPIReady 等待桌面内置 HTTP API 可响应。

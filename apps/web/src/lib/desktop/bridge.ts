@@ -1,12 +1,24 @@
 /**
- * Wails 调用封装 —— 全仓库唯一允许读取 Wails 全局对象的文件。
+ * Wails / Desktop 调用封装 —— 全仓库唯一允许读取原生全局对象的文件。
+ *
+ * 业务 API（含登录）必须走同域 /api，禁止经 wails.localhost AssetServer 转发 POST
+ * （WebView2 会丢 body，表现为登录 400 / 0ms）。
+ *
+ * Desktop 能力优先 Wails Call.ByName；不可用时回退同进程 HTTP：
+ *   GET  /api/desktop/capabilities
+ *   POST /api/desktop/invoke
  */
 
-/** Wails v3 Call.ByName 使用的完全限定方法名。 */
+/** Wails v3 Call.ByName 使用的完全限定方法名（保留兼容）。 */
 export const WAILS_LIST_CAPABILITIES =
   "taskdaemon/internal/desktop.App.ListCapabilities";
 export const WAILS_INVOKE_CAPABILITY =
   "taskdaemon/internal/desktop.App.InvokeCapability";
+
+/** HTTP 能力清单路径。 */
+export const DESKTOP_HTTP_CAPABILITIES = "/api/desktop/capabilities";
+/** HTTP 能力调用路径。 */
+export const DESKTOP_HTTP_INVOKE = "/api/desktop/invoke";
 
 type WailsCall = {
   ByName?: (name: string, ...args: unknown[]) => Promise<unknown>;
@@ -64,15 +76,15 @@ export function detectWailsRuntime(): boolean {
 }
 
 /**
- * 解析 Wails Call.ByName 入口。
+ * 解析已注入的 window.wails.Call。
  *
  * 参数:
  *   - 无。
  *
  * 返回值:
- *   - WailsCall | null: 可用时返回 Call 对象。
+ *   - WailsCall | null。
  */
-function getWailsCall(): WailsCall | null {
+function getInjectedWailsCall(): WailsCall | null {
   if (typeof window === "undefined") {
     return null;
   }
@@ -83,16 +95,89 @@ function getWailsCall(): WailsCall | null {
   return call;
 }
 
+type ApiEnvelope<T> = {
+  data?: T;
+};
+
 /**
- * 通过 Wails Call.ByName 调用 Go binding。
+ * 解析标准 API 成功信封。
  *
  * 参数:
- *   - methodName: 完全限定方法名。
+ *   - response: fetch Response。
+ *
+ * 返回值:
+ *   - Promise<T>: data 字段。
+ */
+async function readAPIData<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    let message = response.statusText;
+    try {
+      const body = (await response.json()) as {
+        error?: { message?: string };
+        message?: string;
+      };
+      message = body.error?.message ?? body.message ?? message;
+    } catch {
+      // ignore
+    }
+    throw new Error(message || `desktop http failed (${response.status})`);
+  }
+  const body = (await response.json()) as ApiEnvelope<T>;
+  return body.data as T;
+}
+
+/**
+ * 通过同域 HTTP 拉取能力清单。
+ *
+ * 参数:
+ *   - 无。
+ *
+ * 返回值:
+ *   - Promise 能力描述数组。
+ */
+async function listDesktopCapabilitiesHTTP(): Promise<
+  DesktopCapabilityDescriptor[]
+> {
+  const response = await fetch(DESKTOP_HTTP_CAPABILITIES, {
+    method: "GET",
+    credentials: "include",
+  });
+  const raw = await readAPIData<DesktopCapabilityDescriptor[]>(response);
+  return Array.isArray(raw) ? raw : [];
+}
+
+/**
+ * 通过同域 HTTP 调用 capability。
+ *
+ * 参数:
+ *   - name: capability 名。
+ *   - payloadJSON: JSON 字符串负载。
+ *
+ * 返回值:
+ *   - Promise 线格式结果。
+ */
+async function invokeDesktopCapabilityHTTP(
+  name: string,
+  payloadJSON: string,
+): Promise<DesktopInvokeResultWire> {
+  const response = await fetch(DESKTOP_HTTP_INVOKE, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, payloadJSON }),
+  });
+  return readAPIData<DesktopInvokeResultWire>(response);
+}
+
+/**
+ * 通过 Wails Call.ByName 或 HTTP 桥调用 Go binding / capability 入口。
+ *
+ * 参数:
+ *   - methodName: 完全限定方法名（仅 Wails 路径使用）。
  *   - args: 方法参数。
  *
  * 返回值:
- *   - Promise<T>: Go 返回值。
- *   - 拒绝: 非 Desktop、无 Call 入口或调用失败。
+ *   - Promise<T>: 返回值。
  */
 export async function callWailsByName<T>(
   methodName: string,
@@ -101,11 +186,24 @@ export async function callWailsByName<T>(
   if (!detectWailsRuntime()) {
     throw new Error("not running in desktop runtime");
   }
-  const call = getWailsCall();
-  if (call?.ByName == null) {
-    throw new Error("wails Call.ByName is unavailable");
+
+  const injected = getInjectedWailsCall();
+  if (injected?.ByName != null) {
+    return (await injected.ByName(methodName, ...args)) as T;
   }
-  return (await call.ByName(methodName, ...args)) as T;
+
+  if (methodName === WAILS_LIST_CAPABILITIES) {
+    return (await listDesktopCapabilitiesHTTP()) as T;
+  }
+  if (methodName === WAILS_INVOKE_CAPABILITY) {
+    const name = typeof args[0] === "string" ? args[0] : "";
+    const payloadJSON = typeof args[1] === "string" ? args[1] : "";
+    return (await invokeDesktopCapabilityHTTP(name, payloadJSON)) as T;
+  }
+
+  throw new Error(
+    `wails Call.ByName is unavailable and no HTTP fallback for ${methodName}`,
+  );
 }
 
 /**

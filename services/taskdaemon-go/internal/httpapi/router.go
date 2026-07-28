@@ -116,6 +116,8 @@ func NewRouter(opts Options) http.Handler {
 		Tasks:  opts.Tasks,
 		Audio:  opts.Audio,
 	})
+	// Desktop 能力 HTTP 桥（同进程 desktop 壳注入；避免 AssetServer POST body 丢失）
+	registerDesktopRoutes(router, opts.Auth)
 	if opts.EnableSwagger {
 		router.GET("/swagger/index.html", func(ctx *gin.Context) {
 			ctx.String(http.StatusOK, "Swagger UI is enabled. Generated docs will be mounted here.")

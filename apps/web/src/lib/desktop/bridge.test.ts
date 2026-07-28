@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  DESKTOP_HTTP_CAPABILITIES,
+  DESKTOP_HTTP_INVOKE,
   invokeDesktopCapability,
   listDesktopCapabilities,
   WAILS_INVOKE_CAPABILITY,
@@ -9,6 +11,7 @@ import {
 describe("bridge", () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
     const w = window as Window & { wails?: unknown; _wails?: unknown };
     delete w.wails;
     delete w._wails;
@@ -27,6 +30,25 @@ describe("bridge", () => {
       { name: "desktop.environment", available: true },
     ]);
     expect(byName).toHaveBeenCalledWith(WAILS_LIST_CAPABILITIES);
+  });
+
+  it("listDesktopCapabilities falls back to HTTP bridge", async () => {
+    (window as Window & { _wails?: unknown })._wails = {};
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [{ name: "desktop.environment", available: true }],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(listDesktopCapabilities()).resolves.toEqual([
+      { name: "desktop.environment", available: true },
+    ]);
+    expect(fetchMock).toHaveBeenCalledWith(
+      DESKTOP_HTTP_CAPABILITIES,
+      expect.objectContaining({ method: "GET", credentials: "include" }),
+    );
   });
 
   it("invokeDesktopCapability returns structured failure without throw", async () => {
@@ -71,5 +93,35 @@ describe("bridge", () => {
       "desktop.environment",
       JSON.stringify({ x: 1 }),
     );
+  });
+
+  it("invokeDesktopCapability falls back to HTTP bridge", async () => {
+    (window as Window & { _wails?: unknown })._wails = {};
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: { ok: true, data: { platform: "windows" } },
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      invokeDesktopCapability("desktop.environment", { x: 1 }),
+    ).resolves.toEqual({
+      ok: true,
+      data: { platform: "windows" },
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      DESKTOP_HTTP_INVOKE,
+      expect.objectContaining({
+        method: "POST",
+        credentials: "include",
+      }),
+    );
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    expect(JSON.parse(String(init.body))).toEqual({
+      name: "desktop.environment",
+      payloadJSON: JSON.stringify({ x: 1 }),
+    });
   });
 });
